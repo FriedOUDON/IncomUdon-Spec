@@ -1,17 +1,13 @@
 ﻿# Test Vectors
 
-This directory will contain deterministic interoperability data for every
-stable protocol feature.
+All vectors use synthetic secrets and identifiers. They are safe to commit but
+MUST NOT be used in production.
 
-Required vector groups before `v1.0.0`:
+| File | Purpose |
+|---|---|
+| `packet-envelope-v1.json` | Plain packet encoding and control payloads |
+| `aes-gcm-v2.json` | Password derivation, AES-GCM v2 AAD, ciphertext, and tag |
+| `fec-rs-6-2.json` | Six-frame two-parity FEC encode/recovery case |
+| `directory-psk-v1.json` | Authenticated directory request envelope |
 
-- packet envelope serialization and parsing;
-- AES-GCM legacy and AES-GCM v2 success/failure cases;
-- join, PTT, codec configuration, and server configuration payloads;
-- PCM, Codec2, and Opus packet examples;
-- FEC recovery examples; and
-- directory PSK authentication examples.
-
-Vectors must state the specification version, input values, expected binary
-hex, and expected decoded output. Secret material in vectors must be synthetic
-and must never be reused in deployed environments.
+A compatible implementation MUST compare raw bytes, not only decoded fields.

@@ -1,27 +1,36 @@
 ﻿# IncomUdon Specification
 
-This repository is the canonical specification for the IncomUdon relay
-protocol and interoperability requirements. It is shared by the Relay,
-PWA client, Qt native client, and the future Rust native client.
+**Specification release:** `v0.1.0-draft`
 
-## Status
+This repository is the canonical interoperability specification for the
+IncomUdon Relay, PWA client, Qt native client, and future Rust native client.
+It describes observed Version 1 behavior and provides deterministic vectors
+for new implementations.
 
-The current wire protocol is version 1. This repository starts as a
-normative baseline for its common packet envelope and security behavior.
-Payload layouts that are not yet covered by golden test vectors are marked
-as provisional. A new implementation MUST NOT claim compatibility until it
-passes the test vectors published with the matching specification release.
+## Normative language
 
-## Repository layout
+The terms MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are to be interpreted as
+requirements for compatible implementations.
 
-- `docs/protocol/`: transport, security, audio, and control specifications.
-- `schemas/`: machine-readable schemas for non-audio messages.
-- `test-vectors/`: binary packet, crypto, FEC, and codec interoperability vectors.
+## Contents
 
-## Consumers
+- `docs/protocol/overview.md`: scope and transport lifecycle.
+- `docs/protocol/wire-format.md`: Version 1 packet envelope.
+- `docs/protocol/control-packets.md`: control payload layouts and relay rules.
+- `docs/protocol/audio-codecs.md`: media payloads and codec negotiation.
+- `docs/protocol/security.md`: password derivation and crypto modes.
+- `docs/protocol/fec.md`: Reed-Solomon-style two-parity FEC.
+- `docs/protocol/directory-udp.md`: optional authenticated directory protocol.
+- `docs/protocol/ping.md`: liveness and RTT measurement.
+- `docs/protocol/versioning.md`: compatibility and release procedure.
+- `schemas/`: JSON Schemas for directory messages.
+- `test-vectors/`: deterministic packet and cryptographic test data.
 
-Each implementation repository MUST declare the exact specification tag it
-implements, for example: `IncomUdon-Spec v1.0.0`.
+## Compatibility rule
+
+An implementation may claim `IncomUdon-Spec v0.1.0-draft` compatibility only
+when it parses every applicable vector and produces byte-identical output for
+all deterministic encode vectors.
 
 ## License
 

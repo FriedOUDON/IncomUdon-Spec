@@ -2,42 +2,42 @@
 
 ## Scope
 
-IncomUdon is a real-time push-to-talk protocol transported over UDP. The
-Relay forwards authenticated traffic between members of a channel. Clients
-may use PCM, Codec2, or Opus audio payloads and may negotiate codec settings
-at runtime.
+IncomUdon Version 1 is a UDP push-to-talk protocol. A Relay keeps a short-lived
+membership table per `channel_id`, grants one or more active talkers according
+to Relay policy, and forwards packets without decoding encrypted media.
 
-This specification defines the common UDP envelope, packet type registry,
-security requirements, timing expectations, and compatibility process. The
-Relay does not decode audio payloads in the normal forwarding path.
+Clients use a single channel ID and sender ID per session. A receiver that
+supports multiple concurrent talkers MUST keep decoder, FEC, and playout state
+separate for each sender ID.
 
-## Transport requirements
+## Transport lifecycle
 
-- UDP is the primary transport for relay audio and control traffic.
-- Numeric fields in the common UDP envelope use network byte order.
-- Clients MUST treat packet loss, duplication, reordering, and endpoint
-  changes as normal network conditions.
-- Real-time traffic MUST prefer dropping stale frames over replaying delayed
-  frames.
-- A client MUST NOT transmit an audio payload before completing the channel
-  join and codec configuration flow.
+1. Send `JOIN` to register the observed UDP source endpoint.
+2. Send `CODEC_CONFIG` before the first media frame for a sender.
+3. Send `PTT_ON`; wait for `TALK_GRANT` before treating media as authorized.
+4. Send `AUDIO` and optional `FEC` while granted.
+5. Send `PTT_OFF`; the Relay broadcasts `TALK_RELEASE`.
+6. Send `KEEPALIVE` while idle and `LEAVE` during a clean disconnect.
+
+A joining client receives `SERVER_CONFIG`. If talkers are already active, the
+Relay sends each active talker's `CODEC_CONFIG` before its `TALK_GRANT`.
+
+## Relay policy
+
+With multi-talk disabled, the Relay grants one active talker. With multi-talk
+enabled, it grants up to its configured active-talker limit. Unauthorized
+`AUDIO` and `FEC` packets are not forwarded. The Relay may release a talker
+when its configured maximum talk duration or membership timeout expires.
 
 ## Packet classes
 
-| Class | Packet types | Purpose |
+| Class | Types | Purpose |
 |---|---|---|
-| Audio | `AUDIO`, `FEC` | Encoded voice and forward-error-correction data |
-| PTT | `PTT_ON`, `PTT_OFF` | Sender talk-state transitions |
-| Membership | `JOIN`, `LEAVE` | Channel membership lifecycle |
-| Floor control | `TALK_GRANT`, `TALK_RELEASE`, `TALK_DENY` | Optional single-talker control |
-| Codec | `CODEC_CONFIG` | Codec and bitrate capability negotiation |
-| Liveness | `KEEPALIVE`, `PING`, `PONG` | Membership and round-trip measurement |
-| Security | `KEY_EXCHANGE` | Legacy/key-exchange compatibility flow |
-| Server | `SERVER_CONFIG` | Server-provided policy/configuration |
+| Membership | `JOIN`, `LEAVE`, `KEEPALIVE` | Endpoint registration and liveness |
+| Floor control | `PTT_ON`, `PTT_OFF`, `TALK_*` | Talk request and Relay decision |
+| Media | `AUDIO`, `FEC`, `CODEC_CONFIG` | Voice frames and decoder configuration |
+| Server | `SERVER_CONFIG` | Talk timeout and multi-talk policy |
+| Diagnostics | `PING`, `PONG` | Endpoint liveness and RTT |
+| Compatibility | `KEY_EXCHANGE` | Legacy handshake marker |
 
-## Compatibility
-
-The protocol version currently carried in packets is `1`. New behavior that
-changes the meaning or byte layout of an existing packet MUST be introduced
-with an explicit feature flag or a new protocol version. Implementations MUST
-continue to parse supported legacy headers as described in `wire-format.md`.
+The Relay recognizes protocol version `1` only.

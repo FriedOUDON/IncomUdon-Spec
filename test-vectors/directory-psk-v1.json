@@ -1,0 +1,16 @@
+﻿{
+  "specVersion": "v0.1.0-draft",
+  "pskAscii": "01234567890123456789012345678901",
+  "keyId": "pwa-1",
+  "epochAscii": "directory-epoch!",
+  "epochBase64Url": "ZGlyZWN0b3J5LWVwb2NoIQ",
+  "sequence": 1,
+  "expiresAt": 1700000010,
+  "type": "request",
+  "derivedKeyHex": "d753fc931e7b9f89daee9f1c4748df9019f094193ef63ce9f15c3467d8c8d265",
+  "nonce12Hex": "494450310000000000000001",
+  "aadHex": "496e636f6d55646f6e204469726563746f727920456e76656c6f70652041414420763100010772657175657374057077612d316469726563746f72792d65706f6368210000000000000001000000006553f10a",
+  "plaintextUtf8": "{\"version\":1,\"issuedAt\":1700000000,\"expiresAt\":1700000010}",
+  "ciphertextBase64Url": "tgswv8RgZA8tSuYjJH9dvdIlw5BDUL7w26liYUglgUVbh_6pAC1Em9LuIl-o0bNiAY9dfGwgZJIwUGzvdIwfc7nqyvHTF0rP1XE",
+  "envelope": {"v": 1, "type": "request", "keyId": "pwa-1", "epoch": "ZGlyZWN0b3J5LWVwb2NoIQ", "sequence": 1, "expiresAt": 1700000010, "ciphertext": "tgswv8RgZA8tSuYjJH9dvdIlw5BDUL7w26liYUglgUVbh_6pAC1Em9LuIl-o0bNiAY9dfGwgZJIwUGzvdIwfc7nqyvHTF0rP1XE"}
+}

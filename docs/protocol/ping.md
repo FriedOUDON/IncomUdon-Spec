@@ -1,19 +1,18 @@
 ﻿# Ping and Liveness
 
-`PING` (`0x0E`) and `PONG` (`0x0F`) provide endpoint liveness and round-trip
-measurement over the Relay audio UDP port.
+`PING` (`0x0E`) and `PONG` (`0x0F`) measure Relay UDP endpoint liveness.
+Their payload is exactly eight opaque bytes.
 
-## Payload
+The Relay replies with `PONG` only when the source address is already
+registered by `JOIN` for the same channel and sender ID. It echoes the eight
+payload bytes to that same endpoint and MUST NOT broadcast or reflect a ping
+from an unknown endpoint.
 
-The payload is an opaque eight-byte nonce. The Relay returns the same nonce
-only to the registered source endpoint.
+Recommended client intervals:
 
-## Timing
+- idle: every 10 seconds;
+- active send or receive: every 5 seconds;
+- no response: back off beyond the normal interval.
 
-- Idle clients SHOULD ping every 10 seconds.
-- A client that is sending or receiving media SHOULD ping every 5 seconds.
-- After a timeout, retry intervals SHOULD increase to avoid unnecessary load.
-- Ping does not substitute for `KEEPALIVE`, which maintains membership.
-
-A client MUST calculate round-trip time from a monotonic local clock and MUST
-not expose remote endpoint addresses in normal user-facing logs.
+RTT MUST use a local monotonic clock. Normal client UI logs MUST NOT expose
+Relay IP addresses merely because address fallback occurred.

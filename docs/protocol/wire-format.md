@@ -1,52 +1,53 @@
 ﻿# UDP Wire Format
 
-## Common envelope
+All multibyte integers use network byte order (big endian).
 
-All multibyte integer fields are unsigned and encoded in network byte order
-(big endian).
+## Version 1 fixed header
 
-### Version 1 fixed header
+| Offset | Bytes | Field |
+|---:|---:|---|
+| 0 | 1 | `version` (`1`) |
+| 1 | 1 | `type` |
+| 2 | 2 | `header_len` |
+| 4 | 4 | `channel_id` |
+| 8 | 4 | `sender_id` |
+| 12 | 2 | `seq` |
+| 14 | 2 | `flags` |
 
-| Offset | Size | Field | Description |
-|---:|---:|---|---|
-| 0 | 1 | `version` | Protocol version; currently `1` |
-| 1 | 1 | `type` | Packet type |
-| 2 | 2 | `header_len` | Number of bytes before payload |
-| 4 | 4 | `channel_id` | Relay channel identifier |
-| 8 | 4 | `sender_id` | Sender identifier |
-| 12 | 2 | `seq` | Per-sender sequence number, wrapping at 65535 |
-| 14 | 2 | `flags` | Envelope feature flags |
+The fixed header is 16 bytes. `seq` increments for every packet sent by a
+client and wraps modulo 65536. Receivers MUST tolerate wrapping and MUST NOT
+assume that the sequence field alone is a cryptographic nonce.
 
-The Version 1 fixed header is 16 bytes.
+## Security header
 
-### Security header
+A packet with `header_len = 28` carries this header immediately after the
+fixed header:
 
-When `header_len` is 28, the fixed header is followed by this 12-byte
-security header:
+| Offset | Bytes | Field |
+|---:|---:|---|
+| 16 | 8 | `nonce` |
+| 24 | 4 | `key_id` |
 
-| Offset from security header | Size | Field | Description |
-|---:|---:|---|---|
-| 0 | 8 | `nonce` | Packet nonce |
-| 8 | 4 | `key_id` | Key identifier |
+For encrypted media, ciphertext follows offset 28 and the final 16 bytes are
+the authentication tag. Plain control packets in encrypted modes also use a
+28-byte header, zero nonce/key ID, their plaintext payload, and 16 zero tag
+bytes; see `security.md`.
 
-A secured packet then carries ciphertext followed by a 16-byte GCM tag.
+## Legacy header
 
-### Legacy header
+A legacy 14-byte header omits `flags`. Existing native clients may parse it
+for backwards compatibility. New implementations MUST transmit the 16-byte
+Version 1 fixed header and MUST NOT generate the 14-byte form.
 
-A legacy fixed header is 14 bytes and omits `flags`. Legacy packets use a
-zero flag value when exposed through the Version 1 API. Implementations MUST
-accept this header only for explicitly supported legacy compatibility modes.
+## Flags
 
-## Envelope flags
-
-| Bit | Name | Meaning |
+| Value | Name | Meaning |
 |---:|---|---|
-| 0 | `AES_GCM_V2_HEADER_AAD` | The complete 28-byte header is AES-GCM additional authenticated data |
+| `0x0001` | `AES_GCM_V2_HEADER_AAD` | Authenticate the first 28 bytes as AES-GCM AAD |
 
-Undefined flag bits MUST be ignored when receiving and MUST be zero when
-transmitting.
+Unknown flag bits MUST be zero when sending and ignored when receiving.
 
-## Packet type registry
+## Packet types
 
 | Value | Name |
 |---:|---|
@@ -66,10 +67,4 @@ transmitting.
 | `0x0E` | `PING` |
 | `0x0F` | `PONG` |
 
-## Plain control packets
-
-Existing Version 1 plain control packets use `header_len = 28`, a zero nonce,
-a zero key ID, and an all-zero 16-byte tag. They are identified by packet type
-and are not authenticated by that zero tag. Future secure control extensions
-MUST use the AES-GCM v2 construction rather than treating the zero tag as
-security.
+See `../test-vectors/packet-envelope-v1.json` for canonical byte examples.

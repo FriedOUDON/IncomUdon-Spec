@@ -1,0 +1,19 @@
+﻿{
+  "specVersion": "v0.1.0-draft",
+  "field": "GF(256), primitive polynomial 0x11d",
+  "blockStart": 0,
+  "blockSize": 6,
+  "frames": [
+    {"audioSeq": 0, "dataHex": "010101010101010101010101"},
+    {"audioSeq": 1, "dataHex": "020202020202020202020202"},
+    {"audioSeq": 2, "dataHex": "030303030303030303030303"},
+    {"audioSeq": 3, "dataHex": "040404040404040404040404"},
+    {"audioSeq": 4, "dataHex": "050505050505050505050505"},
+    {"audioSeq": 5, "dataHex": "060606060606060606060606"}
+  ],
+  "parity": [
+    {"parityIndex": 0, "dataHex": "070707070707070707070707"},
+    {"parityIndex": 1, "dataHex": "b9b9b9b9b9b9b9b9b9b9b9b9"}
+  ],
+  "recoveryCase": {"receivedSequences": [0, 2, 3, 5], "missingSequences": [1, 4], "expectedOutputSequences": [0, 1, 2, 3, 4, 5]}
+}

@@ -1,5 +1,5 @@
 ﻿# Schemas
 
-Machine-readable schemas for directory and other non-media messages belong in
-this directory. Schemas are supplementary to the normative Markdown text and
-must identify the specification version they implement.
+`directory-v1.schema.json` validates the authenticated outer directory
+envelope. It does not validate ciphertext plaintext; that must happen only
+after AES-GCM authentication succeeds.

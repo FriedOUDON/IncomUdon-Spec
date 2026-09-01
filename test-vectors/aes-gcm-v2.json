@@ -1,0 +1,20 @@
+﻿{
+  "specVersion": "v0.1.0-draft",
+  "mode": "aes-gcm-v2",
+  "password": "test-password",
+  "channelId": 1234,
+  "normalizedPasswordHashHex": "c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265",
+  "passwordKeyHex": "8b50c1422d25d5873fd97f1cc50e2aa1c701873d206e3e6ef61fd0897a2b9f78",
+  "hkdfInfoAscii": "incomudon-session-aesgcm-v2",
+  "keyHex": "5a1ab7db20acb00612f7eabbc2e379e4777b6bbb53be7e106d5ca1a3ce20687d",
+  "keyId": 2,
+  "packet": {"type": "AUDIO", "senderId": 5678, "seq": 42, "nonce": "0x0102030405060708", "flags": 1},
+  "nonce12Hex": "000000000102030405060708",
+  "aadHex": "0101001c000004d20000162e002a0001010203040506070800000002",
+  "plaintextHex": "002a11223344",
+  "ciphertextHex": "5d9cde409e17",
+  "tagHex": "dccf50e0159c74ef44a5e21edfff0f08",
+  "datagramHex": "0101001c000004d20000162e002a00010102030405060708000000025d9cde409e17dccf50e0159c74ef44a5e21edfff0f08",
+  "negativeCase": {"mutateOffset": 4, "xor": "01", "expected": "authentication failure"}
+}
+

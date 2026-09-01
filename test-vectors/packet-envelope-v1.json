@@ -1,0 +1,42 @@
+﻿{
+  "specVersion": "v0.1.0-draft",
+  "endianness": "big-endian for envelope and control integers",
+  "vectors": [
+    {
+      "name": "no_crypto_codec_config_opus_12000",
+      "fields": {"version": 1, "type": "CODEC_CONFIG", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 42, "flags": 0},
+      "payloadHex": "00022ee0",
+      "datagramHex": "010b00100000006f000003ea002a000000022ee0"
+    },
+    {
+      "name": "no_crypto_ptt_on",
+      "fields": {"version": 1, "type": "PTT_ON", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 43, "flags": 0},
+      "payloadHex": "",
+      "datagramHex": "010200100000006f000003ea002b0000"
+    },
+    {
+      "name": "no_crypto_talk_grant",
+      "fields": {"version": 1, "type": "TALK_GRANT", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 0, "flags": 0},
+      "payloadHex": "000003ea",
+      "datagramHex": "010700100000006f000003ea00000000000003ea"
+    },
+    {
+      "name": "no_crypto_ping",
+      "fields": {"version": 1, "type": "PING", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 44, "flags": 0},
+      "payloadHex": "1020304050607080",
+      "datagramHex": "010e00100000006f000003ea002c00001020304050607080"
+    },
+    {
+      "name": "modern_audio_payload",
+      "audioSeq": 42,
+      "codecFrameHex": "f8ff0102",
+      "payloadHex": "002af8ff0102",
+      "notes": "The AUDIO envelope is crypto-mode dependent. This vector fixes the payload only."
+    },
+    {
+      "name": "legacy_pcm_payload",
+      "payloadLength": 320,
+      "notes": "Exactly 320 bytes is interpreted as unsequenced 8 kHz signed little-endian PCM."
+    }
+  ]
+}
