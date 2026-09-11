@@ -6,12 +6,17 @@ the common header. Relay-generated `TALK_*` packets set both the header
 
 | Type | Client payload | Relay behavior |
 |---|---|---|
-| `JOIN` | empty | Register endpoint, echo to joiner, send server config and active talker sync |
+| `JOIN` | empty normally; `expiry:u32 || cookie[16]` when Control Authentication v1 is required | Register authenticated endpoint, send server config and active talker sync |
 | `LEAVE` | empty | Remove endpoint and release its talk state |
 | `KEEPALIVE` | empty | Refresh endpoint membership |
 | `PTT_ON` | empty | Grant or deny according to floor policy |
 | `PTT_OFF` | empty | Release the requesting sender if active |
 | `KEY_EXCHANGE` | ASCII `LEGACY` | Legacy compatibility marker |
+| `AUTH_HELLO` | empty, Control Authentication v1 tag required | Relay returns `AUTH_CHALLENGE`; no membership state change |
+| `AUTH_CHALLENGE` | Relay payload: expiry and cookie | Sent only to the requesting endpoint |
+
+Control Authentication v1 requirements, authenticated JOIN payload, and
+replay behavior are defined in `control-auth.md`.
 
 ## Talk packets
 
@@ -31,17 +36,32 @@ other receivers' playout state.
 
 ## Codec configuration
 
-The current payload is four bytes:
+The first coordinated client release uses this five-byte payload:
 
 | Offset | Bytes | Field |
 |---:|---:|---|
 | 0 | 1 | flags; bit 0 is `pcm_only` |
 | 1 | 1 | codec transport ID |
-| 2 | 2 | codec mode/bitrate (`u16`) |
+| 2 | 2 | codec mode/bitrate (`u16`, big-endian) |
+| 4 | 1 | FEC options |
 
-A legacy three-byte form omits the codec transport ID: `[flags][mode:u16]`.
-Receivers interpret that form as Codec2. When `pcm_only` is set, receivers MUST
-interpret the transport as PCM regardless of byte 1.
+FEC option bits are:
+
+| Bit | Name | Meaning |
+|---:|---|---|
+| 0 | `external_parity_fec` | Sender may emit external parity FEC packets |
+| 1 | `opus_inband_fec` | Sender enables Opus in-band FEC; valid only for Opus |
+| 2 | `external_fec_v2` | External parity packets use the FEC v2 payload format |
+| 3-7 | reserved | MUST be zero on transmit and ignored on receive |
+
+`external_fec_v2` MUST be set when `external_parity_fec` is set. A receiver
+MUST ignore inconsistent FEC options and continue to decode ordinary audio.
+It MUST apply FEC state separately for each sender ID.
+
+The historical four-byte and three-byte `CODEC_CONFIG` forms are not required
+for the first coordinated release because all clients are migrated together.
+Implementations may retain historical decoding as a local compatibility option,
+but MUST transmit the five-byte form described above.
 
 ## Server configuration
 

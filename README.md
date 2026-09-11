@@ -18,10 +18,14 @@ requirements for compatible implementations.
 - `docs/protocol/wire-format.md`: Version 1 packet envelope.
 - `docs/protocol/control-packets.md`: control payload layouts and relay rules.
 - `docs/protocol/audio-codecs.md`: media payloads and codec negotiation.
+- `docs/protocol/playout.md`: real-time playout, jitter buffering, and resynchronization.
 - `docs/protocol/security.md`: password derivation and crypto modes.
-- `docs/protocol/fec.md`: Reed-Solomon-style two-parity FEC.
+- `docs/protocol/control-auth.md`: group-authenticated Relay control traffic.
+- `docs/protocol/fec.md`: external parity FEC and Opus in-band FEC.
+- `docs/protocol/fec-testing.md`: common FEC fault-injection cases.
 - `docs/protocol/directory-udp.md`: optional authenticated directory protocol.
 - `docs/protocol/ping.md`: liveness and RTT measurement.
+- `docs/protocol/diagnostics.md`: local debug metrics and redaction rules.
 - `docs/protocol/versioning.md`: compatibility and release procedure.
 - `schemas/`: JSON Schemas for directory messages.
 - `test-vectors/`: deterministic packet and cryptographic test data.

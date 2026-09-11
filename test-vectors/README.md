@@ -7,7 +7,11 @@ MUST NOT be used in production.
 |---|---|
 | `packet-envelope-v1.json` | Plain packet encoding and control payloads |
 | `aes-gcm-v2.json` | Password derivation, AES-GCM v2 AAD, ciphertext, and tag |
-| `fec-rs-6-2.json` | Six-frame two-parity FEC encode/recovery case |
+| `control-auth-v1.json` | Password/control-key derivation and authenticated control tag |
+| `fec-rs-6-2.json` | Historical fixed-size six-frame two-parity FEC case |
+| `fec-v2-variable-6-2.json` | FEC v2 variable-size and short-final-block parity/recovery cases |
+| `fec-fault-cases.json` | Machine-readable index of common FEC fault-injection cases |
 | `directory-psk-v1.json` | Authenticated directory request envelope |
+| `diagnostics-v1.json` | Redacted local debug-metrics snapshot |
 
 A compatible implementation MUST compare raw bytes, not only decoded fields.

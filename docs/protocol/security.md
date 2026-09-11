@@ -34,6 +34,20 @@ aes-gcm:    HKDF(password_key, "incomudon-session-aesgcm", 32)
 aes-gcm-v2: HKDF(password_key, "incomudon-session-aesgcm-v2", 32)
 ```
 
+## Control Authentication key
+
+Control Authentication v1 derives a separate channel control key:
+
+```text
+control-auth-v1: HKDF(password_key, "incomudon-control-auth-v1", 32)
+```
+
+This key is distinct from the media key. It is used for HMAC-authenticated
+control packets and is documented in `control-auth.md`. The normalized password
+input and `password_key` derivation above are unchanged; normal text passwords
+are first SHA-256 normalized, while 64-hex and `sha256:` inputs supply the
+normalized 32 bytes before channel binding.
+
 AES-256-GCM uses a 12-byte nonce:
 
 ```text

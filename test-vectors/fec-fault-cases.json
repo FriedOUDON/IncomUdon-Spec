@@ -1,0 +1,30 @@
+{
+  "specVersion": "v0.1.0-draft",
+  "document": "../docs/protocol/fec-testing.md",
+  "externalFecV2": [
+    "fec-v2-clean",
+    "fec-v2-one-loss-p",
+    "fec-v2-one-loss-q",
+    "fec-v2-two-loss",
+    "fec-v2-three-loss",
+    "fec-v2-parity-loss",
+    "fec-v2-both-parity-loss",
+    "fec-v2-reorder",
+    "fec-v2-late-original",
+    "fec-v2-short-final",
+    "fec-v2-release-incomplete",
+    "fec-v2-oversize"
+  ],
+  "opusInbandFec": [
+    "opus-fec-clean",
+    "opus-fec-one-loss",
+    "opus-fec-two-loss",
+    "opus-fec-final-loss",
+    "opus-fec-unsupported-rate"
+  ],
+  "combined": [
+    "combined-one-loss",
+    "combined-deadline",
+    "combined-two-loss"
+  ]
+}

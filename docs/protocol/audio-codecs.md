@@ -11,6 +11,10 @@
 Unsupported mode values are normalized to the nearest supported value by the
 current PWA implementation. New clients SHOULD transmit only listed values.
 
+`Opus (in-band FEC)` is a profile/UI mode, not a new transport codec ID. It
+uses transport ID `0x02` and advertises its FEC behavior through
+`CODEC_CONFIG`. See `fec.md` and `control-packets.md`.
+
 ## AUDIO payload
 
 The modern media payload is:
@@ -21,7 +25,13 @@ The modern media payload is:
 | 2 | variable | Codec frame |
 
 `audio_seq` increments per media frame and is independent of envelope `seq`.
-It drives FEC grouping. Media frames are normally 20 ms.
+It drives loss detection and external-FEC grouping. Media frames are normally
+20 ms.
+
+`MAX_MEDIA_FRAME_BYTES` is `4096`. A codec frame excludes the two-byte
+`audio_seq` prefix and MUST NOT exceed this value. Receivers MUST discard
+over-limit media before codec decoding. FEC v2 uses the same limit for every
+advertised frame length and its padded parity data.
 
 PCM is signed 16-bit little-endian mono at 8000 Hz, 160 samples per frame
 (320 bytes). A legacy PCM payload of exactly 320 bytes has no `audio_seq` and
@@ -33,11 +43,17 @@ maintain codec state by sender ID, not merely by channel ID.
 
 ## Real-time rules
 
-- Capture, network, and playback queues MUST be bounded.
+The normative receiver playout timeline, latency bounds, and FEC
+deadlines are defined in `playout.md`.
+
+- Capture, network, external-FEC, and playback queues MUST be bounded.
 - Senders SHOULD drop stale frames instead of creating delayed speech.
 - Receivers SHOULD resynchronize near the live edge when jitter-buffer delay
   exceeds their configured limit.
-- A `TALK_RELEASE` flushes incomplete FEC blocks before ending a talker.
+- A `TALK_RELEASE` flushes decodable queued media and then discards remaining
+  incomplete FEC state.
+- Opus in-band FEC receivers retain one 20 ms playout interval to allow
+  reconstruction from the following packet.
 
 The Relay forwards authorized media byte-for-byte. In particular, it MUST NOT
 rewrite AES-GCM v2 headers because they are authenticated.

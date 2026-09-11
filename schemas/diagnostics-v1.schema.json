@@ -1,0 +1,535 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://friedoudon.github.io/incomudon-spec/schemas/diagnostics-v1.schema.json",
+  "title": "IncomUdon Diagnostics v1 snapshot",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "snapshot_monotonic_ms",
+    "connection",
+    "tx",
+    "rx",
+    "control_auth",
+    "network"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "diagnostics-v1"
+    },
+    "snapshot_monotonic_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "connection": {
+      "$ref": "#/$defs/connection"
+    },
+    "tx": {
+      "$ref": "#/$defs/tx"
+    },
+    "rx": {
+      "$ref": "#/$defs/rx"
+    },
+    "control_auth": {
+      "$ref": "#/$defs/controlAuth"
+    },
+    "network": {
+      "$ref": "#/$defs/network"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "counter": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "nullableCounter": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "nullableNumber": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "connection": {
+      "type": "object",
+      "required": [
+        "state",
+        "control_auth_policy",
+        "control_auth_state",
+        "reconnect_attempts"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "disconnected",
+            "connecting",
+            "authenticating",
+            "connected",
+            "reconnecting",
+            "failed"
+          ]
+        },
+        "control_auth_policy": {
+          "enum": [
+            "required",
+            "optional",
+            "off",
+            "unknown"
+          ]
+        },
+        "control_auth_state": {
+          "enum": [
+            "disabled",
+            "hello_sent",
+            "challenge_received",
+            "joined",
+            "failed"
+          ]
+        },
+        "relay_rtt_ms": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "last_relay_rx_age_ms": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "reconnect_attempts": {
+          "$ref": "#/$defs/counter"
+        }
+      },
+      "additionalProperties": false
+    },
+    "tx": {
+      "type": "object",
+      "required": [
+        "ptt_state",
+        "frames_captured",
+        "frames_encoded",
+        "audio_packets_sent",
+        "audio_bytes_sent",
+        "frames_dropped_stale",
+        "frames_dropped_backpressure",
+        "send_errors",
+        "tx_queue_frames",
+        "tx_queue_age_ms",
+        "audio_packets_per_second",
+        "audio_bytes_per_second",
+        "fec",
+        "opus_inband_fec"
+      ],
+      "properties": {
+        "ptt_state": {
+          "enum": [
+            "idle",
+            "requesting",
+            "granted",
+            "denied",
+            "releasing"
+          ]
+        },
+        "frames_captured": {
+          "$ref": "#/$defs/counter"
+        },
+        "frames_encoded": {
+          "$ref": "#/$defs/counter"
+        },
+        "audio_packets_sent": {
+          "$ref": "#/$defs/counter"
+        },
+        "audio_bytes_sent": {
+          "$ref": "#/$defs/counter"
+        },
+        "frames_dropped_stale": {
+          "$ref": "#/$defs/counter"
+        },
+        "frames_dropped_backpressure": {
+          "$ref": "#/$defs/counter"
+        },
+        "send_errors": {
+          "$ref": "#/$defs/counter"
+        },
+        "tx_queue_frames": {
+          "$ref": "#/$defs/counter"
+        },
+        "tx_queue_age_ms": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "audio_packets_per_second": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "audio_bytes_per_second": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "fec": {
+          "$ref": "#/$defs/txFec"
+        },
+        "opus_inband_fec": {
+          "$ref": "#/$defs/txOpusFec"
+        }
+      },
+      "additionalProperties": false
+    },
+    "txFec": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "blocks_emitted",
+        "short_final_blocks_emitted",
+        "parity_p_packets_sent",
+        "parity_q_packets_sent",
+        "parity_bytes_sent"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "blocks_emitted": {
+          "$ref": "#/$defs/counter"
+        },
+        "short_final_blocks_emitted": {
+          "$ref": "#/$defs/counter"
+        },
+        "parity_p_packets_sent": {
+          "$ref": "#/$defs/counter"
+        },
+        "parity_q_packets_sent": {
+          "$ref": "#/$defs/counter"
+        },
+        "parity_bytes_sent": {
+          "$ref": "#/$defs/counter"
+        }
+      },
+      "additionalProperties": false
+    },
+    "txOpusFec": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "expected_loss_percent",
+        "supported_bitrate"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "expected_loss_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "supported_bitrate": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rx": {
+      "type": "object",
+      "required": [
+        "talkers",
+        "overflow_talkers"
+      ],
+      "properties": {
+        "talkers": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/talker"
+          }
+        },
+        "overflow_talkers": {
+          "$ref": "#/$defs/overflow"
+        }
+      },
+      "additionalProperties": false
+    },
+    "talker": {
+      "type": "object",
+      "required": [
+        "sender_id",
+        "active",
+        "codec_id",
+        "codec_mode",
+        "last_packet_age_ms",
+        "audio_packets_received",
+        "audio_bytes_received",
+        "sequence_gaps",
+        "packets_duplicate",
+        "packets_reordered",
+        "packets_late_dropped",
+        "frames_rendered",
+        "frames_plc",
+        "frames_silence",
+        "decode_errors",
+        "playout_target_ms",
+        "playout_effective_ms",
+        "playout_queue_frames",
+        "playout_resyncs",
+        "output_underruns",
+        "external_fec",
+        "opus_inband_fec"
+      ],
+      "properties": {
+        "sender_id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "codec_id": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 255
+        },
+        "codec_mode": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "last_packet_age_ms": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "audio_packets_received": {
+          "$ref": "#/$defs/counter"
+        },
+        "audio_bytes_received": {
+          "$ref": "#/$defs/counter"
+        },
+        "sequence_gaps": {
+          "$ref": "#/$defs/counter"
+        },
+        "packets_duplicate": {
+          "$ref": "#/$defs/counter"
+        },
+        "packets_reordered": {
+          "$ref": "#/$defs/counter"
+        },
+        "packets_late_dropped": {
+          "$ref": "#/$defs/counter"
+        },
+        "frames_rendered": {
+          "$ref": "#/$defs/counter"
+        },
+        "frames_plc": {
+          "$ref": "#/$defs/counter"
+        },
+        "frames_silence": {
+          "$ref": "#/$defs/counter"
+        },
+        "decode_errors": {
+          "$ref": "#/$defs/counter"
+        },
+        "playout_target_ms": {
+          "$ref": "#/$defs/counter"
+        },
+        "playout_effective_ms": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "playout_queue_frames": {
+          "$ref": "#/$defs/counter"
+        },
+        "playout_resyncs": {
+          "$ref": "#/$defs/counter"
+        },
+        "output_underruns": {
+          "$ref": "#/$defs/nullableCounter"
+        },
+        "external_fec": {
+          "$ref": "#/$defs/rxExternalFec"
+        },
+        "opus_inband_fec": {
+          "$ref": "#/$defs/rxOpusFec"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rxExternalFec": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "parity_packets_received",
+        "blocks_completed",
+        "frames_recovered",
+        "blocks_unrecoverable",
+        "invalid_packets",
+        "deadline_misses",
+        "late_results_discarded"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "parity_packets_received": {
+          "$ref": "#/$defs/counter"
+        },
+        "blocks_completed": {
+          "$ref": "#/$defs/counter"
+        },
+        "frames_recovered": {
+          "$ref": "#/$defs/counter"
+        },
+        "blocks_unrecoverable": {
+          "$ref": "#/$defs/counter"
+        },
+        "invalid_packets": {
+          "$ref": "#/$defs/counter"
+        },
+        "deadline_misses": {
+          "$ref": "#/$defs/counter"
+        },
+        "late_results_discarded": {
+          "$ref": "#/$defs/counter"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rxOpusFec": {
+      "type": "object",
+      "required": [
+        "advertised_enabled",
+        "recovery_attempts",
+        "frames_recovered",
+        "not_eligible_gaps",
+        "late_results_discarded"
+      ],
+      "properties": {
+        "advertised_enabled": {
+          "type": "boolean"
+        },
+        "recovery_attempts": {
+          "$ref": "#/$defs/counter"
+        },
+        "frames_recovered": {
+          "$ref": "#/$defs/counter"
+        },
+        "not_eligible_gaps": {
+          "$ref": "#/$defs/counter"
+        },
+        "late_results_discarded": {
+          "$ref": "#/$defs/counter"
+        }
+      },
+      "additionalProperties": false
+    },
+    "overflow": {
+      "type": "object",
+      "required": [
+        "talker_count",
+        "audio_packets_received",
+        "frames_rendered"
+      ],
+      "properties": {
+        "talker_count": {
+          "$ref": "#/$defs/counter"
+        },
+        "audio_packets_received": {
+          "$ref": "#/$defs/counter"
+        },
+        "frames_rendered": {
+          "$ref": "#/$defs/counter"
+        }
+      },
+      "additionalProperties": false
+    },
+    "controlAuth": {
+      "type": "object",
+      "required": [
+        "authenticated_joins",
+        "control_packets_accepted",
+        "invalid_tag_rejections",
+        "unknown_key_rejections",
+        "cookie_rejections",
+        "replay_rejections",
+        "authentication_failures"
+      ],
+      "properties": {
+        "authenticated_joins": {
+          "$ref": "#/$defs/counter"
+        },
+        "control_packets_accepted": {
+          "$ref": "#/$defs/counter"
+        },
+        "invalid_tag_rejections": {
+          "$ref": "#/$defs/counter"
+        },
+        "unknown_key_rejections": {
+          "$ref": "#/$defs/counter"
+        },
+        "cookie_rejections": {
+          "$ref": "#/$defs/counter"
+        },
+        "replay_rejections": {
+          "$ref": "#/$defs/counter"
+        },
+        "authentication_failures": {
+          "$ref": "#/$defs/counter"
+        }
+      },
+      "additionalProperties": false
+    },
+    "network": {
+      "type": "object",
+      "required": [
+        "udp_packets_sent",
+        "udp_packets_received",
+        "udp_bytes_sent",
+        "udp_bytes_received",
+        "udp_packets_sent_per_second",
+        "udp_packets_received_per_second",
+        "udp_bytes_sent_per_second",
+        "udp_bytes_received_per_second",
+        "qos_requested",
+        "qos_applied"
+      ],
+      "properties": {
+        "udp_packets_sent": {
+          "$ref": "#/$defs/counter"
+        },
+        "udp_packets_received": {
+          "$ref": "#/$defs/counter"
+        },
+        "udp_bytes_sent": {
+          "$ref": "#/$defs/counter"
+        },
+        "udp_bytes_received": {
+          "$ref": "#/$defs/counter"
+        },
+        "udp_packets_sent_per_second": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "udp_packets_received_per_second": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "udp_bytes_sent_per_second": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "udp_bytes_received_per_second": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "qos_requested": {
+          "type": "boolean"
+        },
+        "qos_applied": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

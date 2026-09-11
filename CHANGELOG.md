@@ -1,5 +1,30 @@
 ﻿# Changelog
 
+## Unreleased
+
+- Defines Diagnostics and Debug Metrics v1: redacted per-session, transmit,
+  per-talker receive/playout, FEC, authentication, and QoS metrics.
+- Defines Control Authentication v1: password-key separation, HMAC control
+  tags, Relay key provisioning, cookie-authenticated JOIN, and replay
+  protection for first-release secure clients.
+- Adds a real-time playout specification with an 80 ms target delay,
+  120 ms hard delay bound, fixed frame deadlines, and stale-audio
+  resynchronization behavior.
+- Defines the first-release coordinated migration to FEC v2, including
+  variable-size codec-frame parity through length metadata and zero padding.
+- Defines Opus in-band FEC as an Opus profile mode and specifies its sender
+  advertisement and one-frame receive recovery behavior.
+- Defines five-byte `CODEC_CONFIG` FEC option signaling.
+- Specifies that external parity FEC and Opus in-band FEC may be combined only
+  by explicit user choice, with the combination disabled by default.
+- Adds bitrate-specific FEC operation recommendations and sets the Opus
+  in-band FEC expected packet-loss default to 10 percent with normal UI
+  choices of 0, 3, 5, 10, and 15 percent.
+- Defines `MAX_MEDIA_FRAME_BYTES` as 4096 bytes for both codec frames and
+  FEC v2 parity data.
+- Requires P/Q parity for short final FEC blocks and adds common FEC
+  fault-injection requirements and FEC v2 deterministic vectors.
+
 ## v0.1.0-draft - 2026-09-01
 
 - Documents the observed Version 1 UDP envelope and packet registry.

@@ -44,6 +44,7 @@ Version 1 fixed header and MUST NOT generate the 14-byte form.
 | Value | Name | Meaning |
 |---:|---|---|
 | `0x0001` | `AES_GCM_V2_HEADER_AAD` | Authenticate the first 28 bytes as AES-GCM AAD |
+| `0x0002` | `CONTROL_AUTH_V1` | Authenticate plaintext control with HMAC-SHA-256 |
 
 Unknown flag bits MUST be zero when sending and ignored when receiving.
 
@@ -66,5 +67,9 @@ Unknown flag bits MUST be zero when sending and ignored when receiving.
 | `0x0D` | `SERVER_CONFIG` |
 | `0x0E` | `PING` |
 | `0x0F` | `PONG` |
+| `0x10` | `AUTH_HELLO` |
+| `0x11` | `AUTH_CHALLENGE` |
 
 See `../test-vectors/packet-envelope-v1.json` for canonical byte examples.
+
+Control Authentication v1 packet construction is defined in `control-auth.md`.

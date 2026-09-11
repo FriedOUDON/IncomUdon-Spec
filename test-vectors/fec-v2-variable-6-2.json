@@ -1,0 +1,170 @@
+{
+  "specVersion": "v0.1.0-draft",
+  "format": "fec-v2",
+  "field": "GF(256), primitive polynomial 0x11d",
+  "maxMediaFrameBytes": 4096,
+  "cases": [
+    {
+      "name": "variable-size-six-frame-block",
+      "blockStart": 42,
+      "blockSize": 6,
+      "frames": [
+        {
+          "audioSeq": 42,
+          "dataHex": "1020"
+        },
+        {
+          "audioSeq": 43,
+          "dataHex": "304050"
+        },
+        {
+          "audioSeq": 44,
+          "dataHex": "60708090"
+        },
+        {
+          "audioSeq": 45,
+          "dataHex": "a0"
+        },
+        {
+          "audioSeq": 46,
+          "dataHex": "b0c0d0e0f0"
+        },
+        {
+          "audioSeq": 47,
+          "dataHex": "010203040506"
+        }
+      ],
+      "parity": [
+        {
+          "parityIndex": 0,
+          "dataHex": "51d20374f506",
+          "fecPayloadHex": "02002a060000020003000400010005000651d20374f506"
+        },
+        {
+          "parityIndex": 1,
+          "dataHex": "6ba17b5c1bc0",
+          "fecPayloadHex": "02002a06010002000300040001000500066ba17b5c1bc0"
+        }
+      ],
+      "recoveryCases": [
+        {
+          "name": "one-missing-frame",
+          "receivedSequences": [
+            42,
+            43,
+            45,
+            46,
+            47
+          ],
+          "missingSequences": [
+            44
+          ],
+          "expectedRecovered": [
+            {
+              "audioSeq": 44,
+              "dataHex": "60708090"
+            }
+          ],
+          "expectedOutputSequences": [
+            42,
+            43,
+            44,
+            45,
+            46,
+            47
+          ]
+        },
+        {
+          "name": "two-missing-frames",
+          "receivedSequences": [
+            42,
+            44,
+            45,
+            47
+          ],
+          "missingSequences": [
+            43,
+            46
+          ],
+          "expectedRecovered": [
+            {
+              "audioSeq": 43,
+              "dataHex": "304050"
+            },
+            {
+              "audioSeq": 46,
+              "dataHex": "b0c0d0e0f0"
+            }
+          ],
+          "expectedOutputSequences": [
+            42,
+            43,
+            44,
+            45,
+            46,
+            47
+          ]
+        }
+      ]
+    },
+    {
+      "name": "short-final-ptt-block",
+      "blockStart": 48,
+      "blockSize": 3,
+      "finalOnPttRelease": true,
+      "frames": [
+        {
+          "audioSeq": 48,
+          "dataHex": "112233"
+        },
+        {
+          "audioSeq": 49,
+          "dataHex": "44"
+        },
+        {
+          "audioSeq": 50,
+          "dataHex": "55667788"
+        }
+      ],
+      "parity": [
+        {
+          "parityIndex": 0,
+          "dataHex": "00444488",
+          "fecPayloadHex": "020030030000030001000400444488"
+        },
+        {
+          "parityIndex": 1,
+          "dataHex": "d0a7f21a",
+          "fecPayloadHex": "0200300301000300010004d0a7f21a"
+        }
+      ],
+      "recoveryCases": [
+        {
+          "name": "two-missing-frames",
+          "receivedSequences": [
+            48
+          ],
+          "missingSequences": [
+            49,
+            50
+          ],
+          "expectedRecovered": [
+            {
+              "audioSeq": 49,
+              "dataHex": "44"
+            },
+            {
+              "audioSeq": 50,
+              "dataHex": "55667788"
+            }
+          ],
+          "expectedOutputSequences": [
+            48,
+            49,
+            50
+          ]
+        }
+      ]
+    }
+  ]
+}
