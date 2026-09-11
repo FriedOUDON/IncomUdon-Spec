@@ -1,4 +1,4 @@
-# Real-Time Playout
+﻿# Real-Time Playout
 
 ## Scope
 
@@ -45,6 +45,81 @@ The scheduled playout time is the frame's recovery deadline:
 A receiver MUST NOT postpone later scheduled intervals to wait for a missing
 or late frame. It MUST NOT render a frame after its deadline, and MUST NOT
 render an interval twice when an original or FEC-recovered copy arrives late.
+
+## Multi-Talker Mixing
+
+When `SERVER_CONFIG.multi_talk_enabled` is true, a receiver MUST be able to
+render every Relay-authorized active talker concurrently. A talker is identified
+by the tuple `(channel_id, sender_id)`. Decoder, jitter-buffer, FEC, playout,
+and resampler state MUST remain independent for that tuple.
+
+A receiver MUST NOT wait for one talker to reach a playout deadline before
+rendering another talker. Each talker enters and leaves the output mix only at
+its own scheduled playout intervals. A `TALK_RELEASE`, source-limit drop, or
+playout resynchronization for one talker MUST NOT flush, reset, delay, or
+otherwise interrupt another talker's state.
+
+### Source selection and limits
+
+The standard `MAX_MIX_TALKERS` is 16. Relays in an interoperable Version 1
+deployment MUST advertise no more than 16 active talkers, and receivers MUST
+support mixing at least 16 concurrent non-muted talkers. A receiver MAY impose
+a lower local limit only when resource constrained, but it MUST expose the
+resulting source-limit drops in diagnostics and SHOULD make that limitation
+visible to the user.
+
+A source contributes to the mix when it has a renderable scheduled interval:
+ordinary media, timely FEC recovery, or PLC output. Locally muted sources,
+including self-ID mute, MUST NOT contribute. The current contributing-source
+count is `N`. A receiver renders silence when `N = 0`.
+
+### Common render clock and resampling
+
+A receiver MUST convert every contributing mono decoder output to one local
+common mix sample rate before summation. A stateful resampler, when needed,
+MUST be maintained per talker and MUST NOT be shared between talkers. Device
+output-rate conversion occurs after the common-rate mix. Implementations MAY
+duplicate the final mono mix to device output channels; spatial placement is
+outside this protocol.
+
+The common render clock is local. Receivers MUST NOT attempt to synchronize
+talker timelines with one another or add delay beyond the per-talker bounds in
+order to align their starts. This preserves the 80 ms target and 120 ms maximum
+playout delay defined above.
+
+### Gain and limiter
+
+For every common-rate output sample, a receiver computes the per-source target
+gain as:
+
+```text
+gain(N) = 1 / sqrt(N)
+```
+
+The mixed normalized sample is the sum of every contributing source sample
+multiplied by its current gain. When `N` changes, all affected source gains
+MUST transition linearly from their previous value to the new target over
+`MIX_GAIN_TRANSITION_MS = 20 ms`. A newly contributing source starts at zero
+and ramps to its target; a source leaving the mix ramps to zero when enough
+local samples remain. A receiver MAY complete an unavoidable final release
+immediately rather than retain stale speech solely for a gain ramp.
+
+The mixer MUST use an accumulator that cannot wrap for the supported source
+limit. Before conversion to a device sample format, it MUST apply a final peak
+limiter. The baseline interoperable limiter is:
+
+```text
+limited(x) = clamp(x, -1.0, +1.0)
+```
+
+An implementation MAY use a soft limiter instead, provided that its output
+never exceeds the normalized range and that it remains linear for
+`abs(x) <= 0.95`. User-configured master speaker gain is applied after the
+protocol mix and before the final device conversion; it MUST also be covered by
+peak protection.
+
+See `../../test-vectors/multi-talker-mixing-v1.json` for canonical gain,
+limiting, and source-limit cases.
 
 ## Bounded delay and resynchronization
 

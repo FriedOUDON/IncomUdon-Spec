@@ -7,8 +7,9 @@ membership table per `channel_id`, grants one or more active talkers according
 to Relay policy, and forwards packets without decoding encrypted media.
 
 Clients use a single channel ID and sender ID per session. A receiver that
-supports multiple concurrent talkers MUST keep decoder, FEC, and playout state
-separate for each sender ID.
+supports multiple concurrent talkers MUST keep decoder, FEC, playout, and
+resampler state separate for each sender ID, then mix eligible output under
+`playout.md`.
 
 ## Transport lifecycle
 

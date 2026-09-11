@@ -81,7 +81,7 @@ but MUST transmit the five-byte form described above.
 |---:|---:|---|
 | 0 | 2 | `maximum_talk_seconds` in whole seconds; zero disables the server-managed limit |
 | 2 | 1 | flags; bit 0 is `multi_talk_enabled`; bits 1-7 are reserved and MUST be zero |
-| 3 | 1 | maximum active talkers; minimum effective value is one |
+| 3 | 1 | maximum active talkers; value MUST be in the range 1 through 16 |
 
 The timeout is a Relay-enforced monotonic talk lease. Its complete semantics,
 release reasons, configuration-update handling, and client obligations are

@@ -81,6 +81,15 @@
         }
       }
     ],
+    "mixer": {
+      "active_sources": 1,
+      "maximum_sources": 16,
+      "mix_intervals_rendered": 248,
+      "gain_transition_ms": 20,
+      "limiter_activations": 0,
+      "source_limit_drops": 0,
+      "output_underruns": 0
+    },
     "overflow_talkers": {
       "talker_count": 0,
       "audio_packets_received": 0,

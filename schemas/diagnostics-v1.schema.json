@@ -248,7 +248,8 @@
       "type": "object",
       "required": [
         "talkers",
-        "overflow_talkers"
+        "overflow_talkers",
+        "mixer"
       ],
       "properties": {
         "talkers": {
@@ -260,6 +261,51 @@
         },
         "overflow_talkers": {
           "$ref": "#/$defs/overflow"
+        },
+        "mixer": {
+          "$ref": "#/$defs/mixer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "mixer": {
+      "type": "object",
+      "required": [
+        "active_sources",
+        "maximum_sources",
+        "mix_intervals_rendered",
+        "gain_transition_ms",
+        "limiter_activations",
+        "source_limit_drops",
+        "output_underruns"
+      ],
+      "properties": {
+        "active_sources": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "maximum_sources": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "mix_intervals_rendered": {
+          "$ref": "#/$defs/counter"
+        },
+        "gain_transition_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "limiter_activations": {
+          "$ref": "#/$defs/counter"
+        },
+        "source_limit_drops": {
+          "$ref": "#/$defs/counter"
+        },
+        "output_underruns": {
+          "$ref": "#/$defs/nullableCounter"
         }
       },
       "additionalProperties": false

@@ -108,6 +108,26 @@ the standard cap is 16. Additional talkers are aggregated in
 | `playout_resyncs` | Stale-audio resynchronizations |
 | `output_underruns` | Audio output stream underruns, when observable |
 
+## Multi-Talker Mixer Metrics
+
+`rx.mixer` describes the final local mix for the current channel session. It
+contains no PCM samples, channel password material, endpoint address, or
+speaker name. Locally muted sources are excluded from `active_sources`.
+
+| Field | Meaning |
+|---|---|
+| `active_sources` | Current number of contributing sources after local mute policy, 0 through 16 |
+| `maximum_sources` | Local concurrent mix capacity, 1 through 16 |
+| `mix_intervals_rendered` | Count of 20 ms source-mix intervals rendered |
+| `gain_transition_ms` | Configured source-gain transition duration; standard value is 20 |
+| `limiter_activations` | Final peak-limiter activation count |
+| `source_limit_drops` | Talker intervals omitted because the local source limit was reached |
+| `output_underruns` | Aggregate final-output stream underruns, when observable |
+
+`rx.talkers[*].output_underruns`, when a platform can attribute it, remains a
+per-talker observation. `rx.mixer.output_underruns` is the authoritative
+aggregate output-device measure.
+
 `external_fec` records `enabled`, `parity_packets_received`,
 `blocks_completed`, `frames_recovered`, `blocks_unrecoverable`,
 `invalid_packets`, `deadline_misses`, and `late_results_discarded`.
