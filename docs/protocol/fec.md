@@ -50,7 +50,9 @@ MUST reject a block with an invalid version, block size, zero frame length,
 frame length greater than `MAX_MEDIA_FRAME_BYTES`, or parity payload length
 inconsistent with the advertised maximum frame length. `MAX_MEDIA_FRAME_BYTES`
 is defined in `audio-codecs.md` and applies equally to raw audio codec frames
-and FEC parity data.
+and FEC parity data. A sender MUST additionally cap every outbound source
+frame and parity data length at `MAX_TRANSMIT_MEDIA_FRAME_BYTES` so the entire
+FEC datagram satisfies the MTU policy in `mtu.md`.
 
 The FEC packet uses the same crypto mode as media and is forwarded only while
 the sender holds the talk grant. When media encryption is active, all fields in

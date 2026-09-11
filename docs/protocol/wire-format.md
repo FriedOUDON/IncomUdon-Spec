@@ -33,6 +33,12 @@ the authentication tag. Plain control packets in encrypted modes also use a
 28-byte header, zero nonce/key ID, their plaintext payload, and 16 zero tag
 bytes; see `security.md`.
 
+## Datagram size
+
+The complete UDP payload, including this envelope and any authentication tag,
+MUST NOT exceed `MAX_UDP_DATAGRAM_BYTES = 1200`. See `mtu.md` for the
+normative media/FEC budgets and Path MTU handling rules.
+
 ## Legacy header
 
 A legacy 14-byte header omits `flags`. Existing native clients may parse it

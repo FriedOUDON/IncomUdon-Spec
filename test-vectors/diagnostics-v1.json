@@ -17,6 +17,9 @@
     "audio_bytes_sent": 45678,
     "frames_dropped_stale": 1,
     "frames_dropped_backpressure": 0,
+    "frames_dropped_oversize": 0,
+    "datagrams_dropped_oversize": 0,
+    "send_errors_mtu": 0,
     "send_errors": 0,
     "tx_queue_frames": 0,
     "tx_queue_age_ms": 0,
@@ -103,6 +106,7 @@
     "udp_bytes_sent_per_second": 12000,
     "udp_bytes_received_per_second": 12600,
     "qos_requested": true,
-    "qos_applied": true
+    "qos_applied": true,
+    "rx_datagrams_rejected_oversize": 0
   }
 }

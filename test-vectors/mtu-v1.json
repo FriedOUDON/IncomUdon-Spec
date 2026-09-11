@@ -1,0 +1,37 @@
+{
+  "description": "IncomUdon Version 1 MTU-safe UDP datagram budget",
+  "constants": {
+    "max_udp_datagram_bytes": 1200,
+    "max_media_frame_bytes": 4096,
+    "max_transmit_media_frame_bytes": 1139
+  },
+  "cases": [
+    {
+      "name": "aes_gcm_v2_audio_maximum",
+      "security_header_bytes": 28,
+      "audio_sequence_bytes": 2,
+      "codec_frame_bytes": 1139,
+      "tag_bytes": 16,
+      "udp_datagram_bytes": 1185,
+      "transmit_allowed": true
+    },
+    {
+      "name": "aes_gcm_v2_fec_v2_block_6_maximum",
+      "security_header_bytes": 28,
+      "fec_metadata_bytes": 17,
+      "parity_bytes": 1139,
+      "tag_bytes": 16,
+      "udp_datagram_bytes": 1200,
+      "transmit_allowed": true
+    },
+    {
+      "name": "aes_gcm_v2_fec_v2_block_6_oversize",
+      "security_header_bytes": 28,
+      "fec_metadata_bytes": 17,
+      "parity_bytes": 1140,
+      "tag_bytes": 16,
+      "udp_datagram_bytes": 1201,
+      "transmit_allowed": false
+    }
+  ]
+}

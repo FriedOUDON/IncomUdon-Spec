@@ -17,8 +17,10 @@ separate for each sender ID.
    source endpoint. Otherwise send `JOIN`.
 2. Send `CODEC_CONFIG` before the first media frame for a sender.
 3. Send `PTT_ON`; wait for `TALK_GRANT` before treating media as authorized.
-4. Send `AUDIO` and optional `FEC` while granted.
-5. Send `PTT_OFF`; the Relay broadcasts `TALK_RELEASE`.
+4. Send `AUDIO` and optional `FEC` while granted and before any Relay-enforced
+   talk deadline.
+5. Send `PTT_OFF`; the Relay broadcasts `TALK_RELEASE`. The Relay may instead
+   release the talk at its server-managed deadline or on membership expiry.
 6. Send `KEEPALIVE` while idle and `LEAVE` during a clean disconnect.
 
 A joining client receives `SERVER_CONFIG`. If talkers are already active, the
@@ -28,8 +30,12 @@ Relay sends each active talker's `CODEC_CONFIG` before its `TALK_GRANT`.
 
 With multi-talk disabled, the Relay grants one active talker. With multi-talk
 enabled, it grants up to its configured active-talker limit. Unauthorized
-`AUDIO` and `FEC` packets are not forwarded. The Relay may release a talker
-when its configured maximum talk duration or membership timeout expires.
+`AUDIO` and `FEC` packets are not forwarded. The Relay MUST NOT forward a UDP
+datagram larger than the MTU-safe protocol limit defined in `mtu.md`. The
+Relay enforces each granted talker's configured maximum duration with a
+monotonic deadline and releases
+that talker when the deadline or membership lease expires. See
+`ptt-timeout.md` for the authoritative timeout rules.
 
 ## Packet classes
 

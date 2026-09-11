@@ -1,0 +1,29 @@
+{
+  "description": "Server-managed PTT timeout v1 deterministic payload and timeline cases",
+  "talk_release_payloads": [
+    {"talker_id": 1001, "reason": "CLIENT_PTT_OFF", "reason_byte": 0, "payload_hex": "000003e900"},
+    {"talker_id": 1001, "reason": "SERVER_TALK_TIMEOUT", "reason_byte": 1, "payload_hex": "000003e901"},
+    {"talker_id": 1001, "reason": "MEMBERSHIP_TIMEOUT", "reason_byte": 2, "payload_hex": "000003e902"},
+    {"talker_id": 1001, "reason": "CLIENT_LEAVE", "reason_byte": 3, "payload_hex": "000003e903"},
+    {"talker_id": 1001, "reason": "SERVER_POLICY", "reason_byte": 4, "payload_hex": "000003e904"}
+  ],
+  "timeline_cases": [
+    {
+      "name": "deadline_does_not_extend_on_duplicate_ptt_on",
+      "maximum_talk_seconds": 30,
+      "grant_time_ms": 100000,
+      "duplicate_ptt_on_ms": 115000,
+      "deadline_ms": 130000,
+      "must_forward_before_deadline": true,
+      "must_reject_at_or_after_deadline": true,
+      "release_reason": "SERVER_TALK_TIMEOUT"
+    },
+    {
+      "name": "disabled_timeout",
+      "maximum_talk_seconds": 0,
+      "grant_time_ms": 100000,
+      "deadline_ms": null,
+      "release_reason": "CLIENT_PTT_OFF"
+    }
+  ]
+}

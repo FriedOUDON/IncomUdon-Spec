@@ -114,6 +114,9 @@
         "audio_bytes_sent",
         "frames_dropped_stale",
         "frames_dropped_backpressure",
+        "frames_dropped_oversize",
+        "datagrams_dropped_oversize",
+        "send_errors_mtu",
         "send_errors",
         "tx_queue_frames",
         "tx_queue_age_ms",
@@ -148,6 +151,15 @@
           "$ref": "#/$defs/counter"
         },
         "frames_dropped_backpressure": {
+          "$ref": "#/$defs/counter"
+        },
+        "frames_dropped_oversize": {
+          "$ref": "#/$defs/counter"
+        },
+        "datagrams_dropped_oversize": {
+          "$ref": "#/$defs/counter"
+        },
+        "send_errors_mtu": {
           "$ref": "#/$defs/counter"
         },
         "send_errors": {
@@ -492,7 +504,8 @@
         "udp_bytes_sent_per_second",
         "udp_bytes_received_per_second",
         "qos_requested",
-        "qos_applied"
+        "qos_applied",
+        "rx_datagrams_rejected_oversize"
       ],
       "properties": {
         "udp_packets_sent": {
@@ -527,6 +540,9 @@
             "boolean",
             "null"
           ]
+        },
+        "rx_datagrams_rejected_oversize": {
+          "$ref": "#/$defs/counter"
         }
       },
       "additionalProperties": false

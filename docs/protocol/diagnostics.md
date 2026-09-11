@@ -68,7 +68,10 @@ No connection metric may expose the resolved Relay address.
 | `audio_packets_sent` / `audio_bytes_sent` | AUDIO packet totals |
 | `frames_dropped_stale` | Frames dropped to keep real-time latency bounded |
 | `frames_dropped_backpressure` | Frames dropped because send queue/socket backpressure was excessive |
-| `send_errors` | UDP send errors |
+| `frames_dropped_oversize` | Encoded/source frames rejected before packetization because they exceed the transmit media limit |
+| `datagrams_dropped_oversize` | Fully built datagrams rejected because they exceed the UDP datagram limit |
+| `send_errors_mtu` | Local UDP send failures that indicate an MTU/path-MTU error, when distinguishable |
+| `send_errors` | All UDP send errors, including `send_errors_mtu` |
 | `tx_queue_frames` / `tx_queue_age_ms` | Current queued-frame count and oldest-frame age |
 | `audio_packets_per_second` / `audio_bytes_per_second` | Latest one-second transmit rates |
 
@@ -137,7 +140,9 @@ clients MUST increment only the locally observable aggregate failure counter.
 
 The `network` object records `udp_packets_sent`, `udp_packets_received`,
 `udp_bytes_sent`, `udp_bytes_received`, and their latest one-second rates. It
-also records `qos_requested` and `qos_applied` when the platform exposes the
+also records `rx_datagrams_rejected_oversize`: locally received datagrams
+rejected before packet processing because they exceed the protocol MTU limit.
+It records `qos_requested` and `qos_applied` when the platform exposes the
 result of DSCP EF socket configuration. `qos_applied` is null when the result
 cannot be observed.
 

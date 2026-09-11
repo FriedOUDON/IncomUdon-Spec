@@ -17,8 +17,10 @@ requirements for compatible implementations.
 - `docs/protocol/overview.md`: scope and transport lifecycle.
 - `docs/protocol/wire-format.md`: Version 1 packet envelope.
 - `docs/protocol/control-packets.md`: control payload layouts and relay rules.
+- `docs/protocol/ptt-timeout.md`: Relay-enforced maximum talk duration and release behavior.
 - `docs/protocol/audio-codecs.md`: media payloads and codec negotiation.
 - `docs/protocol/playout.md`: real-time playout, jitter buffering, and resynchronization.
+- `docs/protocol/mtu.md`: MTU-safe UDP datagram limits and fragmentation policy.
 - `docs/protocol/security.md`: password derivation and crypto modes.
 - `docs/protocol/control-auth.md`: group-authenticated Relay control traffic.
 - `docs/protocol/fec.md`: external parity FEC and Opus in-band FEC.

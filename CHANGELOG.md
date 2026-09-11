@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Defines an MTU-safe 1200-byte UDP datagram limit, a 1139-byte transmit media
+  frame limit, FEC v2 size budgets, oversize Relay-drop behavior, and
+  diagnostics for local MTU/oversize failures.
+
+- Defines Server-Managed PTT Timeout: monotonic Relay-enforced talk leases,
+  five-byte `TALK_RELEASE` reason signaling, deadline handling, client stop
+  behavior, and required timeout interoperability cases.
+
 - Defines Diagnostics and Debug Metrics v1: redacted per-session, transmit,
   per-talker receive/playout, FEC, authentication, and QoS metrics.
 - Defines Control Authentication v1: password-key separation, HMAC control

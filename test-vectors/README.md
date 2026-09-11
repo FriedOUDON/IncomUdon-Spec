@@ -13,5 +13,7 @@ MUST NOT be used in production.
 | `fec-fault-cases.json` | Machine-readable index of common FEC fault-injection cases |
 | `directory-psk-v1.json` | Authenticated directory request envelope |
 | `diagnostics-v1.json` | Redacted local debug-metrics snapshot |
+| `ptt-timeout-v1.json` | `TALK_RELEASE` reason payloads and timeout timelines |
+| `mtu-v1.json` | MTU-safe AUDIO and FEC v2 datagram budget cases |
 
 A compatible implementation MUST compare raw bytes, not only decoded fields.

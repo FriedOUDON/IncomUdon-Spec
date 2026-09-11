@@ -21,6 +21,12 @@
       "datagramHex": "010700100000006f000003ea00000000000003ea"
     },
     {
+      "name": "no_crypto_talk_release_server_timeout",
+      "fields": {"version": 1, "type": "TALK_RELEASE", "headerLen": 16, "channelId": 111, "senderId": 1001, "seq": 1, "flags": 0},
+      "payloadHex": "000003e901",
+      "datagramHex": "010800100000006f000003e900010000000003e901"
+    },
+    {
       "name": "no_crypto_ping",
       "fields": {"version": 1, "type": "PING", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 44, "flags": 0},
       "payloadHex": "1020304050607080",

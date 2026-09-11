@@ -28,10 +28,15 @@ The modern media payload is:
 It drives loss detection and external-FEC grouping. Media frames are normally
 20 ms.
 
-`MAX_MEDIA_FRAME_BYTES` is `4096`. A codec frame excludes the two-byte
-`audio_seq` prefix and MUST NOT exceed this value. Receivers MUST discard
-over-limit media before codec decoding. FEC v2 uses the same limit for every
-advertised frame length and its padded parity data.
+`MAX_MEDIA_FRAME_BYTES` is `4096`. It is a receiver-side codec and FEC
+validation ceiling: a codec frame excludes the two-byte `audio_seq` prefix and
+receivers MUST discard frames over this value before codec decoding. FEC v2
+uses the same ceiling for every advertised frame length and padded parity data.
+
+It is not a transmit size. Senders MUST cap every outbound codec frame at
+`MAX_TRANSMIT_MEDIA_FRAME_BYTES = 1139` and every complete UDP datagram at
+`MAX_UDP_DATAGRAM_BYTES = 1200`. These MTU-safe limits, including exact
+AES-GCM v2 and FEC v2 budgets, are defined in `mtu.md`.
 
 PCM is signed 16-bit little-endian mono at 8000 Hz, 160 samples per frame
 (320 bytes). A legacy PCM payload of exactly 320 bytes has no `audio_seq` and

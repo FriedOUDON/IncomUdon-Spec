@@ -20,11 +20,15 @@ replay behavior are defined in `control-auth.md`.
 
 ## Talk packets
 
-`TALK_GRANT`, `TALK_RELEASE`, and `TALK_DENY` have a 4-byte payload:
+`TALK_GRANT` and `TALK_DENY` have a 4-byte payload:
 
 | Offset | Bytes | Field |
 |---:|---:|---|
 | 0 | 4 | `talker_id` (`u32`) |
+
+`TALK_RELEASE` has a five-byte payload: `talker_id:u32 || release_reason:u8`.
+Release reason values and authoritative Relay timeout behavior are defined in
+`ptt-timeout.md`.
 
 `TALK_DENY` identifies the current lowest sender ID among active talkers, or
 zero when none can be selected. A client MUST stop pending transmission after
@@ -32,7 +36,7 @@ a deny and MUST discard stale queued frames.
 
 A duplicate `PTT_ON` from an already granted sender causes a grant to be sent
 to that sender only. It does not rebroadcast a grant because that would reset
-other receivers' playout state.
+other receivers' playout state or extend the server-managed talk deadline.
 
 ## Codec configuration
 
@@ -69,14 +73,17 @@ but MUST transmit the five-byte form described above.
 
 | Offset | Bytes | Field |
 |---:|---:|---|
-| 0 | 2 | maximum talk duration in whole seconds; zero disables it |
-| 2 | 1 | flags; bit 0 is `multi_talk_enabled` |
+| 0 | 2 | `maximum_talk_seconds` in whole seconds; zero disables the server-managed limit |
+| 2 | 1 | flags; bit 0 is `multi_talk_enabled`; bits 1-7 are reserved and MUST be zero |
 | 3 | 1 | maximum active talkers; minimum effective value is one |
+
+The timeout is a Relay-enforced monotonic talk lease. Its complete semantics,
+release reasons, configuration-update handling, and client obligations are
+specified in `ptt-timeout.md`.
 
 ## Security note
 
-In the currently deployed protocol, control packets are sent as plain packets
-even when a media crypto mode is selected. Their zero GCM tag is a framing
-placeholder, not authentication. New applications MUST preserve this behavior
-for Version 1 compatibility and MUST NOT treat it as authenticated control.
-A future protocol version should define authenticated control traffic.
+Control Authentication v1 authenticates control packets when its flag is set
+and required by Relay policy; see `control-auth.md`. The legacy zero-tag
+control framing is permitted only when Control Authentication v1 is not in
+use. A receiver MUST NOT treat a legacy zero tag as authentication.
