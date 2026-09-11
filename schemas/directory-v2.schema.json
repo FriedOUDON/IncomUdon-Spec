@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FriedOUDON/IncomUdon-Spec/schemas/directory-v2.schema.json",
+  "title": "IncomUdon Directory UDP v2",
+  "type": "object",
+  "required": ["v", "type", "channelId", "epoch", "sequence", "expiresAt", "ciphertext"],
+  "properties": {
+    "v": {"const": 2},
+    "type": {"enum": ["snapshot", "participants", "request", "register", "heartbeat"]},
+    "channelId": {"type": "integer", "minimum": 0, "maximum": 4294967295},
+    "epoch": {"type": "string", "minLength": 22, "maxLength": 22, "pattern": "^[A-Za-z0-9_-]{22}$"},
+    "sequence": {"type": "integer", "minimum": 1, "maximum": 18446744073709551615},
+    "expiresAt": {"type": "integer", "minimum": 1},
+    "ciphertext": {"type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_-]+$"}
+  },
+  "additionalProperties": false
+}

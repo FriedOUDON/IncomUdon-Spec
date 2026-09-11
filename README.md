@@ -26,7 +26,7 @@ requirements for compatible implementations.
 - `docs/protocol/identity-admission.md`: optional OIDC-derived per-user Relay admission.
 - `docs/protocol/fec.md`: external parity FEC and Opus in-band FEC.
 - `docs/protocol/fec-testing.md`: common FEC fault-injection cases.
-- `docs/protocol/directory-udp.md`: optional authenticated directory protocol.
+- `docs/protocol/directory-udp.md`: optional Directory protocol; channel-password-derived v2 is primary and shared-PSK v1 is compatibility-only.
 - `docs/protocol/ping.md`: liveness and RTT measurement.
 - `docs/protocol/diagnostics.md`: local debug metrics and redaction rules.
 - `docs/protocol/versioning.md`: compatibility and release procedure.

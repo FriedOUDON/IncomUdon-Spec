@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Promotes channel-password-derived Directory UDP v2 as the primary optional
+  directory mode. Defines per-channel directional AES-GCM keys, authenticated
+  channel scoping, schema, and a deterministic vector; retains shared-PSK
+  Directory v1 only as an explicit compatibility/administrative mode.
 - Defines optional Identity Admission v1: OIDC Access Service integration,
   Ed25519 proof-of-possession Relay Admission Tickets, per-channel listen/talk
   permissions, and default-off Relay policy modes.

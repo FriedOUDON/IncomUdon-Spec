@@ -40,11 +40,14 @@ Control Authentication v1 derives a separate channel control key:
 
 ```text
 control-auth-v1: HKDF(password_key, "incomudon-control-auth-v1", 32)
+directory-channel-v2: HKDF(password_key, "incomudon-directory-channel-v2", 32)
 ```
 
-This key is distinct from the media key. It is used for HMAC-authenticated
-control packets and is documented in `control-auth.md`. When configured,
-Identity Admission v1 additionally uses this authenticated control path for
+The `control-auth-v1` key is distinct from the media key. It is used for
+HMAC-authenticated control packets and is documented in `control-auth.md`.
+Directory UDP v2 derives additional direction and epoch keys from
+`directory-channel-v2`; these are distinct from both media and Control
+Authentication keys. See `directory-udp.md`. When configured, Identity Admission v1 additionally uses this authenticated control path for
 its OIDC-derived Relay ticket and proof exchange; it does not derive a new
 channel-password key. The normalized password
 input and `password_key` derivation above are unchanged; normal text passwords

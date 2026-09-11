@@ -1,0 +1,28 @@
+{
+  "specVersion": "unreleased",
+  "passwordInput": "test-password",
+  "normalizedPasswordHashHex": "c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265",
+  "channelId": 111,
+  "passwordKeyHex": "b7bae9dc64bf0d8864b3a9526a493eca7ad43e7e51d80fe08a1313be857deaaf",
+  "directoryChannelKeyHex": "e7ba135cec72ec8bad25681d157aa1335ed38ff9b46c53c77979ba7bae5d9940",
+  "directoryC2rKeyHex": "88e57d30071a4db28e5c67b5fa6aae7a0e95890fc1c34c947c9ad8148eb47551",
+  "epochAscii": "directory-epoch!",
+  "epochBase64Url": "ZGlyZWN0b3J5LWVwb2NoIQ",
+  "directoryEpochKeyHex": "a43719aaa49abfe7808fc9a47e63e1c4b16097c79323877ce62846bf3b0fe708",
+  "sequence": 1,
+  "expiresAt": 1700000010,
+  "type": "request",
+  "nonce12Hex": "494450320000000000000001",
+  "aadHex": "496e636f6d55646f6e204469726563746f727920456e76656c6f706520414144207632000207726571756573740000006f6469726563746f72792d65706f6368210000000000000001000000006553f10a",
+  "plaintextUtf8": "{\"version\":2,\"issuedAt\":1700000000,\"expiresAt\":1700000010}",
+  "ciphertextBase64Url": "KK50Ejj3FE3RtKRBChBWIBWUjK0SmgyskI2_21c7oKBQUbm-t0Eju0tJtgi5eZxz-uIuFvBna7apM4NRaKpM31TDfsxEimfJ8d4",
+  "envelope": {
+    "v": 2,
+    "type": "request",
+    "channelId": 111,
+    "epoch": "ZGlyZWN0b3J5LWVwb2NoIQ",
+    "sequence": 1,
+    "expiresAt": 1700000010,
+    "ciphertext": "KK50Ejj3FE3RtKRBChBWIBWUjK0SmgyskI2_21c7oKBQUbm-t0Eju0tJtgi5eZxz-uIuFvBna7apM4NRaKpM31TDfsxEimfJ8d4"
+  }
+}

@@ -11,7 +11,8 @@ MUST NOT be used in production.
 | `fec-rs-6-2.json` | Historical fixed-size six-frame two-parity FEC case |
 | `fec-v2-variable-6-2.json` | FEC v2 variable-size and short-final-block parity/recovery cases |
 | `fec-fault-cases.json` | Machine-readable index of common FEC fault-injection cases |
-| `directory-psk-v1.json` | Authenticated directory request envelope |
+| `directory-psk-v1.json` | Legacy shared-PSK Directory v1 request envelope |
+| `directory-channel-v2.json` | Primary channel-password-derived Directory v2 request envelope |
 | `diagnostics-v1.json` | Redacted local debug-metrics snapshot |
 | `ptt-timeout-v1.json` | `TALK_RELEASE` reason payloads and timeout timelines |
 | `identity-admission-v1.json` | Ed25519 JWS ticket, proof-of-possession, and denial payloads |
