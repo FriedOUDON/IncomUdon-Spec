@@ -14,6 +14,7 @@ MUST NOT be used in production.
 | `directory-psk-v1.json` | Authenticated directory request envelope |
 | `diagnostics-v1.json` | Redacted local debug-metrics snapshot |
 | `ptt-timeout-v1.json` | `TALK_RELEASE` reason payloads and timeout timelines |
+| `identity-admission-v1.json` | Ed25519 JWS ticket, proof-of-possession, and denial payloads |
 | `mtu-v1.json` | MTU-safe AUDIO and FEC v2 datagram budget cases |
 
 A compatible implementation MUST compare raw bytes, not only decoded fields.

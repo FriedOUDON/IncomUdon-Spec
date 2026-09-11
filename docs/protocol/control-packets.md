@@ -14,9 +14,15 @@ the common header. Relay-generated `TALK_*` packets set both the header
 | `KEY_EXCHANGE` | ASCII `LEGACY` | Legacy compatibility marker |
 | `AUTH_HELLO` | empty, Control Authentication v1 tag required | Relay returns `AUTH_CHALLENGE`; no membership state change |
 | `AUTH_CHALLENGE` | Relay payload: expiry and cookie | Sent only to the requesting endpoint |
+| `IDENTITY_BEGIN` | Admission Ticket and Ed25519 public key | Starts optional OIDC-derived Relay identity admission |
+| `IDENTITY_CHALLENGE` | Relay expiry and random challenge | Sent after a valid ticket is presented |
+| `IDENTITY_PROOF` | Ed25519 challenge signature | Completes proof-of-possession before JOIN |
+| `IDENTITY_DENY` | Relay admission denial reason | Indicates required/invalid/expired/unauthorized admission |
 
 Control Authentication v1 requirements, authenticated JOIN payload, and
-replay behavior are defined in `control-auth.md`.
+replay behavior are defined in `control-auth.md`. Optional OIDC-derived Relay
+admission, ticket/proof payloads, and authorization policy are defined in
+`identity-admission.md`.
 
 ## Talk packets
 

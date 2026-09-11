@@ -95,8 +95,13 @@ or forwards its media:
 
 1. Send authenticated `AUTH_HELLO` (`0x10`) with an empty payload.
 2. Receive authenticated `AUTH_CHALLENGE` (`0x11`) from the Relay.
-3. Send authenticated `JOIN` containing the challenge expiry and cookie.
-4. Receive normal authenticated Relay state/configuration packets.
+3. When Identity Admission is enabled, complete `IDENTITY_BEGIN`,
+   `IDENTITY_CHALLENGE`, and `IDENTITY_PROOF` before JOIN.
+4. Send authenticated `JOIN` containing the challenge expiry and cookie.
+5. Receive normal authenticated Relay state/configuration packets.
+
+Identity Admission is fully optional and defaults to off. Its additional
+admission flow is defined in `identity-admission.md`.
 
 A client chooses a cryptographically random 32-bit `client_session_id`. The
 high 32 bits of every client-originated control nonce are this session ID; the
@@ -153,9 +158,12 @@ it is required for the channel:
 - `PTT_OFF`
 - `CODEC_CONFIG`
 - `PING`
+- `IDENTITY_BEGIN`
+- `IDENTITY_PROOF`
 
 The Relay MUST apply Control Authentication v1 to its generated `AUTH_CHALLENGE`,
-`TALK_GRANT`, `TALK_RELEASE`, `TALK_DENY`, `SERVER_CONFIG`, and `PONG` packets.
+`IDENTITY_CHALLENGE`, `IDENTITY_DENY`, `TALK_GRANT`, `TALK_RELEASE`,
+`TALK_DENY`, `SERVER_CONFIG`, and `PONG` packets.
 It MUST verify authentication before caching a CodecConfig, granting/releasing
 talk, registering a peer, refreshing membership, or forwarding an authenticated
 client control packet. Audio and FEC packets are accepted only from an

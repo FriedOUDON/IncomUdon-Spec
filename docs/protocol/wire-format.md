@@ -75,6 +75,10 @@ Unknown flag bits MUST be zero when sending and ignored when receiving.
 | `0x0F` | `PONG` |
 | `0x10` | `AUTH_HELLO` |
 | `0x11` | `AUTH_CHALLENGE` |
+| `0x12` | `IDENTITY_BEGIN` |
+| `0x13` | `IDENTITY_CHALLENGE` |
+| `0x14` | `IDENTITY_PROOF` |
+| `0x15` | `IDENTITY_DENY` |
 
 See `../test-vectors/packet-envelope-v1.json` for canonical byte examples.
 

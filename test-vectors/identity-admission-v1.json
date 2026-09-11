@@ -1,0 +1,50 @@
+{
+  "specVersion": "v0.3.0-draft",
+  "scheme": "identity-admission-v1",
+  "synthetic_keys": {
+    "issuer_private_seed_hex": "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",
+    "issuer_public_key_hex": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+    "client_private_seed_hex": "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb",
+    "client_public_key_hex": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c",
+    "client_public_key_sha256_base64url": "OfcT0KZEJT8EUpQhufUbmwiXnQgpWVnE85kO5hf1E58"
+  },
+  "ticket": {
+    "protected_header_json": "{\"alg\":\"EdDSA\",\"kid\":\"test-ed25519-1\",\"typ\":\"incomudon-admission+jwt\"}",
+    "payload_json": "{\"aud\":\"incomudon-relay-test\",\"ch\":100,\"cnf\":{\"jkt\":\"OfcT0KZEJT8EUpQhufUbmwiXnQgpWVnE85kO5hf1E58\"},\"exp\":1700000300,\"iat\":1700000000,\"iss\":\"https://access.example.test\",\"jti\":\"test-ticket-0001\",\"perm\":3,\"sid\":1001,\"sub\":\"user-test-1001\"}",
+    "signing_input_ascii": "eyJhbGciOiJFZERTQSIsImtpZCI6InRlc3QtZWQyNTUxOS0xIiwidHlwIjoiaW5jb211ZG9uLWFkbWlzc2lvbitqd3QifQ.eyJhdWQiOiJpbmNvbXVkb24tcmVsYXktdGVzdCIsImNoIjoxMDAsImNuZiI6eyJqa3QiOiJPZmNUMEtaRUpUOEVVcFFodWZVYm13aVhuUWdwV1ZuRTg1a081aGYxRTU4In0sImV4cCI6MTcwMDAwMDMwMCwiaWF0IjoxNzAwMDAwMDAwLCJpc3MiOiJodHRwczovL2FjY2Vzcy5leGFtcGxlLnRlc3QiLCJqdGkiOiJ0ZXN0LXRpY2tldC0wMDAxIiwicGVybSI6Mywic2lkIjoxMDAxLCJzdWIiOiJ1c2VyLXRlc3QtMTAwMSJ9",
+    "signature_base64url": "Y1A17MPwesje1zWhPXaXXuUVatokMqbS_sYJylDqICqvb5sfybY1GR9zKaWuI8SYuRQtfFrj5AMYom19brFyCQ",
+    "compact_jws": "eyJhbGciOiJFZERTQSIsImtpZCI6InRlc3QtZWQyNTUxOS0xIiwidHlwIjoiaW5jb211ZG9uLWFkbWlzc2lvbitqd3QifQ.eyJhdWQiOiJpbmNvbXVkb24tcmVsYXktdGVzdCIsImNoIjoxMDAsImNuZiI6eyJqa3QiOiJPZmNUMEtaRUpUOEVVcFFodWZVYm13aVhuUWdwV1ZuRTg1a081aGYxRTU4In0sImV4cCI6MTcwMDAwMDMwMCwiaWF0IjoxNzAwMDAwMDAwLCJpc3MiOiJodHRwczovL2FjY2Vzcy5leGFtcGxlLnRlc3QiLCJqdGkiOiJ0ZXN0LXRpY2tldC0wMDAxIiwicGVybSI6Mywic2lkIjoxMDAxLCJzdWIiOiJ1c2VyLXRlc3QtMTAwMSJ9.Y1A17MPwesje1zWhPXaXXuUVatokMqbS_sYJylDqICqvb5sfybY1GR9zKaWuI8SYuRQtfFrj5AMYom19brFyCQ",
+    "byte_length": 498
+  },
+  "identity_begin": {
+    "ticket_length": 498,
+    "payload_hex": "01f265794a68624763694f694a465a45525451534973496d74705a434936496e526c633351745a5751794e5455784f5330784969776964486c77496a6f696157356a623231315a4739754c57466b62576c7a63326c76626974716433516966512e65794a68645751694f694a70626d4e766258566b62323474636d567359586b746447567a64434973496d4e6f496a6f784d444173496d4e755a69493665794a71613351694f694a505a6d4e554d457461525570554f4556566346466f64575a56596d3133615668755557647756315a7552546731613038316147597852545534496e3073496d5634634349364d5463774d4441774d444d774d43776961574630496a6f784e7a41774d4441774d4441774c434a7063334d694f694a6f64485277637a6f764c32466a5932567a6379356c654746746347786c4c6e526c633351694c434a7164476b694f694a305a584e304c5852705932746c644330774d4441784969776963475679625349364d79776963326c6b496a6f784d4441784c434a7a645749694f694a31633256794c58526c633351744d5441774d534a392e59314131374d507765736a65317a5768505861585875555661746f6b4d7162535f73594a796c44714943717662357366796259314752397a4b61577549385359755251746646726a35414d596f6d31396272467943513d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c",
+    "authenticated_datagram_bytes": 576
+  },
+  "identity_challenge": {
+    "expiry_unix_seconds": 1700000030,
+    "challenge_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "payload_hex": "6553f11e000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+  },
+  "identity_proof": {
+    "message_sha256_hex": "61ac99aabf2270d5497ddd17452efd49ca768d6787ceb9ffc96797f26ae7697c",
+    "signature_hex": "44a06fc1eecfab3a598c42ae5805e23532b1439c8b6803ec0e2e60f54453b056f6fc99296c81e8c67657beb74ce7fe072a6f6cdb4d581fc466756673befab005"
+  },
+  "identity_deny_payloads": [
+    {
+      "reason": "ADMISSION_REQUIRED",
+      "reason_byte": 0,
+      "payload_hex": "00"
+    },
+    {
+      "reason": "INVALID_TICKET",
+      "reason_byte": 1,
+      "payload_hex": "01"
+    },
+    {
+      "reason": "INVALID_PROOF",
+      "reason_byte": 5,
+      "payload_hex": "05"
+    }
+  ]
+}

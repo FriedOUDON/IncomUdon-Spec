@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Defines optional Identity Admission v1: OIDC Access Service integration,
+  Ed25519 proof-of-possession Relay Admission Tickets, per-channel listen/talk
+  permissions, and default-off Relay policy modes.
+
 - Defines an MTU-safe 1200-byte UDP datagram limit, a 1139-byte transmit media
   frame limit, FEC v2 size budgets, oversize Relay-drop behavior, and
   diagnostics for local MTU/oversize failures.

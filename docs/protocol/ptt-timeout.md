@@ -54,7 +54,8 @@ with reason `SERVER_POLICY`.
 | `0x02` | `MEMBERSHIP_TIMEOUT` | The talker's membership lease expired. |
 | `0x03` | `CLIENT_LEAVE` | Relay accepted the talker's `LEAVE`. |
 | `0x04` | `SERVER_POLICY` | Relay or administrator ended the active talk for policy reasons. |
-| `0x05-0xff` | reserved | A receiver MUST treat an unknown value as a release. |
+| `0x05` | `IDENTITY_EXPIRED` | The optional Identity Admission Ticket expired or was no longer valid. |
+| `0x06-0xff` | reserved | A receiver MUST treat an unknown value as a release. |
 
 Relay-generated `TALK_RELEASE` packets MUST use the resolved talker ID in both
 the common header `sender_id` and payload `talker_id`.

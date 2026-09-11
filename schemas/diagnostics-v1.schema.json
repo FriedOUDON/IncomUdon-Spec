@@ -10,6 +10,7 @@
     "tx",
     "rx",
     "control_auth",
+    "identity_admission",
     "network"
   ],
   "properties": {
@@ -31,6 +32,9 @@
     },
     "control_auth": {
       "$ref": "#/$defs/controlAuth"
+    },
+    "identity_admission": {
+      "$ref": "#/$defs/identityAdmission"
     },
     "network": {
       "$ref": "#/$defs/network"
@@ -487,6 +491,66 @@
           "$ref": "#/$defs/counter"
         },
         "authentication_failures": {
+          "$ref": "#/$defs/counter"
+        }
+      },
+      "additionalProperties": false
+    },
+    "identityAdmission": {
+      "type": "object",
+      "required": [
+        "mode",
+        "state",
+        "listen_permitted",
+        "talk_permitted",
+        "ticket_lifetime_remaining_ms",
+        "tickets_accepted",
+        "tickets_denied",
+        "proof_failures",
+        "renewals",
+        "admission_expirations"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "off",
+            "optional",
+            "required",
+            "unknown"
+          ]
+        },
+        "state": {
+          "enum": [
+            "disabled",
+            "pending",
+            "admitted",
+            "denied",
+            "expired",
+            "unknown"
+          ]
+        },
+        "listen_permitted": {
+          "type": "boolean"
+        },
+        "talk_permitted": {
+          "type": "boolean"
+        },
+        "ticket_lifetime_remaining_ms": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "tickets_accepted": {
+          "$ref": "#/$defs/counter"
+        },
+        "tickets_denied": {
+          "$ref": "#/$defs/counter"
+        },
+        "proof_failures": {
+          "$ref": "#/$defs/counter"
+        },
+        "renewals": {
+          "$ref": "#/$defs/counter"
+        },
+        "admission_expirations": {
           "$ref": "#/$defs/counter"
         }
       },

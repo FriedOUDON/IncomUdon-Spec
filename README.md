@@ -23,6 +23,7 @@ requirements for compatible implementations.
 - `docs/protocol/mtu.md`: MTU-safe UDP datagram limits and fragmentation policy.
 - `docs/protocol/security.md`: password derivation and crypto modes.
 - `docs/protocol/control-auth.md`: group-authenticated Relay control traffic.
+- `docs/protocol/identity-admission.md`: optional OIDC-derived per-user Relay admission.
 - `docs/protocol/fec.md`: external parity FEC and Opus in-band FEC.
 - `docs/protocol/fec-testing.md`: common FEC fault-injection cases.
 - `docs/protocol/directory-udp.md`: optional authenticated directory protocol.

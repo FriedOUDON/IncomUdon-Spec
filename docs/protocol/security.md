@@ -43,7 +43,10 @@ control-auth-v1: HKDF(password_key, "incomudon-control-auth-v1", 32)
 ```
 
 This key is distinct from the media key. It is used for HMAC-authenticated
-control packets and is documented in `control-auth.md`. The normalized password
+control packets and is documented in `control-auth.md`. When configured,
+Identity Admission v1 additionally uses this authenticated control path for
+its OIDC-derived Relay ticket and proof exchange; it does not derive a new
+channel-password key. The normalized password
 input and `password_key` derivation above are unchanged; normal text passwords
 are first SHA-256 normalized, while 64-hex and `sha256:` inputs supply the
 normalized 32 bytes before channel binding.

@@ -5,7 +5,8 @@
     {"talker_id": 1001, "reason": "SERVER_TALK_TIMEOUT", "reason_byte": 1, "payload_hex": "000003e901"},
     {"talker_id": 1001, "reason": "MEMBERSHIP_TIMEOUT", "reason_byte": 2, "payload_hex": "000003e902"},
     {"talker_id": 1001, "reason": "CLIENT_LEAVE", "reason_byte": 3, "payload_hex": "000003e903"},
-    {"talker_id": 1001, "reason": "SERVER_POLICY", "reason_byte": 4, "payload_hex": "000003e904"}
+    {"talker_id": 1001, "reason": "SERVER_POLICY", "reason_byte": 4, "payload_hex": "000003e904"},
+    {"talker_id": 1001, "reason": "IDENTITY_EXPIRED", "reason_byte": 5, "payload_hex": "000003e905"}
   ],
   "timeline_cases": [
     {

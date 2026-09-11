@@ -12,9 +12,11 @@ separate for each sender ID.
 
 ## Transport lifecycle
 
-1. When Control Authentication v1 is required, complete `AUTH_HELLO`,
-   `AUTH_CHALLENGE`, and authenticated `JOIN` to register the observed UDP
-   source endpoint. Otherwise send `JOIN`.
+1. When Control Authentication v1 is required, complete `AUTH_HELLO` and
+   `AUTH_CHALLENGE`. When the optional Identity Admission policy requires it,
+   complete `IDENTITY_BEGIN`, `IDENTITY_CHALLENGE`, and `IDENTITY_PROOF`; then
+   send authenticated `JOIN` to register the observed UDP source endpoint.
+   Otherwise send `JOIN`.
 2. Send `CODEC_CONFIG` before the first media frame for a sender.
 3. Send `PTT_ON`; wait for `TALK_GRANT` before treating media as authorized.
 4. Send `AUDIO` and optional `FEC` while granted and before any Relay-enforced
@@ -48,5 +50,6 @@ that talker when the deadline or membership lease expires. See
 | Diagnostics | `PING`, `PONG` | Endpoint liveness and RTT |
 | Compatibility | `KEY_EXCHANGE` | Legacy handshake marker |
 | Authentication | `AUTH_HELLO`, `AUTH_CHALLENGE` | Relay cookie challenge for authenticated membership |
+| Identity admission | `IDENTITY_*` | Optional OIDC-derived per-user Relay authorization |
 
 The Relay recognizes protocol version `1` only.

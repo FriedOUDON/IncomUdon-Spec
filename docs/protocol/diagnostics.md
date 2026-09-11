@@ -136,6 +136,26 @@ the client can observe.
 The exact Relay rejection reason may be unavailable to a client. In that case,
 clients MUST increment only the locally observable aggregate failure counter.
 
+## Identity admission metrics
+
+`identity_admission` records only local admission state and aggregate outcomes.
+It MUST NOT contain a compact JWS, OIDC credential, ticket ID, issuer URL,
+subject, public key, challenge, or channel authorization list.
+
+| Field | Meaning |
+|---|---|
+| `mode` | `off`, `optional`, `required`, or `unknown` Relay identity-admission policy |
+| `state` | `disabled`, `pending`, `admitted`, `denied`, `expired`, or `unknown` |
+| `listen_permitted` / `talk_permitted` | Locally effective permissions; false when unavailable or denied |
+| `ticket_lifetime_remaining_ms` | Remaining local ticket lifetime, or null when unavailable/disabled |
+| `tickets_accepted` / `tickets_denied` | Admission result totals |
+| `proof_failures` | Locally observed identity proof failures |
+| `renewals` | Successful admission renewals |
+| `admission_expirations` | Local admissions that expired during the session |
+
+In `off` mode, `state` MUST be `disabled`, permission values MUST be false,
+and all counters MUST be zero.
+
 ## Network and QoS metrics
 
 The `network` object records `udp_packets_sent`, `udp_packets_received`,

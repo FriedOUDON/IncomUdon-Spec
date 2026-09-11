@@ -29,9 +29,10 @@ documents current behavior and the first coordinated Rust migration target.
 The PWA, Qt, and Rust clients covered by `v0.1.0-draft` have not yet reached a
 formal production release. They therefore MUST migrate together to the
 five-byte `CODEC_CONFIG`, five-byte `TALK_RELEASE` with release reason,
-FEC v2, Control Authentication v1, and the 1200-byte UDP datagram limit
-defined in this draft. Supporting FEC v1 or unauthenticated secure controls
-in first-release clients is optional, not required.
+FEC v2, Control Authentication v1, optional Identity Admission v1, and the
+1200-byte UDP datagram limit defined in this draft. Supporting FEC v1 or
+unauthenticated secure controls in first-release clients is optional, not
+required.
 
 Once a production release is declared, future incompatible changes MUST follow
 the compatibility requirements above and use explicit version negotiation or a
