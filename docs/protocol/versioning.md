@@ -29,8 +29,11 @@ documents current behavior and the first coordinated Rust migration target.
 The PWA, Qt, and Rust clients covered by `v0.1.0-draft` have not yet reached a
 formal production release. They therefore MUST migrate together to the
 five-byte `CODEC_CONFIG`, five-byte `TALK_RELEASE` with release reason,
-FEC v2, Control Authentication v1, optional Identity Admission v1, and the
-1200-byte UDP datagram limit defined in this draft. Supporting FEC v1 or
+FEC v2, Control Authentication v1, optional Identity Admission v1, the
+1200-byte UDP datagram limit, and the AES-GCM v2 32-byte media header with a
+direct 96-bit nonce defined in this draft. First-release clients MUST NOT
+transmit or require support for the predecessor draft AES-GCM v2 28-byte media
+header with its zero-prefixed 64-bit nonce. Supporting FEC v1 or
 unauthenticated secure controls in first-release clients is optional, not
 required.
 

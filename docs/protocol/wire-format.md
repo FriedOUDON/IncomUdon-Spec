@@ -18,20 +18,34 @@ The fixed header is 16 bytes. `seq` increments for every packet sent by a
 client and wraps modulo 65536. Receivers MUST tolerate wrapping and MUST NOT
 assume that the sequence field alone is a cryptographic nonce.
 
-## Security header
+## AES-GCM v2 media security header
 
-A packet with `header_len = 28` carries this header immediately after the
-fixed header:
+An AES-GCM v2 encrypted `AUDIO` or `FEC` packet MUST set `header_len = 32` and
+carry this header immediately after the fixed header:
+
+| Offset | Bytes | Field |
+|---:|---:|---|
+| 16 | 12 | `nonce_96` |
+| 28 | 4 | `key_id` |
+
+Ciphertext follows offset 32 and the final 16 bytes are the AES-GCM
+authentication tag. `nonce_96` is the direct AES-GCM nonce and the exact
+32-byte packet prefix is authenticated as AAD; see `security.md`.
+
+## Control and legacy security header
+
+A packet with `header_len = 28` carries this separate header immediately after
+the fixed header:
 
 | Offset | Bytes | Field |
 |---:|---:|---|
 | 16 | 8 | `nonce` |
 | 24 | 4 | `key_id` |
 
-For encrypted media, ciphertext follows offset 28 and the final 16 bytes are
-the authentication tag. Plain control packets in encrypted modes also use a
-28-byte header, zero nonce/key ID, their plaintext payload, and 16 zero tag
-bytes; see `security.md`.
+This form is used by Control Authentication v1 and documented in
+`control-auth.md`. It MUST NOT be used for AES-GCM v2 encrypted media. Legacy
+plain control packets in encrypted modes may carry a 28-byte zero nonce/key-ID
+header, their plaintext payload, and a 16-byte zero tag for compatibility.
 
 ## Datagram size
 
@@ -49,7 +63,7 @@ Version 1 fixed header and MUST NOT generate the 14-byte form.
 
 | Value | Name | Meaning |
 |---:|---|---|
-| `0x0001` | `AES_GCM_V2_HEADER_AAD` | Authenticate the first 28 bytes as AES-GCM AAD |
+| `0x0001` | `AES_GCM_V2_HEADER_AAD` | AES-GCM v2 media: `header_len = 32`; authenticate the first 32 bytes as AAD |
 | `0x0002` | `CONTROL_AUTH_V1` | Authenticate plaintext control with HMAC-SHA-256 |
 
 Unknown flag bits MUST be zero when sending and ignored when receiving.

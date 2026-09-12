@@ -16,7 +16,7 @@ authentication tag. It excludes the UDP and IP headers.
 |---|---:|---|
 | `MAX_UDP_DATAGRAM_BYTES` | 1200 bytes | Maximum complete UDP payload emitted or forwarded by a Version 1 implementation. |
 | `MAX_MEDIA_FRAME_BYTES` | 4096 bytes | Receiver-side codec/FEC validation ceiling. It is not a permitted transmit size. |
-| `MAX_TRANSMIT_MEDIA_FRAME_BYTES` | 1139 bytes | Maximum codec-frame size a sender may place into AUDIO or FEC v2. |
+| `MAX_TRANSMIT_MEDIA_FRAME_BYTES` | 1135 bytes | Maximum codec-frame size a sender may place into AUDIO or FEC v2. |
 
 The 1200-byte datagram limit leaves room for IPv6 and UDP headers below the
 IPv6 minimum link MTU of 1280 bytes. It is deliberately lower than a typical
@@ -33,9 +33,9 @@ locally report such drops, but MUST NOT log media content or secret material.
 For AES-GCM v2 AUDIO, the largest relevant envelope is:
 
 ```text
-28-byte IncomUdon security header
+32-byte IncomUdon AES-GCM v2 media security header
 + 2-byte AUDIO sequence
-+ 1139-byte codec frame
++ 1135-byte codec frame
 + 16-byte AES-GCM tag
 = 1185 bytes
 ```
@@ -44,9 +44,9 @@ For an AES-GCM v2 FEC v2 parity packet with the maximum block size of six, the
 largest envelope is:
 
 ```text
-28-byte IncomUdon security header
+32-byte IncomUdon AES-GCM v2 media security header
 + 17-byte FEC v2 metadata (5-byte prefix + six u16 lengths)
-+ 1139-byte parity data
++ 1135-byte parity data
 + 16-byte AES-GCM tag
 = 1200 bytes
 ```
@@ -84,11 +84,11 @@ old parity, and MUST NOT exceed the datagram limit for either parity packet.
 
 ## Required interoperability cases
 
-1. An AES-GCM v2 AUDIO frame of 1139 bytes produces a datagram no larger than
+1. An AES-GCM v2 AUDIO frame of 1135 bytes produces a datagram no larger than
    1185 bytes.
-2. A six-frame AES-GCM v2 FEC v2 parity datagram with 1139-byte parity data is
+2. A six-frame AES-GCM v2 FEC v2 parity datagram with 1135-byte parity data is
    exactly 1200 bytes and is accepted for transmission.
-3. A 1140-byte codec frame or FEC parity source is rejected before network
+3. A 1136-byte codec frame or FEC parity source is rejected before network
    transmission.
 4. A Relay receives a datagram larger than 1200 bytes and does not forward it.
 5. An MTU-related local send error increments diagnostics and does not cause

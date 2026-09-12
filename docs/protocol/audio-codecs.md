@@ -34,7 +34,7 @@ receivers MUST discard frames over this value before codec decoding. FEC v2
 uses the same ceiling for every advertised frame length and padded parity data.
 
 It is not a transmit size. Senders MUST cap every outbound codec frame at
-`MAX_TRANSMIT_MEDIA_FRAME_BYTES = 1139` and every complete UDP datagram at
+`MAX_TRANSMIT_MEDIA_FRAME_BYTES = 1135` and every complete UDP datagram at
 `MAX_UDP_DATAGRAM_BYTES = 1200`. These MTU-safe limits, including exact
 AES-GCM v2 and FEC v2 budgets, are defined in `mtu.md`.
 

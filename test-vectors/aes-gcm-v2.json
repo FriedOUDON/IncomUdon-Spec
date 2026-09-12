@@ -8,13 +8,22 @@
   "hkdfInfoAscii": "incomudon-session-aesgcm-v2",
   "keyHex": "5a1ab7db20acb00612f7eabbc2e379e4777b6bbb53be7e106d5ca1a3ce20687d",
   "keyId": 2,
-  "packet": {"type": "AUDIO", "senderId": 5678, "seq": 42, "nonce": "0x0102030405060708", "flags": 1},
-  "nonce12Hex": "000000000102030405060708",
-  "aadHex": "0101001c000004d20000162e002a0001010203040506070800000002",
+  "packet": {
+    "type": "AUDIO",
+    "senderId": 5678,
+    "seq": 42,
+    "headerLen": 32,
+    "nonce96Hex": "0102030405060708090a0b0c",
+    "flags": 1
+  },
+  "aadHex": "01010020000004d20000162e002a00010102030405060708090a0b0c00000002",
   "plaintextHex": "002a11223344",
-  "ciphertextHex": "5d9cde409e17",
-  "tagHex": "dccf50e0159c74ef44a5e21edfff0f08",
-  "datagramHex": "0101001c000004d20000162e002a00010102030405060708000000025d9cde409e17dccf50e0159c74ef44a5e21edfff0f08",
-  "negativeCase": {"mutateOffset": 4, "xor": "01", "expected": "authentication failure"}
+  "ciphertextHex": "21bf520d2a0c",
+  "tagHex": "66597c0831f829cf0958ef01f90e519d",
+  "datagramHex": "01010020000004d20000162e002a00010102030405060708090a0b0c0000000221bf520d2a0c66597c0831f829cf0958ef01f90e519d",
+  "negativeCase": {
+    "mutateOffset": 4,
+    "xor": "01",
+    "expected": "authentication failure"
+  }
 }
-

@@ -14,9 +14,13 @@
   Ed25519 proof-of-possession Relay Admission Tickets, per-channel listen/talk
   permissions, and default-off Relay policy modes.
 
-- Defines an MTU-safe 1200-byte UDP datagram limit, a 1139-byte transmit media
+- Defines an MTU-safe 1200-byte UDP datagram limit, a 1135-byte transmit media
   frame limit, FEC v2 size budgets, oversize Relay-drop behavior, and
   diagnostics for local MTU/oversize failures.
+- Revises AES-GCM v2 media nonces to a direct CSPRNG-generated 96-bit
+  sender/session base plus monotonic allocation, increases its authenticated
+  media header to 32 bytes, and adds the coordinated first-release migration
+  requirement.
 
 - Defines Server-Managed PTT Timeout: monotonic Relay-enforced talk leases,
   five-byte `TALK_RELEASE` reason signaling, deadline handling, client stop

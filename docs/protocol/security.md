@@ -54,20 +54,50 @@ input and `password_key` derivation above are unchanged; normal text passwords
 are first SHA-256 normalized, while 64-hex and `sha256:` inputs supply the
 normalized 32 bytes before channel binding.
 
-AES-256-GCM uses a 12-byte nonce:
+## AES-GCM nonce lifecycle
+
+AES-256-GCM v2 uses the 12-byte `nonce_96` carried directly in the media
+security header as its AEAD nonce/IV. It MUST NOT prepend a fixed zero prefix
+or otherwise transform this value before AES-GCM processing.
+
+At encrypted-media session initialization, a sender MUST obtain a fresh
+96-bit `nonce_base` from a cryptographically secure random number generator
+(CSPRNG), initialize `nonce_counter = 0`, and allocate nonces as:
 
 ```text
-nonce_bytes = 0x00000000 || U64BE(packet_nonce)
+nonce_96 = U96BE((U96BE(nonce_base) + nonce_counter) mod 2^96)
+nonce_counter = nonce_counter + 1
 ```
 
-A sender MUST use a cryptographically random 64-bit nonce base and increment
-it for every encrypted packet. A nonce MUST NOT repeat with the same key.
+The sender MUST allocate the next nonce before attempting encryption. A failed
+send or encryption operation consumes the allocation; implementations MUST
+never roll the counter back or reuse that nonce. The same nonce-counter
+namespace covers every AES-GCM v2 encrypted `AUDIO` and `FEC` packet produced
+with the media key, including both P and Q parity packets.
+
+A sender MUST NOT wrap the 96-bit counter space. To retain a conservative
+lifetime bound, an encrypted-media session MUST contain no more than `2^32`
+nonce allocations. Before reaching that limit, or whenever the counter state
+is lost or reset while retaining the media key, the sender MUST begin a fresh
+session with a newly generated 96-bit `nonce_base`. A receiver uses the
+on-wire `nonce_96` directly and does not need the base or counter state.
+
+The media key is shared by channel participants, so implementations MUST use a
+CSPRNG for every sender/session base; sequential, timestamp-derived, or
+sender-ID-derived bases are prohibited. This gives each sender/session a
+96-bit random nonce starting point and makes accidental cross-sender range
+collisions cryptographically negligible for the intended deployment. As with
+all AES-GCM use, a `(media_key, nonce_96)` pair MUST NOT be reused.
 
 ## AES-GCM v2
 
-AES-GCM v2 sets flag `0x0001`, uses `key_id = 2`, and authenticates the exact
-28-byte packet prefix as AAD. The encrypted payload and 16-byte GCM tag do not
-increase packet size compared with AES-GCM v1.
+AES-GCM v2 sets flag `0x0001`, uses `key_id = 2`, requires `header_len = 32`
+for encrypted `AUDIO` and `FEC` packets, and authenticates the exact 32-byte
+packet prefix as AAD. The final 16 bytes of every encrypted payload are the
+GCM authentication tag.
+
+The 28-byte Control Authentication v1 header is a separate HMAC construction;
+it is not an AES-GCM v2 nonce format and MUST NOT be used for encrypted media.
 
 AES-GCM v1 uses no AAD. A receiver configured for v2 MUST reject a packet that
 lacks the v2 flag, and a legacy receiver MUST reject a packet carrying it.
