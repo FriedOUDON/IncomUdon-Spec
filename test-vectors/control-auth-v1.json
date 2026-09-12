@@ -3,16 +3,15 @@
   "scheme": "control-auth-v1",
   "passwordInput": "test-password",
   "channelId": 100,
-  "normalizedPasswordHashHex": "c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265",
-  "passwordKeyHex": "a8ae9c1cce4ef530ace44084ab2597c3ff3ae694d1b79a8919dbe876b46b186c",
-  "mediaKeyHex": "2a3867644aef1a7a557ec9cd77f8cbbcf9fc6d9c328821110964aa38f114913d",
-  "controlKeyHex": "02c607e56b7e4ecf3e93539b10e2f945177ee0c8d77aad4306b683ca24a72ebc",
+  "passwordKeyHex": "8301b028f55d90b967879f804c31593632b7f0cad5be896f0ec25d17c0b8f768",
+  "mediaKeyHex": "e8029a2b011bbe69b651a4da75ff2b53e8a19b324f5df91dc2ba445b41fbea9a",
+  "controlKeyHex": "f7bf50ee89a0e406253d1a31040a54ac9681e6bacdd4346251b365a757bd5153",
   "controlPacket": {
     "type": "PTT_ON",
     "headerHex": "0102001c00000064000003ea002a0002123456780000000200000001",
     "payloadHex": "",
     "domainHex": "696e636f6d75646f6e2d636f6e74726f6c2d617574682d763100",
-    "tagHex": "209b1ece9e4488001af2f659034b6626"
+    "tagHex": "f4df8ba41610f2a6f4a592620e51130a"
   },
   "cookieCase": {
     "relayCookieSecretHex": "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -21,5 +20,14 @@
     "clientSessionId": 305419896,
     "expiryUnixSeconds": 1694498816,
     "cookieHex": "164304de5e5b6a7782f9657740ba0eaf"
+  },
+  "credentialKind": "argon2id-v1",
+  "channelSaltHex": "42177c694a63e58760e1d3b7f8a9d99d",
+  "argon2id": {
+    "version": 19,
+    "memoryKiB": 65536,
+    "iterations": 3,
+    "parallelism": 4,
+    "outputBytes": 32
   }
 }

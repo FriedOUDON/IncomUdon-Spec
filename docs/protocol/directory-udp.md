@@ -60,15 +60,11 @@ increase in the replay domain below.
 
 ### Key derivation and AEAD
 
-The existing channel-password normalization and binding in `security.md` are
-normative:
-
-```text
-password_key = SHA-256(normalized_password_hash || U32BE(channel_id))
-```
-
-A Relay and client MUST derive Directory keys from `password_key`, never from
-the raw password text or merely from `normalized_password_hash`.
+The channel credential and `password_key` derivation in `security.md` are
+normative. A Relay and client MUST derive Directory keys from `password_key`,
+never from the raw credential text. `argon2id-v1` passphrase derivation or the
+explicit `raw-secret-v1` input form MUST be completed before Directory key
+derivation begins.
 
 ```text
 directory_channel_key = HKDF-SHA-256(
@@ -148,12 +144,11 @@ client sends independent Directory requests for each configured channel.
 
 ### Password strength
 
-Directory v2 does not increase the password trust boundary: anyone who knows a
-channel password can already derive the corresponding media and authenticated
-control keys. However, encrypted JSON has predictable structure, so weak or
-empty channel passwords MUST NOT be treated as confidential. An empty password
-continues to normalize to zero bytes as defined in `security.md` and provides
-no meaningful Directory metadata protection.
+Directory v2 does not increase the credential trust boundary: anyone who
+knows a channel credential can already derive the corresponding media and
+authenticated control keys. Encrypted JSON has predictable structure, so weak
+passphrases MUST NOT be treated as confidential even with Argon2id. Empty
+credentials are rejected for Directory v2 as required by `security.md`.
 
 See `../../test-vectors/directory-channel-v2.json` for a deterministic v2
 request envelope.

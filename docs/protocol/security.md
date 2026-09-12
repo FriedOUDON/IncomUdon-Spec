@@ -9,21 +9,82 @@
 | `aes-gcm` | Legacy AES-GCM | 1 |
 | `aes-gcm-v2` | Default for new clients | 2 |
 
-## Password normalization
+## Channel credential and root-key derivation
 
-Let `P` be the configured password string.
+A secure channel credential is either a human-entered passphrase or an
+explicitly marked 256-bit random secret. Its only purpose at this stage is to
+produce the 32-byte `password_key`; media, control, and Directory keys remain
+separately derived from that root key.
 
-1. If `P` is `sha256:` followed by 64 hexadecimal characters, use those 32
-   decoded bytes.
-2. If `P` is exactly 64 hexadecimal characters, use those 32 decoded bytes.
-3. Otherwise use `SHA-256(UTF-8(P))`.
-4. If `P` is empty after trimming, use 32 zero bytes.
+The configured credential is interpreted as follows:
 
-The channel password key is:
+| Form | Credential kind | Rule |
+|---|---|---|
+| `secret:` followed by exactly 64 hexadecimal characters | `raw-secret-v1` | Decode the 32 bytes after `secret:`. |
+| Any other non-empty string | `argon2id-v1` | Normalize to Unicode NFC and encode as UTF-8 passphrase bytes. |
+
+The `secret:` prefix is ASCII and case-sensitive. Implementations MUST NOT
+automatically recognize a bare 64-hex string as a raw secret; it is a
+passphrase unless it has the explicit prefix. A credential beginning with
+`sha256:` MUST be rejected. The draft-era `sha256:` and bare-64-hex
+normalization forms are removed in the first coordinated migration.
+
+For every secure channel, derive the public 16-byte channel salt:
 
 ```text
-password_key = SHA-256(normalized_password_hash || U32BE(channel_id))
+channel_salt = SHA-256(
+  "incomudon-channel-password-salt-v1\0" || U32BE(channel_id)
+)[0:16]
 ```
+
+`channel_salt` is not secret and need not be transmitted. It prevents a single
+precomputation from applying to every channel ID while avoiding an additional
+per-channel provisioning field. A future random provisioned channel salt MUST
+use a new credential-KDF version.
+
+For `argon2id-v1`, derive:
+
+```text
+password_key = Argon2id(
+  password = UTF8(NFC(P)),
+  salt = channel_salt,
+  version = 0x13,
+  memory_kib = 65536,
+  iterations = 3,
+  parallelism = 4,
+  output_length = 32
+)
+```
+
+`argon2id-v1` follows the memory-constrained Argon2id recommendation in
+[RFC 9106, Section 4](https://www.rfc-editor.org/rfc/rfc9106.html#section-4).
+Parameters are protocol constants and MUST NOT be silently reduced after a
+derivation failure.
+
+For `raw-secret-v1`, derive:
+
+```text
+password_key = HKDF-SHA-256(
+  IKM = decoded_secret_32,
+  salt = channel_salt,
+  info = "incomudon-raw-secret-v1",
+  length = 32
+)
+```
+
+Secure modes MUST reject an empty credential. `no-crypto` ignores the
+credential and is the only mode that may be used without one. Implementations
+MUST select the credential kind from the configured input before attempting
+packet authentication and MUST NOT silently fall back to the removed SHA-256
+scheme or try multiple credential kinds for an incoming packet. The credential
+kind is local channel configuration, not UDP packet metadata.
+
+Argon2id is performed only while establishing or reconfiguring a local channel
+session, never once per packet. Implementations SHOULD retain only the derived
+keys needed by the active session and SHOULD clear temporary passphrase and KDF
+memory where the platform permits it. A 256-bit `secret:` credential is
+recommended for unattended or high-security deployments; Argon2id raises the
+cost of offline guessing but cannot make a weak passphrase strong.
 
 ## AES-GCM keys
 
@@ -47,12 +108,10 @@ The `control-auth-v1` key is distinct from the media key. It is used for
 HMAC-authenticated control packets and is documented in `control-auth.md`.
 Directory UDP v2 derives additional direction and epoch keys from
 `directory-channel-v2`; these are distinct from both media and Control
-Authentication keys. See `directory-udp.md`. When configured, Identity Admission v1 additionally uses this authenticated control path for
-its OIDC-derived Relay ticket and proof exchange; it does not derive a new
-channel-password key. The normalized password
-input and `password_key` derivation above are unchanged; normal text passwords
-are first SHA-256 normalized, while 64-hex and `sha256:` inputs supply the
-normalized 32 bytes before channel binding.
+Authentication keys. See `directory-udp.md`. When configured, Identity
+Admission v1 additionally uses this authenticated control path for its
+OIDC-derived Relay ticket and proof exchange; it does not derive a new
+channel-password key.
 
 ## AES-GCM nonce lifecycle
 
@@ -116,5 +175,6 @@ new profile.
 
 ## Deterministic vector
 
-See `../../test-vectors/aes-gcm-v2.json`. Test keys and passwords in that file
-are synthetic and MUST NOT be deployed.
+See `../../test-vectors/password-kdf-v1.json` for root-key derivation and
+`../../test-vectors/aes-gcm-v2.json` for AEAD construction. Test credentials
+and keys in those files are synthetic and MUST NOT be deployed.

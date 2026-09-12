@@ -1,21 +1,20 @@
 {
   "specVersion": "unreleased",
   "passwordInput": "test-password",
-  "normalizedPasswordHashHex": "c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265",
   "channelId": 111,
-  "passwordKeyHex": "b7bae9dc64bf0d8864b3a9526a493eca7ad43e7e51d80fe08a1313be857deaaf",
-  "directoryChannelKeyHex": "e7ba135cec72ec8bad25681d157aa1335ed38ff9b46c53c77979ba7bae5d9940",
-  "directoryC2rKeyHex": "88e57d30071a4db28e5c67b5fa6aae7a0e95890fc1c34c947c9ad8148eb47551",
+  "passwordKeyHex": "6c63ca4d97d0866372c0a8e13b4a79db4970b48687964d0445c6354e39c41005",
+  "directoryChannelKeyHex": "a019d798b98b08223ceac9367ca9aad4ea54aada9e3dfc7981198ddcae70f1c9",
+  "directoryC2rKeyHex": "51c17b3a6cfc3a6c318b22e37632d7b1802a7cceecb41adab3796d406597e2e0",
   "epochAscii": "directory-epoch!",
   "epochBase64Url": "ZGlyZWN0b3J5LWVwb2NoIQ",
-  "directoryEpochKeyHex": "a43719aaa49abfe7808fc9a47e63e1c4b16097c79323877ce62846bf3b0fe708",
+  "directoryEpochKeyHex": "e0b915b7f6338b5d4dc0505314500ee3febc6eb9bb681c4c8dc69b3b1d0675d8",
   "sequence": 1,
   "expiresAt": 1700000010,
   "type": "request",
   "nonce12Hex": "494450320000000000000001",
   "aadHex": "496e636f6d55646f6e204469726563746f727920456e76656c6f706520414144207632000207726571756573740000006f6469726563746f72792d65706f6368210000000000000001000000006553f10a",
   "plaintextUtf8": "{\"version\":2,\"issuedAt\":1700000000,\"expiresAt\":1700000010}",
-  "ciphertextBase64Url": "KK50Ejj3FE3RtKRBChBWIBWUjK0SmgyskI2_21c7oKBQUbm-t0Eju0tJtgi5eZxz-uIuFvBna7apM4NRaKpM31TDfsxEimfJ8d4",
+  "ciphertextBase64Url": "80zIpuefuuMAq0wAhGDD9J3_K1I9Xo6ml4gGxcvrn8dKHYns5EyLuwtgevIu9b1wlI3kfcnm9Hs2G_iT3zw_oB7iC0ehRZqPQL0",
   "envelope": {
     "v": 2,
     "type": "request",
@@ -23,6 +22,15 @@
     "epoch": "ZGlyZWN0b3J5LWVwb2NoIQ",
     "sequence": 1,
     "expiresAt": 1700000010,
-    "ciphertext": "KK50Ejj3FE3RtKRBChBWIBWUjK0SmgyskI2_21c7oKBQUbm-t0Eju0tJtgi5eZxz-uIuFvBna7apM4NRaKpM31TDfsxEimfJ8d4"
+    "ciphertext": "80zIpuefuuMAq0wAhGDD9J3_K1I9Xo6ml4gGxcvrn8dKHYns5EyLuwtgevIu9b1wlI3kfcnm9Hs2G_iT3zw_oB7iC0ehRZqPQL0"
+  },
+  "credentialKind": "argon2id-v1",
+  "channelSaltHex": "468b8d4c0526073f773e205e21874187",
+  "argon2id": {
+    "version": 19,
+    "memoryKiB": 65536,
+    "iterations": 3,
+    "parallelism": 4,
+    "outputBytes": 32
   }
 }

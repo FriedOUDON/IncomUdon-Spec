@@ -6,7 +6,8 @@ MUST NOT be used in production.
 | File | Purpose |
 |---|---|
 | `packet-envelope-v1.json` | Plain packet encoding and control payloads |
-| `aes-gcm-v2.json` | Password derivation, AES-GCM v2 AAD, ciphertext, and tag |
+| `password-kdf-v1.json` | Argon2id-v1 and raw-secret-v1 root-key derivation |
+| `aes-gcm-v2.json` | Channel credential derivation, AES-GCM v2 AAD, ciphertext, and tag |
 | `control-auth-v1.json` | Password/control-key derivation and authenticated control tag |
 | `fec-rs-6-2.json` | Historical fixed-size six-frame two-parity FEC case |
 | `fec-v2-variable-6-2.json` | FEC v2 variable-size and short-final-block parity/recovery cases |

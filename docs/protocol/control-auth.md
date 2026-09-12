@@ -22,18 +22,12 @@ authorized group member.
 
 ## Password and key derivation
 
-Let `P` be the configured channel-password input. Apply the existing password
-normalization and channel binding from `security.md`:
-
-```text
-normalized_password_hash = normalize(P)
-password_key = SHA-256(normalized_password_hash || U32BE(channel_id))
-```
-
-For ordinary text input, `normalize(P)` is `SHA-256(UTF-8(P))`. A value written
-as `sha256:` followed by 64 hexadecimal characters, or as exactly 64
-hexadecimal characters, supplies the 32 normalized bytes directly. Neither
-form is itself `password_key`: the channel-ID binding hash is still applied.
+Derive `password_key` from the configured channel credential exactly as
+specified in `security.md`. `argon2id-v1` is the default for a passphrase;
+`raw-secret-v1` is available only through the explicit `secret:` input form.
+The removed `sha256:` and bare-64-hex normalization forms MUST NOT be accepted.
+The credential kind is selected from local configuration before control traffic
+is processed and is not conveyed in a control packet.
 
 Derive separate keys from the same `password_key`:
 
@@ -52,10 +46,11 @@ password according to their local profile-security policy, but MUST derive keys
 only in process memory when establishing a session.
 
 Key separation means possession of a stored `control_key` does not directly
-provide `media_key`. It does not protect weak human passwords against offline
-dictionary attacks if `control_key` is disclosed. Secure deployments SHOULD
-use a randomly generated 256-bit channel secret, represented as 64 hexadecimal
-characters, instead of a memorable password.
+provide `media_key`. `argon2id-v1` increases the cost of offline passphrase
+guessing if an authenticated packet is disclosed, but does not eliminate the
+risk of weak passwords. Secure deployments SHOULD use a randomly generated
+256-bit channel secret represented as `secret:` followed by 64 hexadecimal
+characters.
 
 ## Packet authentication format
 

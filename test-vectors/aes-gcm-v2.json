@@ -1,12 +1,10 @@
 ﻿{
   "specVersion": "v0.1.0-draft",
   "mode": "aes-gcm-v2",
-  "password": "test-password",
   "channelId": 1234,
-  "normalizedPasswordHashHex": "c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265",
-  "passwordKeyHex": "8b50c1422d25d5873fd97f1cc50e2aa1c701873d206e3e6ef61fd0897a2b9f78",
+  "passwordKeyHex": "bcad701cf1a05f957d93aad27ea055a7d76f2d2650c89ab5bcb0790182854e4b",
   "hkdfInfoAscii": "incomudon-session-aesgcm-v2",
-  "keyHex": "5a1ab7db20acb00612f7eabbc2e379e4777b6bbb53be7e106d5ca1a3ce20687d",
+  "keyHex": "98d59cc1721c51b90c86f227c21953ecf96336ac848475ce5d2ea728ed954036",
   "keyId": 2,
   "packet": {
     "type": "AUDIO",
@@ -18,12 +16,22 @@
   },
   "aadHex": "01010020000004d20000162e002a00010102030405060708090a0b0c00000002",
   "plaintextHex": "002a11223344",
-  "ciphertextHex": "21bf520d2a0c",
-  "tagHex": "66597c0831f829cf0958ef01f90e519d",
-  "datagramHex": "01010020000004d20000162e002a00010102030405060708090a0b0c0000000221bf520d2a0c66597c0831f829cf0958ef01f90e519d",
+  "ciphertextHex": "e1dfeab6506e",
+  "tagHex": "1c68705b16520f405f8a86323d95e591",
+  "datagramHex": "01010020000004d20000162e002a00010102030405060708090a0b0c00000002e1dfeab6506e1c68705b16520f405f8a86323d95e591",
   "negativeCase": {
     "mutateOffset": 4,
     "xor": "01",
     "expected": "authentication failure"
+  },
+  "credentialKind": "argon2id-v1",
+  "passwordInput": "test-password",
+  "channelSaltHex": "63b6415e8f58a6bb2c439eb5128f7157",
+  "argon2id": {
+    "version": 19,
+    "memoryKiB": 65536,
+    "iterations": 3,
+    "parallelism": 4,
+    "outputBytes": 32
   }
 }

@@ -21,6 +21,9 @@
   sender/session base plus monotonic allocation, increases its authenticated
   media header to 32 bytes, and adds the coordinated first-release migration
   requirement.
+- Replaces the fast SHA-256 channel-password normalization with `argon2id-v1`
+  for passphrases, adds the explicit `raw-secret-v1` 256-bit secret form, and
+  removes the draft-era `sha256:` and implicit bare-64-hex inputs.
 
 - Defines Server-Managed PTT Timeout: monotonic Relay-enforced talk leases,
   five-byte `TALK_RELEASE` reason signaling, deadline handling, client stop
