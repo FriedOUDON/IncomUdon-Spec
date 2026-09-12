@@ -1,4 +1,4 @@
-﻿# Control Packets
+# Control Packets
 
 Unless otherwise stated, a client control request uses its own `sender_id` in
 the common header. Relay-generated `TALK_*` packets set both the header
@@ -46,7 +46,7 @@ other receivers' playout state or extend the server-managed talk deadline.
 
 ## Codec configuration
 
-The first coordinated client release uses this five-byte payload:
+The first coordinated client release uses this 17-byte payload:
 
 | Offset | Bytes | Field |
 |---:|---:|---|
@@ -54,6 +54,19 @@ The first coordinated client release uses this five-byte payload:
 | 1 | 1 | codec transport ID |
 | 2 | 2 | codec mode/bitrate (`u16`, big-endian) |
 | 4 | 1 | FEC options |
+| 5 | 12 | `media_nonce_base_96` |
+
+For `aes-gcm-v2`, `media_nonce_base_96` MUST be a newly CSPRNG-generated,
+non-zero media session base and MUST match every subsequent encrypted `AUDIO`
+and `FEC` header for this sender until the next configuration. A sender MUST
+create a fresh base whenever it changes the codec transport, mode, or FEC
+options and emits a replacement configuration. The packet MUST use Control
+Authentication v1. A receiver MUST authenticate this configuration before
+creating or replacing the sender's media replay domain.
+
+For `no-crypto`, `legacy-xor`, and legacy `aes-gcm`, bytes 5 through 16 MUST
+be all zero and receivers MUST ignore them. They remain present so the payload
+length is unambiguous across the coordinated release.
 
 FEC option bits are:
 
@@ -68,10 +81,10 @@ FEC option bits are:
 MUST ignore inconsistent FEC options and continue to decode ordinary audio.
 It MUST apply FEC state separately for each sender ID.
 
-The historical four-byte and three-byte `CODEC_CONFIG` forms are not required
-for the first coordinated release because all clients are migrated together.
-Implementations may retain historical decoding as a local compatibility option,
-but MUST transmit the five-byte form described above.
+The historical three-, four-, and five-byte `CODEC_CONFIG` forms are not
+required for the first coordinated release because all clients are migrated
+together. Implementations may retain historical decoding as a local
+compatibility option, but MUST transmit the 17-byte form described above.
 
 ## Server configuration
 

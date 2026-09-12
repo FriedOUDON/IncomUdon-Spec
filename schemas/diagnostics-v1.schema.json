@@ -324,6 +324,10 @@
         "packets_duplicate",
         "packets_reordered",
         "packets_late_dropped",
+        "media_auth_failures",
+        "media_replay_rejections",
+        "media_stale_counter_drops",
+        "media_unannounced_session_rejections",
         "frames_rendered",
         "frames_plc",
         "frames_silence",
@@ -380,6 +384,18 @@
           "$ref": "#/$defs/counter"
         },
         "packets_late_dropped": {
+          "$ref": "#/$defs/counter"
+        },
+        "media_auth_failures": {
+          "$ref": "#/$defs/counter"
+        },
+        "media_replay_rejections": {
+          "$ref": "#/$defs/counter"
+        },
+        "media_stale_counter_drops": {
+          "$ref": "#/$defs/counter"
+        },
+        "media_unannounced_session_rejections": {
           "$ref": "#/$defs/counter"
         },
         "frames_rendered": {

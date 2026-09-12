@@ -1,4 +1,4 @@
-﻿{
+{
   "specVersion": "v0.1.0-draft",
   "mode": "aes-gcm-v2",
   "channelId": 1234,
@@ -10,15 +10,17 @@
     "type": "AUDIO",
     "senderId": 5678,
     "seq": 42,
-    "headerLen": 32,
-    "nonce96Hex": "0102030405060708090a0b0c",
-    "flags": 1
+    "headerLen": 36,
+    "flags": 1,
+    "mediaNonceBase96Hex": "0102030405060708090a0b0c",
+    "mediaCounter": 42,
+    "derivedNonce96Hex": "0102030405060708090a0b36"
   },
-  "aadHex": "01010020000004d20000162e002a00010102030405060708090a0b0c00000002",
+  "aadHex": "01010024000004d20000162e002a00010102030405060708090a0b0c0000002a00000002",
   "plaintextHex": "002a11223344",
-  "ciphertextHex": "e1dfeab6506e",
-  "tagHex": "1c68705b16520f405f8a86323d95e591",
-  "datagramHex": "01010020000004d20000162e002a00010102030405060708090a0b0c00000002e1dfeab6506e1c68705b16520f405f8a86323d95e591",
+  "ciphertextHex": "900c290f44c8",
+  "tagHex": "ef4a6dda44b425bbf2580d88e1bed5d1",
+  "datagramHex": "01010024000004d20000162e002a00010102030405060708090a0b0c0000002a00000002900c290f44c8ef4a6dda44b425bbf2580d88e1bed5d1",
   "negativeCase": {
     "mutateOffset": 4,
     "xor": "01",
@@ -33,5 +35,6 @@
     "iterations": 3,
     "parallelism": 4,
     "outputBytes": 32
-  }
+  },
+  "replayWindowSize": 64
 }

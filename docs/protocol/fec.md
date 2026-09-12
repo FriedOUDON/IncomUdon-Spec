@@ -74,7 +74,8 @@ both P and Q. More than two missing frames are not recoverable. After
 recovery, a receiver MUST truncate each recovered padded frame to its advertised
 original length before passing it to the codec decoder.
 
-Receivers MUST key external FEC state by sender ID and codec configuration.
+Receivers MUST key external FEC state by sender ID, codec configuration, and
+AES-GCM v2 `media_nonce_base_96` when encryption is active.
 They MUST bound FEC state and discard stale blocks rather than increasing
 playout latency without limit. On `TALK_RELEASE`, receivers MUST flush any
 available original or recovered media in sequence order and discard the

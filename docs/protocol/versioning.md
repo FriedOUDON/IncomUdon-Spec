@@ -28,15 +28,18 @@ documents current behavior and the first coordinated Rust migration target.
 
 The PWA, Qt, and Rust clients covered by `v0.1.0-draft` have not yet reached a
 formal production release. They therefore MUST migrate together to the
-five-byte `CODEC_CONFIG`, five-byte `TALK_RELEASE` with release reason,
-FEC v2, Control Authentication v1, optional Identity Admission v1, the
-1200-byte UDP datagram limit, the AES-GCM v2 32-byte media header with a
-direct 96-bit nonce, and the `argon2id-v1`/`raw-secret-v1` channel credential
-KDF defined in this draft. First-release clients MUST NOT transmit or require
-support for the predecessor draft AES-GCM v2 28-byte media header with its
-zero-prefixed 64-bit nonce, nor accept the removed `sha256:` or implicit
-bare-64-hex password normalization forms. Supporting FEC v1 or unauthenticated
-secure controls in first-release clients is optional, not required.
+17-byte `CODEC_CONFIG` with a media nonce base, five-byte `TALK_RELEASE`
+with release reason, FEC v2, Control Authentication v1, optional Identity
+Admission v1, the 1200-byte UDP datagram limit, the AES-GCM v2 36-byte media
+header with an explicit 96-bit session base and 32-bit anti-replay counter,
+and the `argon2id-v1`/`raw-secret-v1` channel credential KDF defined in this
+draft. First-release clients MUST NOT transmit or require support for the
+predecessor draft AES-GCM v2 28-byte media header with its zero-prefixed 64-bit
+nonce, the predecessor 32-byte direct-nonce header, old `CODEC_CONFIG` payload
+forms, or the removed `sha256:` and implicit bare-64-hex password normalization
+forms. Supporting FEC v1 or unauthenticated secure controls in first-release
+clients is optional, not required; AES-GCM v2 itself always requires Control
+Authentication v1.
 
 Once a production release is declared, future incompatible changes MUST follow
 the compatibility requirements above and use explicit version negotiation or a

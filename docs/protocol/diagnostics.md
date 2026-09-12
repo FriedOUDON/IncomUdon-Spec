@@ -100,6 +100,10 @@ the standard cap is 16. Additional talkers are aggregated in
 | `sequence_gaps` | Detected missing audio-sequence intervals |
 | `packets_duplicate` / `packets_reordered` | Duplicate and reordering observations |
 | `packets_late_dropped` | Media received after its playout deadline |
+| `media_auth_failures` | AES-GCM authentication failures before media processing |
+| `media_replay_rejections` | Authenticated media counters already seen in the replay window |
+| `media_stale_counter_drops` | Media counters older than the 64-counter replay window |
+| `media_unannounced_session_rejections` | AES-GCM v2 media whose nonce base lacks matching authenticated `CODEC_CONFIG` |
 | `frames_rendered` | Frames accepted by the playback pipeline |
 | `frames_plc` / `frames_silence` | Packet-loss concealment and explicit-silence intervals |
 | `decode_errors` | Codec decode failures |

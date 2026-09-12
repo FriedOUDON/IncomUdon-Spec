@@ -161,7 +161,10 @@ The Relay MUST apply Control Authentication v1 to its generated `AUTH_CHALLENGE`
 `TALK_DENY`, `SERVER_CONFIG`, and `PONG` packets.
 It MUST verify authentication before caching a CodecConfig, granting/releasing
 talk, registering a peer, refreshing membership, or forwarding an authenticated
-client control packet. Audio and FEC packets are accepted only from an
+client control packet. For AES-GCM v2, the Relay MUST cache the verified
+CodecConfig and forward it before forwarding `AUDIO` or `FEC` with that
+sender's announced `media_nonce_base_96`; it MUST NOT forward media for an
+unconfigured base. Audio and FEC packets are accepted only from an
 authenticated peer session that currently holds a valid membership.
 
 ## Relay key provisioning and policy

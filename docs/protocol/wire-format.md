@@ -20,17 +20,20 @@ assume that the sequence field alone is a cryptographic nonce.
 
 ## AES-GCM v2 media security header
 
-An AES-GCM v2 encrypted `AUDIO` or `FEC` packet MUST set `header_len = 32` and
+An AES-GCM v2 encrypted `AUDIO` or `FEC` packet MUST set `header_len = 36` and
 carry this header immediately after the fixed header:
 
 | Offset | Bytes | Field |
 |---:|---:|---|
-| 16 | 12 | `nonce_96` |
-| 28 | 4 | `key_id` |
+| 16 | 12 | `media_nonce_base_96` |
+| 28 | 4 | `media_counter` (`u32`) |
+| 32 | 4 | `key_id` |
 
-Ciphertext follows offset 32 and the final 16 bytes are the AES-GCM
-authentication tag. `nonce_96` is the direct AES-GCM nonce and the exact
-32-byte packet prefix is authenticated as AAD; see `security.md`.
+Ciphertext follows offset 36 and the final 16 bytes are the AES-GCM
+authentication tag. The AES-GCM nonce is
+`U96BE(U96BE(media_nonce_base_96) + U32BE(media_counter))`; the exact 36-byte
+packet prefix is authenticated as AAD. The base/counter fields also define the
+receiver media anti-replay domain and sliding replay window; see `security.md`.
 
 ## Control and legacy security header
 
@@ -63,7 +66,7 @@ Version 1 fixed header and MUST NOT generate the 14-byte form.
 
 | Value | Name | Meaning |
 |---:|---|---|
-| `0x0001` | `AES_GCM_V2_HEADER_AAD` | AES-GCM v2 media: `header_len = 32`; authenticate the first 32 bytes as AAD |
+| `0x0001` | `AES_GCM_V2_HEADER_AAD` | AES-GCM v2 media: `header_len = 36`; authenticate the first 36 bytes as AAD |
 | `0x0002` | `CONTROL_AUTH_V1` | Authenticate plaintext control with HMAC-SHA-256 |
 
 Unknown flag bits MUST be zero when sending and ignored when receiving.

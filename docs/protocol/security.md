@@ -113,47 +113,93 @@ Admission v1 additionally uses this authenticated control path for its
 OIDC-derived Relay ticket and proof exchange; it does not derive a new
 channel-password key.
 
-## AES-GCM nonce lifecycle
+## AES-GCM nonce lifecycle and media anti-replay
 
-AES-256-GCM v2 uses the 12-byte `nonce_96` carried directly in the media
-security header as its AEAD nonce/IV. It MUST NOT prepend a fixed zero prefix
-or otherwise transform this value before AES-GCM processing.
+AES-256-GCM v2 identifies every encrypted-media session with a 12-byte
+`media_nonce_base_96`. At session initialization, a sender MUST obtain this
+base from a cryptographically secure random number generator (CSPRNG), set
+`media_counter = 0`, announce the base in authenticated `CODEC_CONFIG`, and
+allocate one counter for every encrypted `AUDIO` and `FEC` packet. This shared
+namespace includes both P and Q parity packets.
 
-At encrypted-media session initialization, a sender MUST obtain a fresh
-96-bit `nonce_base` from a cryptographically secure random number generator
-(CSPRNG), initialize `nonce_counter = 0`, and allocate nonces as:
+The on-wire header carries both the base and the allocated `media_counter`:
 
 ```text
-nonce_96 = U96BE((U96BE(nonce_base) + nonce_counter) mod 2^96)
-nonce_counter = nonce_counter + 1
+nonce_96 = U96BE((U96BE(media_nonce_base_96) + U32BE(media_counter)) mod 2^96)
 ```
 
-The sender MUST allocate the next nonce before attempting encryption. A failed
-send or encryption operation consumes the allocation; implementations MUST
-never roll the counter back or reuse that nonce. The same nonce-counter
-namespace covers every AES-GCM v2 encrypted `AUDIO` and `FEC` packet produced
-with the media key, including both P and Q parity packets.
+The sender MUST allocate the counter before encryption. A failed encryption or
+send consumes that counter; an implementation MUST NOT roll it back, reuse it,
+or emit it twice. `media_counter` ranges from `0` through `2^32 - 1`; a sender
+MUST start a fresh media session with a newly generated base before it would
+wrap, whenever counter state is lost, or whenever a local session is reset
+while retaining the media key. A fresh session MUST send a new authenticated
+`CODEC_CONFIG` before its first encrypted media packet.
 
-A sender MUST NOT wrap the 96-bit counter space. To retain a conservative
-lifetime bound, an encrypted-media session MUST contain no more than `2^32`
-nonce allocations. Before reaching that limit, or whenever the counter state
-is lost or reset while retaining the media key, the sender MUST begin a fresh
-session with a newly generated 96-bit `nonce_base`. A receiver uses the
-on-wire `nonce_96` directly and does not need the base or counter state.
+The media key is shared by channel participants. Sequential, timestamp-based,
+or sender-ID-derived bases are prohibited. A CSPRNG-generated 96-bit base per
+sender/session makes accidental overlap of the at-most-`2^32` counter ranges
+cryptographically negligible. As with all AES-GCM use, a `(media_key,
+nonce_96)` pair MUST NOT be reused.
 
-The media key is shared by channel participants, so implementations MUST use a
-CSPRNG for every sender/session base; sequential, timestamp-derived, or
-sender-ID-derived bases are prohibited. This gives each sender/session a
-96-bit random nonce starting point and makes accidental cross-sender range
-collisions cryptographically negligible for the intended deployment. As with
-all AES-GCM use, a `(media_key, nonce_96)` pair MUST NOT be reused.
+### Receiver replay window
+
+AES-GCM authentication alone does not identify a previously valid packet that
+has been replayed. Each receiver MUST therefore maintain a 64-counter sliding
+replay window for every media replay domain:
+
+```text
+(channel_id, sender_id, key_id, media_nonce_base_96)
+```
+
+A receiver creates a domain only after accepting the matching authenticated
+17-byte `CODEC_CONFIG`; the configuration's `media_nonce_base_96` binds the
+sender's announced session to its codec state. It MUST reject encrypted media
+whose base has not been announced for that sender/key/codec configuration.
+When a newly accepted configuration changes the base, the receiver MUST discard
+the old replay window, jitter/FEC state, and codec ordering state for that
+sender before accepting the new domain.
+
+For a packet in an announced domain, the receiver MUST:
+
+1. reject a counter more than 63 below the highest authenticated counter as
+   stale;
+2. authenticate the AES-GCM tag using the derived `nonce_96` and exact header
+   AAD;
+3. after successful authentication, reject a counter already marked in the
+   64-counter window as replayed;
+4. accept an unseen counter within the window to tolerate UDP reordering; and
+5. advance and prune the window when a newly authenticated counter is newer
+   than the recorded high-water counter.
+
+Authentication failure MUST NOT advance the high-water counter or mark a
+counter as seen. Implementations processing media concurrently MUST make the
+post-authenticate check-and-mark operation atomic for a replay domain. A
+receiver MUST drop rejected replay or stale packets before codec, FEC, jitter,
+or playout processing.
+
+`audio_seq` remains a codec/FEC and playout sequence only. It MUST NOT replace
+this cryptographic replay check and MAY wrap independently. The Relay MAY keep
+an equivalent bounded per-sender replay cache to discard obvious duplicates
+before forwarding, but this is an optional bandwidth/DoS optimization; every
+receiver MUST perform the final replay check itself.
+
+Control Authentication v1 is REQUIRED with AES-GCM v2 so `CODEC_CONFIG` is
+integrity-protected before it establishes an accepted media replay domain. It
+protects active-session configuration replay through its own authenticated
+control-session window. This group-key construction cannot make replay
+protection survive an attacker who can reproduce an old authenticated session
+across a full receiver-state loss; deployments requiring that stronger property
+need a future Relay-issued epoch, persistent state, or per-sender credential
+extension.
 
 ## AES-GCM v2
 
-AES-GCM v2 sets flag `0x0001`, uses `key_id = 2`, requires `header_len = 32`
-for encrypted `AUDIO` and `FEC` packets, and authenticates the exact 32-byte
-packet prefix as AAD. The final 16 bytes of every encrypted payload are the
-GCM authentication tag.
+AES-GCM v2 sets flag `0x0001`, uses `key_id = 2`, requires `header_len = 36`
+for encrypted `AUDIO` and `FEC` packets, and authenticates the exact 36-byte
+packet prefix as AAD. The header carries `media_nonce_base_96`, `media_counter`,
+and `key_id`; the final 16 bytes of every encrypted payload are the GCM
+authentication tag.
 
 The 28-byte Control Authentication v1 header is a separate HMAC construction;
 it is not an AES-GCM v2 nonce format and MUST NOT be used for encrypted media.

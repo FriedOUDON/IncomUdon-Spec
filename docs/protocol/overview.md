@@ -18,7 +18,9 @@ resampler state separate for each sender ID, then mix eligible output under
    complete `IDENTITY_BEGIN`, `IDENTITY_CHALLENGE`, and `IDENTITY_PROOF`; then
    send authenticated `JOIN` to register the observed UDP source endpoint.
    Otherwise send `JOIN`.
-2. Send `CODEC_CONFIG` before the first media frame for a sender.
+2. Send authenticated 17-byte `CODEC_CONFIG` before the first media frame for
+   a sender. For AES-GCM v2 it announces the fresh media nonce base and
+   establishes the receiver replay domain.
 3. Send `PTT_ON`; wait for `TALK_GRANT` before treating media as authorized.
 4. Send `AUDIO` and optional `FEC` while granted and before any Relay-enforced
    talk deadline.

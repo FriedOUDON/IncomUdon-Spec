@@ -1,4 +1,4 @@
-﻿# Test Vectors
+# Test Vectors
 
 All vectors use synthetic secrets and identifiers. They are safe to commit but
 MUST NOT be used in production.
@@ -7,7 +7,8 @@ MUST NOT be used in production.
 |---|---|
 | `packet-envelope-v1.json` | Plain packet encoding and control payloads |
 | `password-kdf-v1.json` | Argon2id-v1 and raw-secret-v1 root-key derivation |
-| `aes-gcm-v2.json` | Channel credential derivation, AES-GCM v2 AAD, ciphertext, and tag |
+| `aes-gcm-v2.json` | Channel credential derivation, AES-GCM v2 base/counter AAD, ciphertext, and tag |
+| `media-replay-v1.json` | AES-GCM v2 authenticated media replay-window acceptance and rejection cases |
 | `control-auth-v1.json` | Password/control-key derivation and authenticated control tag |
 | `fec-rs-6-2.json` | Historical fixed-size six-frame two-parity FEC case |
 | `fec-v2-variable-6-2.json` | FEC v2 variable-size and short-final-block parity/recovery cases |

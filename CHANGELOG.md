@@ -14,13 +14,15 @@
   Ed25519 proof-of-possession Relay Admission Tickets, per-channel listen/talk
   permissions, and default-off Relay policy modes.
 
-- Defines an MTU-safe 1200-byte UDP datagram limit, a 1135-byte transmit media
+- Defines AES-GCM v2 media anti-replay protection: an authenticated
+  `CODEC_CONFIG` announces a CSPRNG 96-bit media-session base; every AUDIO/FEC
+  packet carries that base plus a shared 32-bit counter; and receivers enforce
+  a 64-counter post-authentication replay window per sender/session/key.
+  AES-GCM v2 now requires Control Authentication v1, uses a 36-byte AAD header,
+  and rejects media from an unannounced session.
+- Defines an MTU-safe 1200-byte UDP datagram limit, a 1131-byte transmit media
   frame limit, FEC v2 size budgets, oversize Relay-drop behavior, and
   diagnostics for local MTU/oversize failures.
-- Revises AES-GCM v2 media nonces to a direct CSPRNG-generated 96-bit
-  sender/session base plus monotonic allocation, increases its authenticated
-  media header to 32 bytes, and adds the coordinated first-release migration
-  requirement.
 - Replaces the fast SHA-256 channel-password normalization with `argon2id-v1`
   for passphrases, adds the explicit `raw-secret-v1` 256-bit secret form, and
   removes the draft-era `sha256:` and implicit bare-64-hex inputs.

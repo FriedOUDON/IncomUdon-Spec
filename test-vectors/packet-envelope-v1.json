@@ -1,12 +1,13 @@
-﻿{
+{
   "specVersion": "v0.1.0-draft",
   "endianness": "big-endian for envelope and control integers",
   "vectors": [
     {
       "name": "no_crypto_codec_config_opus_12000",
       "fields": {"version": 1, "type": "CODEC_CONFIG", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 42, "flags": 0},
-      "payloadHex": "00022ee000",
-      "datagramHex": "010b00100000006f000003ea002a000000022ee000"
+      "payloadHex": "00022ee000000000000000000000000000",
+      "datagramHex": "010b00100000006f000003ea002a000000022ee000000000000000000000000000",
+      "notes": "17-byte CODEC_CONFIG; no-crypto reserves the media_nonce_base_96 bytes as zero."
     },
     {
       "name": "no_crypto_ptt_on",

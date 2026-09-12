@@ -78,7 +78,11 @@
           "frames_recovered": 1,
           "not_eligible_gaps": 1,
           "late_results_discarded": 0
-        }
+        },
+        "media_auth_failures": 0,
+        "media_replay_rejections": 0,
+        "media_stale_counter_drops": 0,
+        "media_unannounced_session_rejections": 0
       }
     ],
     "mixer": {

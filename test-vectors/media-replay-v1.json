@@ -1,0 +1,102 @@
+{
+  "specVersion": "v0.1.0-draft",
+  "mode": "aes-gcm-v2",
+  "windowSize": 64,
+  "replayDomain": {
+    "channelId": 1234,
+    "senderId": 5678,
+    "keyId": 2,
+    "mediaNonceBase96Hex": "0102030405060708090a0b0c"
+  },
+  "cases": [
+    {
+      "name": "first_authenticated_counter",
+      "initialHighestAuthenticatedCounter": null,
+      "initialSeenCounters": [],
+      "counter": 42,
+      "authentication": "valid",
+      "expected": "accept_and_mark_seen",
+      "resultHighestAuthenticatedCounter": 42,
+      "resultSeenCounters": [
+        42
+      ]
+    },
+    {
+      "name": "reordered_unseen_counter_within_window",
+      "initialHighestAuthenticatedCounter": 100,
+      "initialSeenCounters": [
+        100,
+        99,
+        97
+      ],
+      "counter": 98,
+      "authentication": "valid",
+      "expected": "accept_and_mark_seen",
+      "resultHighestAuthenticatedCounter": 100,
+      "resultSeenCounters": [
+        100,
+        99,
+        98,
+        97
+      ]
+    },
+    {
+      "name": "authenticated_duplicate_counter",
+      "initialHighestAuthenticatedCounter": 100,
+      "initialSeenCounters": [
+        100,
+        99,
+        97
+      ],
+      "counter": 97,
+      "authentication": "valid",
+      "expected": "reject_replay",
+      "resultHighestAuthenticatedCounter": 100,
+      "resultSeenCounters": [
+        100,
+        99,
+        97
+      ]
+    },
+    {
+      "name": "counter_older_than_window",
+      "initialHighestAuthenticatedCounter": 100,
+      "initialSeenCounters": [
+        100,
+        99
+      ],
+      "counter": 36,
+      "authentication": "not_attempted",
+      "expected": "reject_stale",
+      "resultHighestAuthenticatedCounter": 100,
+      "resultSeenCounters": [
+        100,
+        99
+      ]
+    },
+    {
+      "name": "invalid_tag_does_not_poison_window",
+      "initialHighestAuthenticatedCounter": 100,
+      "initialSeenCounters": [
+        100,
+        99
+      ],
+      "counter": 101,
+      "authentication": "invalid",
+      "expected": "reject_authentication_failure_without_state_change",
+      "resultHighestAuthenticatedCounter": 100,
+      "resultSeenCounters": [
+        100,
+        99
+      ]
+    },
+    {
+      "name": "unannounced_nonce_base",
+      "announcedMediaNonceBase96Hex": "0102030405060708090a0b0c",
+      "packetMediaNonceBase96Hex": "1112131415161718191a1b1c",
+      "counter": 0,
+      "authentication": "not_attempted",
+      "expected": "reject_unannounced_session"
+    }
+  ]
+}
