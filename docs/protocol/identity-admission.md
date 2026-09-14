@@ -30,7 +30,7 @@ Relay identity-admission policy has these modes:
 |---|---|
 | `off` | Default. No OIDC hook, Access Service, ticket processing, or identity admission state is initialized. Existing JOIN behavior is unchanged. |
 | `optional` | Legacy authenticated JOIN is permitted. A client that presents an identity ticket must complete the identity flow successfully; a valid ticket adds its per-channel permissions. |
-| `required` | An ordinary client must complete Identity Admission before JOIN. When Managed Service Admission v1 is enabled, a valid service admission may satisfy this prerequisite only for the authorized service endpoint. JOIN, media receive membership, and PTT are denied without a valid, unexpired admission. |
+| `required` | An ordinary client must complete Identity Admission before JOIN. When Managed Service Admission v1 is enabled, a valid service admission may satisfy this prerequisite only for the authorized service endpoint. JOIN, media receive membership, and PTT are denied without a valid, unexpired admission, subject only to the bounded existing receive-only service grace below. |
 
 The deployment configuration default is:
 
@@ -42,7 +42,26 @@ identity_admission.mode = off
 closed at startup if `required` is configured without the channel Control Key
 material needed to authenticate the identity control messages. Deployments
 SHOULD also use AES-GCM v2 media, but Identity Admission does not itself alter
-the selected media crypto mode. Managed Service Admission is a separately configured optional path described in `../extensions/management/service-admission.md`; it never weakens OIDC requirements for ordinary endpoints.
+the selected media crypto mode. Managed Service Admission is a separately
+configured optional path described in
+`../extensions/management/service-admission.md`; it never weakens OIDC
+requirements for ordinary endpoints.
+
+### Required-mode receive-only service grace
+
+When Identity Admission is `required` and Managed Service Admission v1 is
+enabled, the `valid, unexpired admission` rule has one explicit exception: an
+already-established continuous receive-only service membership may continue to
+receive media during the bounded `exp + grace_seconds` period defined by Managed
+Service Admission v1. During that period, the expired service grant is effective
+only for retaining that exact membership and its receive path.
+
+This exception MUST NOT authorize a new JOIN, PTT, `PTT_REQUEST`, source-endpoint
+change, privilege increase, or a new admission flow. It does not apply to
+talk-capable or interrupt-capable services, and it does not relax Identity
+Admission requirements for ordinary endpoints. The Relay MUST remove the service
+membership at the earlier of the normal membership deadline and the applicable
+Managed Service Admission grace deadline.
 
 `optional` is intended for rollout and mixed deployments. It is not sufficient
 to restrict a channel to named users, because a legacy client can still join.

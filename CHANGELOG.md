@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Clarifies that Managed Service Admission receive-only grace remains a
+  bounded existing-membership exception when Identity Admission is `required`,
+  without authorizing JOIN, PTT, endpoint changes, or ordinary endpoint access.
+
 - Defines Managed Service Admission v1 natural expiry: effective membership
   deadlines, receive-only grace limits, `SERVICE_ADMISSION_EXPIRED` release
   reason `0x08`, renewal races, and deterministic expiry cases.

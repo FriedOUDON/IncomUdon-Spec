@@ -146,6 +146,13 @@ A receive-only service has `perm = 1` (`listen` only), with neither `talk` nor
 A grant with `talk` or `interrupt` MUST NOT use this grace. Its service
 admission deadline is exactly `exp`.
 
+When Identity Admission is `required`, this bounded grace is the sole exception
+for a Managed Service Admission endpoint to the otherwise unexpired-admission
+requirement. It applies only to the existing continuous receive-only membership
+and its media receive path. It MUST NOT authorize a new JOIN, PTT,
+`PTT_REQUEST`, endpoint change, privilege increase, or new admission flow, and
+MUST NOT weaken Identity Admission requirements for ordinary endpoints.
+
 ### Natural expiry
 
 The service admission deadline is `exp`, except that a continuous
@@ -228,4 +235,5 @@ Implementations that support Managed Service Admission v1 MUST verify the
 grant, proof, and counter sequence before claiming compatibility. They MUST also
 verify the grant-expiry cases: expiry of a talk-capable service removes membership
 and releases an active talker with `SERVICE_ADMISSION_EXPIRED`; receive-only
-grace cannot exceed `exp + grace_seconds` or a normal membership deadline.
+grace cannot exceed `exp + grace_seconds` or a normal membership deadline,
+including when Identity Admission is `required`.
