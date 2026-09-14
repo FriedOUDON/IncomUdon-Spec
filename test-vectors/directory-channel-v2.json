@@ -6,6 +6,7 @@
   "directoryChannelKeyHex": "a019d798b98b08223ceac9367ca9aad4ea54aada9e3dfc7981198ddcae70f1c9",
   "directoryC2rKeyHex": "51c17b3a6cfc3a6c318b22e37632d7b1802a7cceecb41adab3796d406597e2e0",
   "epochAscii": "directory-epoch!",
+  "epochRawHex": "6469726563746f72792d65706f636821",
   "epochBase64Url": "ZGlyZWN0b3J5LWVwb2NoIQ",
   "directoryEpochKeyHex": "e0b915b7f6338b5d4dc0505314500ee3febc6eb9bb681c4c8dc69b3b1d0675d8",
   "sequence": 1,

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Clarifies that Directory UDP v2 HKDF and AAD use decoded 16-byte
+  `epoch_raw`, not the base64url JSON text.
+
 - Adds canonical paginated `GET /audit-records` retrieval for redacted
   Management Plane audit records.
 

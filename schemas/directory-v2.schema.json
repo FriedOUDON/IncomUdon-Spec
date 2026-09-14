@@ -8,7 +8,7 @@
     "v": {"const": 2},
     "type": {"enum": ["snapshot", "participants", "request", "register", "heartbeat"]},
     "channelId": {"type": "integer", "minimum": 0, "maximum": 4294967295},
-    "epoch": {"type": "string", "minLength": 22, "maxLength": 22, "pattern": "^[A-Za-z0-9_-]{22}$"},
+    "epoch": {"type": "string", "minLength": 22, "maxLength": 22, "pattern": "^[A-Za-z0-9_-]{22}$", "description": "Canonical unpadded base64url encoding of exactly 16 raw epoch bytes."},
     "sequence": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
     "expiresAt": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
     "ciphertext": {"type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_-]+$"}

@@ -58,6 +58,12 @@ plaintext only so the receiver can select the candidate key; it is included in
 AAD and is therefore authenticated. Sequence MUST be nonzero and monotonically
 increase in the replay domain below.
 
+The JSON `epoch` is the canonical unpadded base64url encoding of a 16-byte
+binary value. Let `epoch_raw = BASE64URL-DECODE(envelope.epoch)`. `epoch_raw`
+MUST be exactly 16 bytes, and `BASE64URL-ENCODE(epoch_raw)` MUST exactly equal
+`envelope.epoch`. All cryptographic references to `epoch` in Directory v2 use
+`epoch_raw`, never the UTF-8 or ASCII bytes of the JSON base64url string.
+
 ### Key derivation and AEAD
 
 The channel credential and `password_key` derivation in `security.md` are
@@ -80,16 +86,17 @@ directory_r2c_key = HKDF-SHA-256(
   "incomudon-directory-channel-v2 relay-to-client", 32)
 
 directory_epoch_key = HKDF-SHA-256(
-  directional_key, epoch,
+  directional_key, epoch_raw,
   "incomudon-directory-envelope-v2", 32)
 ```
 
 `directional_key` is `directory_c2r_key` for `request`, `register`, and
 `heartbeat`; it is `directory_r2c_key` for `snapshot` and `participants`.
 Directional keys prevent nonce collisions between client and Relay traffic.
-Each sender MUST choose a fresh random 16-byte epoch before its first message
-and whenever its sequence state is reset. Sequence increases monotonically per
-`direction, channelId, epoch` replay domain.
+Each sender MUST choose a fresh random 16-byte `epoch_raw` before its first
+message and whenever its sequence state is reset, then set `envelope.epoch` to
+its canonical unpadded base64url encoding. Sequence increases monotonically per
+`direction, channelId, epoch_raw` replay domain.
 
 AES-256-GCM encrypts the JSON payload. The nonce is:
 
@@ -101,9 +108,15 @@ AAD is the concatenation of:
 
 ```text
 "IncomUdon Directory Envelope AAD v2\0"
-U8(v) || U8(len(type)) || type || U32BE(channelId) || epoch ||
+U8(v) || U8(len(type)) || type || U32BE(channelId) || epoch_raw ||
 U64BE(sequence) || U64BE(expiresAt)
 ```
+
+Before HKDF derivation or AAD construction, a receiver MUST base64url-decode
+`envelope.epoch`, reject a decode failure, reject a result other than exactly
+16 bytes, and reject a non-canonical encoding for which re-encoding the raw
+bytes does not exactly reproduce `envelope.epoch`. It MUST then use that
+16-byte `epoch_raw` for the HKDF salt, AAD, and replay domain.
 
 Receivers MUST enforce the exact envelope schema, channel ID range, epoch
 size, expiration, allowed direction/type combination, AEAD authentication tag,
