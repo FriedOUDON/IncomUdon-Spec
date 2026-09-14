@@ -20,6 +20,7 @@ MUST NOT be used in production.
 | `floor-interrupt-v1.json` | Admission-required interrupt request, preemption release, and priority-selection cases |
 | `identity-admission-v1.json` | Ed25519 JWS ticket, proof-of-possession, and denial payloads |
 | `management/service-admission-v1.json` | Managed Service Admission Ed25519 JWS grant, proof-of-possession, and denial payloads |
+| `configuration/relay-csv-v1.json` | Relay Directory, Control Authentication, and Management Plane CSV parser fixture |
 | `mtu-v1.json` | MTU-safe AUDIO and FEC v2 datagram budget cases |
 | `multi-talker-mixing-v1.json` | Concurrent-talker gain, limiter, transition, and source-limit cases |
 

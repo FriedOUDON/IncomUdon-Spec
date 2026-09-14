@@ -72,7 +72,8 @@ The Management Service maps the verified client certificate Subject Alternative
 Name or SHA-256 certificate fingerprint to one `service_id` and a channel-scoped
 ACL. Certificate sharing between services is prohibited. The mapping and role
 assignment are local administration data and are not propagated through the
-UDP protocol.
+UDP protocol. `../../configuration/relay-csv.md` defines the canonical CSV
+format when a Relay deployment uses file-backed certificate and channel ACLs.
 
 Administrators are responsible for:
 

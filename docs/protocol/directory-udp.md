@@ -127,7 +127,8 @@ is scoped to the authenticated envelope `channelId`.
 
   A speaker row with `channelId` set to the string `all` in source CSV input
   is resolved by the Relay into the requested channel; a channel-specific row
-  wins.
+  wins. Source CSV field definitions and validation rules are in
+  `../configuration/relay-csv.md`.
 - `participants` contains only participants for the corresponding channel,
   each with `channelId`, `senderId`, `lastSeenAt`, and `talking`.
 - `request` contains `version`, `issuedAt`, and `expiresAt`.

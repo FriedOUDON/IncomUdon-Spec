@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Defines Relay Operational CSV Configuration v1: UTF-8/RFC 4180 parsing,
+  Directory channel/speaker metadata, Control Authentication key rows, and
+  optional Management Plane service and channel ACL inputs with atomic reload,
+  revocation, redaction, and parser fixtures.
+
 - Defines optional Floor Interrupt v1: an Admission-required, Control-
   Authentication-protected `PTT_REQUEST` path for Relay-authorized higher-
   priority preemption, bounded per-talker replacement, `PREEMPTED` release,

@@ -25,6 +25,7 @@ requirements for compatible implementations.
 - `docs/protocol/security.md`: password derivation and crypto modes.
 - `docs/protocol/control-auth.md`: group-authenticated Relay control traffic.
 - `docs/protocol/identity-admission.md`: optional OIDC-derived per-user Relay admission.
+- `docs/configuration/relay-csv.md`: Relay Directory, control-key, and Management Plane CSV provisioning formats.
 - `docs/extensions/management/overview.md`: optional, mTLS-protected Management Plane boundary and roles.
 - `docs/extensions/management/service-admission.md`: signed Managed Service Admission for non-interactive services.
 - `docs/extensions/management/recording-integration.md`: receive-only recording-worker integration boundary.
@@ -36,7 +37,7 @@ requirements for compatible implementations.
 - `docs/protocol/diagnostics.md`: local debug metrics and redaction rules.
 - `docs/protocol/versioning.md`: compatibility and release procedure.
 - `schemas/`: JSON Schemas for directory, management events, and service grants.
-- `test-vectors/`: deterministic packet and cryptographic test data, including service admission.
+- `test-vectors/`: deterministic packet, cryptographic, service-admission, and Relay CSV parser test data.
 
 ## Compatibility rule
 
