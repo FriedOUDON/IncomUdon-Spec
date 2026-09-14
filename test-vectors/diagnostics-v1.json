@@ -46,7 +46,7 @@
         "sender_id": 1002,
         "active": true,
         "codec_id": 2,
-        "codec_mode": 16000,
+        "codec_mode": 128000,
         "last_packet_age_ms": 8,
         "audio_packets_received": 250,
         "audio_bytes_received": 55400,

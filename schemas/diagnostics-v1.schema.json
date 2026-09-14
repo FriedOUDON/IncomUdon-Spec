@@ -363,7 +363,7 @@
             "null"
           ],
           "minimum": 0,
-          "maximum": 65535
+          "maximum": 4294967295
         },
         "last_packet_age_ms": {
           "$ref": "#/$defs/nullableNumber"

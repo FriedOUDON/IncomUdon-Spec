@@ -94,7 +94,7 @@ the standard cap is 16. Additional talkers are aggregated in
 |---|---|
 | `sender_id` | Remote talker sender ID |
 | `active` | Whether the Relay currently reports the sender as talking |
-| `codec_id` / `codec_mode` | Last authenticated codec configuration |
+| `codec_id` / `codec_mode` | Last authenticated codec configuration; `codec_mode` is the exact `u32` codec mode/bitrate value |
 | `last_packet_age_ms` | Monotonic age of the latest media packet |
 | `audio_packets_received` / `audio_bytes_received` | AUDIO packet totals |
 | `sequence_gaps` | Detected missing audio-sequence intervals |
