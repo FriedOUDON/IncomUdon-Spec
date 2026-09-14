@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://friedoudon.github.io/incomudon-spec/schemas/management/management-event-v1.schema.json",
+  "title": "IncomUdon Management Plane v1 event",
+  "type": "object",
+  "required": ["schema_version", "event_id", "occurred_at", "type", "channel_id"],
+  "properties": {
+    "schema_version": { "const": "management-event-v1" },
+    "event_id": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[0-9]+$" },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "type": {
+      "enum": [
+        "participant_joined",
+        "participant_left",
+        "talk_started",
+        "talk_ended",
+        "relay_health_changed",
+        "recording_state_changed",
+        "service_admission_issued",
+        "service_admission_revoked"
+      ]
+    },
+    "channel_id": { "type": ["integer", "null"], "minimum": 0, "maximum": 4294967295 },
+    "sender_id": { "type": ["integer", "null"], "minimum": 0, "maximum": 4294967295 },
+    "service_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 128 },
+    "recording_job_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 128 },
+    "state": { "type": ["string", "null"], "enum": [null, "healthy", "degraded", "unhealthy", "starting", "recording", "stopping", "stopped", "failed"] },
+    "reason": { "type": ["string", "null"], "minLength": 1, "maxLength": 128, "pattern": "^[A-Z0-9_:-]+$" }
+  },
+  "additionalProperties": false
+}

@@ -30,7 +30,7 @@ Relay identity-admission policy has these modes:
 |---|---|
 | `off` | Default. No OIDC hook, Access Service, ticket processing, or identity admission state is initialized. Existing JOIN behavior is unchanged. |
 | `optional` | Legacy authenticated JOIN is permitted. A client that presents an identity ticket must complete the identity flow successfully; a valid ticket adds its per-channel permissions. |
-| `required` | A client must complete Identity Admission before JOIN. JOIN, media receive membership, and PTT are denied without a valid, unexpired admission. |
+| `required` | An ordinary client must complete Identity Admission before JOIN. When Managed Service Admission v1 is enabled, a valid service admission may satisfy this prerequisite only for the authorized service endpoint. JOIN, media receive membership, and PTT are denied without a valid, unexpired admission. |
 
 The deployment configuration default is:
 
@@ -42,7 +42,7 @@ identity_admission.mode = off
 closed at startup if `required` is configured without the channel Control Key
 material needed to authenticate the identity control messages. Deployments
 SHOULD also use AES-GCM v2 media, but Identity Admission does not itself alter
-the selected media crypto mode.
+the selected media crypto mode. Managed Service Admission is a separately configured optional path described in `../extensions/management/service-admission.md`; it never weakens OIDC requirements for ordinary endpoints.
 
 `optional` is intended for rollout and mixed deployments. It is not sufficient
 to restrict a channel to named users, because a legacy client can still join.
@@ -87,7 +87,8 @@ The signed payload MUST contain these claims:
 | `iat` / `exp` | Numeric Unix seconds. `exp - iat` MUST NOT exceed 300 seconds. |
 | `ch` | Authorized `channel_id` (`u32`). |
 | `sid` | Authorized `sender_id` (`u32`). |
-| `perm` | Permission bitset: bit 0 `listen`, bit 1 `talk`. Bit 0 MUST be set. |
+| `perm` | Permission bitset: bit 0 `listen`, bit 1 `talk`, bit 2 `interrupt`. Bit 0 MUST be set; bit 2 requires bit 1. |
+| `pri` | Interrupt priority (`u8`), required and non-zero only when bit 2 is set. |
 | `cnf.jkt` | Base64url SHA-256 digest of the raw 32-byte Ed25519 client public key. |
 
 The Access Service MUST apply group/user/channel policy before ticket issuance.
@@ -96,7 +97,7 @@ channel passwords, keys, and arbitrary group claims from the ticket.
 
 The Relay verifies the JWS against a locally configured active or previous
 Ed25519 public key selected by `kid`. It MUST validate `iss`, `aud`, `iat`,
-`exp`, maximum lifetime, `ch`, `sid`, permissions, and `cnf.jkt` before marking
+`exp`, maximum lifetime, `ch`, `sid`, permissions, `pri` when present, and `cnf.jkt` before marking
 a peer admitted. A Relay MAY allow at most 30 seconds of clock skew. Ticket
 keys MUST support overlap during signing-key rotation.
 
@@ -155,8 +156,11 @@ second JOIN and MUST NOT reset an active server-managed PTT deadline.
 ## Authorization and expiry
 
 An admitted peer with `listen` may JOIN and receive channel traffic. It may
-send `PTT_ON` only when its ticket also grants `talk`. A Relay MUST reject PTT
-from a listen-only ticket and MUST NOT forward that peer's media or FEC.
+send ordinary `PTT_ON` only when its ticket also grants `talk`. It may send
+`PTT_REQUEST` only when `talk`, `interrupt`, and a valid non-zero `pri` are
+present and Floor Interrupt v1 is enabled. A Relay MUST reject a PTT request
+whose required permission is absent and MUST NOT forward that peer's media or
+FEC.
 
 Relay membership expiration is the earlier of the normal membership deadline
 and the ticket `exp`. On ticket expiry, the Relay MUST remove membership. If
@@ -176,7 +180,7 @@ extension and is outside Identity Admission v1.
 | `0x01` | `INVALID_TICKET` | Invalid JWS format, signature, algorithm, or key ID. |
 | `0x02` | `TICKET_EXPIRED` | Ticket is expired, not yet valid, or exceeds the allowed lifetime. |
 | `0x03` | `TICKET_SCOPE_MISMATCH` | Issuer, audience, channel ID, sender ID, or key binding mismatch. |
-| `0x04` | `PERMISSION_DENIED` | Required `listen` or `talk` permission is absent. |
+| `0x04` | `PERMISSION_DENIED` | Required `listen`, `talk`, or `interrupt` permission is absent. |
 | `0x05` | `INVALID_PROOF` | Challenge, endpoint binding, or Ed25519 proof verification failed. |
 | `0x06-0xff` | reserved | Client MUST display a generic admission failure. |
 
@@ -203,9 +207,11 @@ URIs, and rotate signing keys through overlapping `kid` entries.
 
 1. `off` mode performs no ticket processing and accepts existing authenticated
    JOIN behavior unchanged.
-2. `required` mode rejects JOIN without current identity admission.
+2. `required` mode rejects an ordinary JOIN without current Identity Admission and rejects a service JOIN without current enabled Managed Service Admission.
 3. A valid listen-only ticket permits JOIN but rejects PTT.
 4. A valid talk ticket completes the cookie, ticket, proof, and JOIN flow.
+5. An interrupt ticket with valid non-zero `pri` may use Floor Interrupt only
+   when the Relay enables it; a talk-only ticket cannot preempt.
 5. An altered ticket, wrong `kid`, expired ticket, wrong channel/sender ID,
    wrong public key, replayed challenge, and invalid signature are rejected.
 6. Ticket renewal preserves membership without resetting an active PTT lease.

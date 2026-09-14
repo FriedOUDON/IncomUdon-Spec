@@ -1,7 +1,18 @@
-﻿# Changelog
+# Changelog
 
 ## Unreleased
 
+- Defines optional Floor Interrupt v1: an Admission-required, Control-
+  Authentication-protected `PTT_REQUEST` path for Relay-authorized higher-
+  priority preemption, bounded per-talker replacement, `PREEMPTED` release,
+  immediate old-audio cleanup, and deterministic authorization/packet vectors.
+- Defines optional Management Plane v1: an administratively isolated HTTPS/mTLS
+  API, channel-scoped roles and ACLs, redacted SSE event delivery, private
+  Relay integration, and Recorder Worker orchestration without media/key proxying.
+- Defines Managed Service Admission v1: mTLS-gated, Ed25519-signed,
+  proof-of-possession Relay grants for non-interactive services, bounded
+  renewable/grace behavior, revocation, an API contract, schemas, and a
+  deterministic admission vector. Existing Directory UDP behavior is unchanged.
 - Defines Multi-Talker Mixing: independent per-talker decoding and playout,
   16-talker Relay/receiver interoperability limit, common-rate mixing,
   20 ms gain ramps, final peak protection, mixer diagnostics, and canonical

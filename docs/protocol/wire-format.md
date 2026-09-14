@@ -1,4 +1,4 @@
-﻿# UDP Wire Format
+# UDP Wire Format
 
 All multibyte integers use network byte order (big endian).
 
@@ -96,6 +96,11 @@ Unknown flag bits MUST be zero when sending and ignored when receiving.
 | `0x13` | `IDENTITY_CHALLENGE` |
 | `0x14` | `IDENTITY_PROOF` |
 | `0x15` | `IDENTITY_DENY` |
+| `0x16` | `SERVICE_ADMISSION_BEGIN` |
+| `0x17` | `SERVICE_ADMISSION_CHALLENGE` |
+| `0x18` | `SERVICE_ADMISSION_PROOF` |
+| `0x19` | `SERVICE_ADMISSION_DENY` |
+| `0x1A` | `PTT_REQUEST` |
 
 See `../test-vectors/packet-envelope-v1.json` for canonical byte examples.
 

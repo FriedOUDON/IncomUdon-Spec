@@ -17,7 +17,9 @@ MUST NOT be used in production.
 | `directory-channel-v2.json` | Primary channel-password-derived Directory v2 request envelope |
 | `diagnostics-v1.json` | Redacted local debug-metrics snapshot |
 | `ptt-timeout-v1.json` | `TALK_RELEASE` reason payloads and timeout timelines |
+| `floor-interrupt-v1.json` | Admission-required interrupt request, preemption release, and priority-selection cases |
 | `identity-admission-v1.json` | Ed25519 JWS ticket, proof-of-possession, and denial payloads |
+| `management/service-admission-v1.json` | Managed Service Admission Ed25519 JWS grant, proof-of-possession, and denial payloads |
 | `mtu-v1.json` | MTU-safe AUDIO and FEC v2 datagram budget cases |
 | `multi-talker-mixing-v1.json` | Concurrent-talker gain, limiter, transition, and source-limit cases |
 

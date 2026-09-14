@@ -1,4 +1,4 @@
-﻿# Security
+# Security
 
 ## Crypto mode registry
 
@@ -111,7 +111,9 @@ Directory UDP v2 derives additional direction and epoch keys from
 Authentication keys. See `directory-udp.md`. When configured, Identity
 Admission v1 additionally uses this authenticated control path for its
 OIDC-derived Relay ticket and proof exchange; it does not derive a new
-channel-password key.
+channel-password key. Managed Service Admission v1 uses the same authenticated
+control path for its signed grant and proof exchange. It likewise does not
+derive, disclose, or replace any channel-password key.
 
 ## AES-GCM nonce lifecycle and media anti-replay
 

@@ -9,7 +9,8 @@ the common header. Relay-generated `TALK_*` packets set both the header
 | `JOIN` | empty normally; `expiry:u32 || cookie[16]` when Control Authentication v1 is required | Register authenticated endpoint, send server config and active talker sync |
 | `LEAVE` | empty | Remove endpoint and release its talk state |
 | `KEEPALIVE` | empty | Refresh endpoint membership |
-| `PTT_ON` | empty | Grant or deny according to floor policy |
+| `PTT_ON` | empty | Ordinary grant or deny according to floor policy |
+| `PTT_REQUEST` | `0x01` (`INTERRUPT_REQUESTED`) | Admission-required authorized higher-priority preemption request |
 | `PTT_OFF` | empty | Release the requesting sender if active |
 | `KEY_EXCHANGE` | ASCII `LEGACY` | Legacy compatibility marker |
 | `AUTH_HELLO` | empty, Control Authentication v1 tag required | Relay returns `AUTH_CHALLENGE`; no membership state change |
@@ -18,11 +19,16 @@ the common header. Relay-generated `TALK_*` packets set both the header
 | `IDENTITY_CHALLENGE` | Relay expiry and random challenge | Sent after a valid ticket is presented |
 | `IDENTITY_PROOF` | Ed25519 challenge signature | Completes proof-of-possession before JOIN |
 | `IDENTITY_DENY` | Relay admission denial reason | Indicates required/invalid/expired/unauthorized admission |
+| `SERVICE_ADMISSION_BEGIN` | Service Admission Grant and Ed25519 public key | Starts optional Management-Plane-derived service admission |
+| `SERVICE_ADMISSION_CHALLENGE` | Relay expiry and random challenge | Sent after a valid service grant is presented |
+| `SERVICE_ADMISSION_PROOF` | Ed25519 challenge signature | Completes service proof-of-possession before JOIN |
+| `SERVICE_ADMISSION_DENY` | Relay service-admission denial reason | Indicates disabled/invalid/expired/revoked service admission |
 
 Control Authentication v1 requirements, authenticated JOIN payload, and
 replay behavior are defined in `control-auth.md`. Optional OIDC-derived Relay
 admission, ticket/proof payloads, and authorization policy are defined in
-`identity-admission.md`.
+`identity-admission.md`. Optional mTLS-Management-Plane-derived service
+admission is defined in `../extensions/management/service-admission.md`.
 
 ## Talk packets
 
@@ -39,6 +45,10 @@ Release reason values and authoritative Relay timeout behavior are defined in
 `TALK_DENY` identifies the current lowest sender ID among active talkers, or
 zero when none can be selected. A client MUST stop pending transmission after
 a deny and MUST discard stale queued frames.
+
+`PTT_REQUEST` payload and Relay preemption rules are defined in
+`floor-interrupt.md`. Floor Interrupt uses a new packet type so legacy empty
+`PTT_ON` behavior remains unchanged.
 
 A duplicate `PTT_ON` from an already granted sender causes a grant to be sent
 to that sender only. It does not rebroadcast a grant because that would reset

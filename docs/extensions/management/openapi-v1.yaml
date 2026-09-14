@@ -1,0 +1,204 @@
+openapi: 3.1.0
+info:
+  title: IncomUdon Management Plane API
+  version: v1-draft
+  description: |
+    Optional administration-plane API. It uses HTTPS with required mutual TLS.
+    It never returns channel credentials, media keys, media plaintext, or client
+    certificate private keys.
+servers:
+  - url: https://management.example.invalid/v1
+security:
+  - mutualTLS: []
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Read Management Service health.
+      responses:
+        '200':
+          description: Health snapshot.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    enum: [healthy, degraded, unhealthy]
+                additionalProperties: false
+  /channels:
+    get:
+      operationId: listChannels
+      summary: List channels visible to the authenticated service.
+      responses:
+        '200':
+          description: Channel summaries.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [channels]
+                properties:
+                  channels:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChannelSummary'
+                additionalProperties: false
+  /channels/{channel_id}/participants:
+    get:
+      operationId: listParticipants
+      summary: Read current participant state for one authorized channel.
+      parameters:
+        - $ref: '#/components/parameters/ChannelId'
+      responses:
+        '200':
+          description: Participant snapshot.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [channel_id, participants]
+                properties:
+                  channel_id: { $ref: '#/components/schemas/U32' }
+                  participants:
+                    type: array
+                    items: { $ref: '#/components/schemas/Participant' }
+                additionalProperties: false
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /events:
+    get:
+      operationId: streamEvents
+      summary: Subscribe to redacted management events using SSE.
+      parameters:
+        - name: since
+          in: query
+          required: false
+          schema: { type: string, pattern: '^[0-9]+$' }
+      responses:
+        '200':
+          description: Event stream. Reconnection uses Last-Event-ID.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '410':
+          description: Requested event cursor is no longer retained; fetch a fresh snapshot.
+  /service-admission-grants:
+    post:
+      operationId: issueServiceAdmissionGrant
+      summary: Issue a short-lived channel-scoped service admission grant.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [channel_id, sender_id, role, service_public_key]
+              properties:
+                channel_id: { $ref: '#/components/schemas/U32' }
+                sender_id: { $ref: '#/components/schemas/U32' }
+                role:
+                  enum: [recorder, observer, automation]
+                request_talk:
+                  type: boolean
+                  default: false
+                request_interrupt:
+                  type: boolean
+                  default: false
+                  description: Requests the ACL-derived interrupt permission; callers cannot select priority.
+                service_public_key:
+                  type: string
+                  description: Base64url raw 32-byte Ed25519 public key.
+                  pattern: '^[A-Za-z0-9_-]{43}$'
+              additionalProperties: false
+      responses:
+        '201':
+          description: Signed compact JWS grant. It is secret-adjacent and MUST NOT be logged.
+          headers:
+            Cache-Control:
+              required: true
+              schema: { const: no-store }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [grant, expires_at]
+                properties:
+                  grant: { type: string, minLength: 1, maxLength: 768 }
+                  expires_at: { type: string, format: date-time }
+                additionalProperties: false
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /recording-jobs:
+    post:
+      operationId: startRecordingJob
+      summary: Create a recording job for one authorized channel.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [channel_id]
+              properties:
+                channel_id: { $ref: '#/components/schemas/U32' }
+              additionalProperties: false
+      responses:
+        '201':
+          description: Recording job accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [job_id, state]
+                properties:
+                  job_id: { type: string, minLength: 1, maxLength: 128 }
+                  state: { enum: [starting, recording] }
+                additionalProperties: false
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /recording-jobs/{job_id}/stop:
+    post:
+      operationId: stopRecordingJob
+      summary: Request a recording job stop.
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 128 }
+      responses:
+        '202':
+          description: Stop accepted.
+        '403': { $ref: '#/components/responses/Forbidden' }
+components:
+  securitySchemes:
+    mutualTLS:
+      type: mutualTLS
+      description: A trusted client certificate mapped to a Management Plane ACL is required.
+  parameters:
+    ChannelId:
+      name: channel_id
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/U32' }
+  responses:
+    Forbidden:
+      description: The mTLS identity lacks the required channel-scoped permission.
+  schemas:
+    U32:
+      type: integer
+      minimum: 0
+      maximum: 4294967295
+    ChannelSummary:
+      type: object
+      required: [channel_id, participant_count]
+      properties:
+        channel_id: { $ref: '#/components/schemas/U32' }
+        participant_count: { type: integer, minimum: 0 }
+      additionalProperties: false
+    Participant:
+      type: object
+      required: [sender_id, state]
+      properties:
+        sender_id: { $ref: '#/components/schemas/U32' }
+        state: { enum: [joined, talking, idle] }
+      additionalProperties: false

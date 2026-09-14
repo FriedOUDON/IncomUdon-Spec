@@ -1,0 +1,83 @@
+{
+  "specVersion": "v0.5.0-draft",
+  "scheme": "floor-interrupt-v1",
+  "endianness": "big-endian for envelope and control integers",
+  "packets": [
+    {
+      "name": "interrupt_request",
+      "fields": {
+        "version": 1,
+        "type": "PTT_REQUEST",
+        "headerLen": 16,
+        "channelId": 111,
+        "senderId": 1002,
+        "seq": 45,
+        "flags": 0
+      },
+      "payloadHex": "01",
+      "datagramHex": "011a00100000006f000003ea002d000001"
+    },
+    {
+      "name": "preempted_release",
+      "fields": {
+        "version": 1,
+        "type": "TALK_RELEASE",
+        "headerLen": 16,
+        "channelId": 111,
+        "senderId": 1001,
+        "seq": 2,
+        "flags": 0
+      },
+      "payloadHex": "000003e907",
+      "datagramHex": "010800100000006f000003e900020000000003e907"
+    }
+  ],
+  "authorization_cases": [
+    {
+      "name": "identity_admission_required",
+      "identity_admission_mode": "required",
+      "control_auth_required": true,
+      "requester_perm": 7,
+      "requester_priority": 100,
+      "active_talkers": [
+        { "sender_id": 1001, "priority": 10 }
+      ],
+      "result": "preempt_sender_1001"
+    },
+    {
+      "name": "missing_interrupt_permission",
+      "identity_admission_mode": "required",
+      "control_auth_required": true,
+      "requester_perm": 3,
+      "requester_priority": 0,
+      "active_talkers": [
+        { "sender_id": 1001, "priority": 10 }
+      ],
+      "result": "deny"
+    },
+    {
+      "name": "equal_priority_denied",
+      "identity_admission_mode": "required",
+      "control_auth_required": true,
+      "requester_perm": 7,
+      "requester_priority": 10,
+      "active_talkers": [
+        { "sender_id": 1001, "priority": 10 }
+      ],
+      "result": "deny"
+    },
+    {
+      "name": "multi_talk_deterministic_lowest_selection",
+      "identity_admission_mode": "required",
+      "control_auth_required": true,
+      "requester_perm": 7,
+      "requester_priority": 80,
+      "active_talkers": [
+        { "sender_id": 1005, "priority": 20 },
+        { "sender_id": 1001, "priority": 20 },
+        { "sender_id": 1003, "priority": 40 }
+      ],
+      "result": "preempt_sender_1001"
+    }
+  ]
+}

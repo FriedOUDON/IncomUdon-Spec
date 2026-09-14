@@ -55,7 +55,9 @@ with reason `SERVER_POLICY`.
 | `0x03` | `CLIENT_LEAVE` | Relay accepted the talker's `LEAVE`. |
 | `0x04` | `SERVER_POLICY` | Relay or administrator ended the active talk for policy reasons. |
 | `0x05` | `IDENTITY_EXPIRED` | The optional Identity Admission Ticket expired or was no longer valid. |
-| `0x06-0xff` | reserved | A receiver MUST treat an unknown value as a release. |
+| `0x06` | `SERVICE_ADMISSION_REVOKED` | Managed Service Admission was revoked. |
+| `0x07` | `PREEMPTED` | A higher-priority authorized Floor Interrupt replaced this talker. |
+| `0x08-0xff` | reserved | A receiver MUST treat an unknown value as a release. |
 
 Relay-generated `TALK_RELEASE` packets MUST use the resolved talker ID in both
 the common header `sender_id` and payload `talker_id`.
@@ -98,10 +100,12 @@ physical/button input remains held after a `SERVER_TALK_TIMEOUT` release. A
 new press edge is required before requesting the floor again. This avoids an
 unintended immediate re-grant loop at the maximum-duration boundary.
 
-On a remote `TALK_RELEASE`, receivers MUST retain already accepted media in
-their bounded per-talker playout buffer and drain it under `playout.md`.
-They MUST NOT delay the release indefinitely waiting for missing packets, and
-MUST start an end-of-talk cue only after that accepted media has drained.
+On a remote `TALK_RELEASE` other than `PREEMPTED`, receivers MUST retain
+already accepted media in their bounded per-talker playout buffer and drain it
+under `playout.md`. They MUST NOT delay the release indefinitely waiting for
+missing packets, and MUST start an end-of-talk cue only after that accepted
+media has drained. `PREEMPTED` instead follows the immediate cleanup and
+cue-suppression rule in `floor-interrupt.md`.
 
 ## SERVER_CONFIG delivery
 

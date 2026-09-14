@@ -1,4 +1,4 @@
-﻿# Real-Time Playout
+# Real-Time Playout
 
 ## Scope
 
@@ -152,9 +152,16 @@ was already rendered.
 
 ## Release and state cleanup
 
-On `TALK_RELEASE`, a receiver MUST render only frames that remain eligible
-under their scheduled deadlines. It MUST then discard residual jitter-buffer,
-FEC, and decoder ordering state for that talker. It MUST NOT keep a released
+On `TALK_RELEASE` with reason `PREEMPTED`, a receiver MUST fade the preempted
+talker from the mix in no more than 20 ms, discard all unrendered jitter-buffer,
+FEC, and decoder ordering state immediately, and suppress that talker's
+end-of-talk cue. It MUST NOT delay the replacement talker to drain preempted
+speech.
+
+On any other `TALK_RELEASE`, a receiver MUST render only frames that remain
+eligible under their scheduled deadlines. It MUST then discard residual
+jitter-buffer, FEC, and decoder ordering state for that talker. It MUST NOT
+keep a released
 talker alive merely to await late parity.
 
 ## Diagnostics
