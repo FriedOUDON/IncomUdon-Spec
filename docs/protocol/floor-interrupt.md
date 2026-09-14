@@ -150,8 +150,15 @@ source network addresses.
    an end-of-talk cue for it.
 9. A duplicate request from an already granted talker does not preempt another
    talker or extend its current talk deadline.
+10. `PTT_REQUEST` is rejected when its Control Authentication header, tag, or
+    client nonce replay state is invalid.
+11. A `PREEMPTED` `TALK_RELEASE` uses an authenticated 28-byte Control
+    Authentication header and is rejected when its Relay-generated tag is
+    invalid.
 
 ## Deterministic vector
 
-`../../test-vectors/floor-interrupt-v1.json` contains canonical PTT request and
-preemption-release envelopes plus authorization and selection cases.
+`../../test-vectors/floor-interrupt-v1.json` contains byte-for-byte authenticated
+`PTT_REQUEST` and `PREEMPTED` `TALK_RELEASE` envelopes, including their
+28-byte Control Authentication headers, nonces, Control Key ID, and HMAC tags,
+plus authorization and selection cases.

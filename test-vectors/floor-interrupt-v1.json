@@ -8,28 +8,40 @@
       "fields": {
         "version": 1,
         "type": "PTT_REQUEST",
-        "headerLen": 16,
+        "headerLen": 28,
         "channelId": 111,
         "senderId": 1002,
         "seq": 45,
-        "flags": 0
+        "flags": 2
+      },
+      "controlAuth": {
+        "nonceHex": "1234567800000004",
+        "keyId": 1,
+        "authenticatedHeaderHex": "011a001c0000006f000003ea002d0002123456780000000400000001",
+        "tagHex": "c107ff2f229865a400b023975bdf0b12"
       },
       "payloadHex": "01",
-      "datagramHex": "011a00100000006f000003ea002d000001"
+      "datagramHex": "011a001c0000006f000003ea002d000212345678000000040000000101c107ff2f229865a400b023975bdf0b12"
     },
     {
       "name": "preempted_release",
       "fields": {
         "version": 1,
         "type": "TALK_RELEASE",
-        "headerLen": 16,
+        "headerLen": 28,
         "channelId": 111,
         "senderId": 1001,
         "seq": 2,
-        "flags": 0
+        "flags": 2
+      },
+      "controlAuth": {
+        "nonceHex": "8765432100000002",
+        "keyId": 1,
+        "authenticatedHeaderHex": "0108001c0000006f000003e900020002876543210000000200000001",
+        "tagHex": "518224376c042d8280ae23ce40528737"
       },
       "payloadHex": "000003e907",
-      "datagramHex": "010800100000006f000003e900020000000003e907"
+      "datagramHex": "0108001c0000006f000003e900020002876543210000000200000001000003e907518224376c042d8280ae23ce40528737"
     }
   ],
   "authorization_cases": [
@@ -79,5 +91,17 @@
       ],
       "result": "preempt_sender_1001"
     }
+  ],
+  "control_auth": {
+    "key_id": 1,
+    "control_key_hex": "f7bf50ee89a0e406253d1a31040a54ac9681e6bacdd4346251b365a757bd5153",
+    "domain_hex": "696e636f6d75646f6e2d636f6e74726f6c2d617574682d763100",
+    "client_session_id": 305419896,
+    "relay_instance_id": 2271560481
+  },
+  "authentication_rejection_cases": [
+    "PTT_REQUEST with header_len other than 28 or without CONTROL_AUTH_V1 is rejected.",
+    "PTT_REQUEST with an invalid Control Authentication tag or replayed nonce is rejected.",
+    "PREEMPTED TALK_RELEASE with header_len other than 28 or an invalid Control Authentication tag is rejected."
   ]
 }

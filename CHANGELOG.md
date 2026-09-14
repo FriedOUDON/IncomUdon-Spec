@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Fixes Floor Interrupt v1 canonical vectors to carry the required 28-byte
+  Control Authentication header and HMAC tag for both `PTT_REQUEST` and the
+  Relay-generated `PREEMPTED` `TALK_RELEASE`; adds authentication rejection
+  cases.
+
 - Fixes Control Authentication v1 client nonce-counter allocation: all
   authenticated pre-JOIN exchanges consume the next counter, JOIN no longer
   assumes counter one after admission, and Relays retain a provisional replay
