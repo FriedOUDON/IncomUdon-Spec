@@ -1,4 +1,5 @@
 {
+  "specVersion": "unreleased",
   "description": "Server-managed PTT timeout v1 deterministic payload and timeline cases",
   "talk_release_payloads": [
     {"talker_id": 1001, "reason": "CLIENT_PTT_OFF", "reason_byte": 0, "payload_hex": "000003e900"},

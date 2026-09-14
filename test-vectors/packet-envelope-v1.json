@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.1.0-draft",
+  "specVersion": "unreleased",
   "endianness": "big-endian for envelope and control integers",
   "vectors": [
     {

@@ -1,11 +1,13 @@
 # IncomUdon Specification
 
-**Specification release:** `v0.1.0-draft`
+**Wire protocol version:** `1`
+**Specification snapshot:** [`SPEC_VERSION`](SPEC_VERSION) (currently `unreleased`)
+**Latest tagged specification:** `v0.6.0-draft`
 
 This repository is the canonical interoperability specification for the
 IncomUdon Relay, PWA client, Qt native client, and future Rust native client.
-It describes observed Version 1 behavior and provides deterministic vectors
-for new implementations.
+It describes Version 1 behavior and provides deterministic vectors for new
+implementations.
 
 ## Normative language
 
@@ -41,9 +43,14 @@ requirements for compatible implementations.
 
 ## Compatibility rule
 
-An implementation may claim `IncomUdon-Spec v0.1.0-draft` compatibility only
-when it parses every applicable vector and produces byte-identical output for
-all deterministic encode vectors.
+An implementation may claim compatibility with a tagged IncomUdon specification
+only when it uses the documentation, schemas, and applicable test vectors from
+that exact Git tag, parses every applicable vector, and produces byte-identical
+output for all deterministic encode vectors.
+
+The `main` branch normally has `SPEC_VERSION` set to `unreleased`. Its vectors
+describe the current development specification and MUST NOT be used to claim
+compatibility with an older tagged release.
 
 ## License
 

@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.1.0-draft",
+  "specVersion": "unreleased",
   "format": "fec-v2",
   "field": "GF(256), primitive polynomial 0x11d",
   "maxMediaFrameBytes": 4096,

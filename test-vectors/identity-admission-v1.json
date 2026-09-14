@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.3.0-draft",
+  "specVersion": "unreleased",
   "scheme": "identity-admission-v1",
   "synthetic_keys": {
     "issuer_private_seed_hex": "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",

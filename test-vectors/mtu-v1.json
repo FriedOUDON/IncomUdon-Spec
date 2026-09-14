@@ -1,4 +1,5 @@
 {
+  "specVersion": "unreleased",
   "description": "IncomUdon Version 1 MTU-safe UDP datagram budget",
   "constants": {
     "max_udp_datagram_bytes": 1200,

@@ -1,4 +1,5 @@
 {
+  "specVersion": "unreleased",
   "schema_version": "diagnostics-v1",
   "snapshot_monotonic_ms": 123456,
   "connection": {

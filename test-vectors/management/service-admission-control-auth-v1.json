@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.5.0-draft",
+  "specVersion": "unreleased",
   "scheme": "managed-service-admission-control-auth-v1",
   "client_session_id": 305419896,
   "client_to_relay": [

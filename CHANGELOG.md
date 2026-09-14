@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Introduces `SPEC_VERSION` as the single source of the current specification
+  snapshot, normalizes all vector `specVersion` values, and adds CI validation
+  for development snapshots and tagged releases.
+
 - Adds the registered Opus `24000` bps mode, aligns the 24 kbps FEC
   recommendation, and adds a canonical `CODEC_CONFIG` packet vector.
 
