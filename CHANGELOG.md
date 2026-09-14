@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Generalizes Server-Managed PTT Timeout `grant_time` to every newly
+  created `TALK_GRANT`, including Floor Interrupt requests that use an
+  available slot or preempt an active talker.
+
 - Separates Control Authentication `control_key_id` terminology from AES-GCM
   v2 `media_key_id` terminology. Clarifies that authenticated
   `CODEC_CONFIG` establishes media replay state with the mode-selected Media

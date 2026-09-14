@@ -14,8 +14,11 @@ and FEC traffic MUST NOT extend it.
 ## Relay time base and grant snapshot
 
 The Relay MUST measure every active talk lease with a monotonic clock. The
-lease starts when the Relay accepts `PTT_ON` and emits `TALK_GRANT`; call this
-instant `grant_time`.
+lease starts when the Relay creates a new talk grant and emits `TALK_GRANT`; call this instant
+`grant_time`. This covers an accepted `PTT_ON` and a successful `PTT_REQUEST` when Floor
+Interrupt v1 is enabled, whether it uses an available slot or preempts another
+talker. A retransmission for an already granted talker does not create a new
+grant and MUST NOT reset or extend its lease.
 
 For a nonzero configured duration `T`, the deadline is:
 

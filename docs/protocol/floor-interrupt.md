@@ -102,9 +102,12 @@ possible, so receivers must handle either ordering without retaining obsolete
 media. The new talker receives a fresh normal PTT lease; it does not inherit
 any remaining duration from the preempted talker.
 
-An already granted talker that retransmits `PTT_REQUEST` receives an ordinary
-unicast `TALK_GRANT` only when it remains active. Such a retransmission MUST
-NOT preempt another talker, reset the talk lease, or change active priorities.
+A successful `PTT_REQUEST` creates a new normal talk grant. Its
+`grant_time` and server-managed deadline are defined by `ptt-timeout.md`,
+whether the grant used an available slot or replaced another talker. An already
+granted talker that retransmits `PTT_REQUEST` receives an ordinary unicast
+`TALK_GRANT` only when it remains active. Such a retransmission MUST NOT
+preempt another talker, reset the talk lease, or change active priorities.
 
 ## Release and playout behavior
 
