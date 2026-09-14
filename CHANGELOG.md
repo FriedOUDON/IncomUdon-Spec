@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Clarifies Multi-Talker Mixing receiver conformance: 16 concurrent sources
+  define the full-mix-capable profile, while resource-constrained receivers
+  may enforce a lower deterministic local limit with visible diagnostics.
+
 - Generalizes Server-Managed PTT Timeout `grant_time` to every newly
   created `TALK_GRANT`, including Floor Interrupt requests that use an
   available slot or preempt an active talker.

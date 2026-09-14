@@ -48,10 +48,11 @@ render an interval twice when an original or FEC-recovered copy arrives late.
 
 ## Multi-Talker Mixing
 
-When `SERVER_CONFIG.multi_talk_enabled` is true, a receiver MUST be able to
-render every Relay-authorized active talker concurrently. A talker is identified
-by the tuple `(channel_id, sender_id)`. Decoder, jitter-buffer, FEC, playout,
-and resampler state MUST remain independent for that tuple.
+When `SERVER_CONFIG.multi_talk_enabled` is true, a receiver MUST attempt to
+render every Relay-authorized active talker concurrently, subject only to its
+documented local source limit. A talker is identified by the tuple
+`(channel_id, sender_id)`. Decoder, jitter-buffer, FEC, playout, and resampler
+state MUST remain independent for that tuple.
 
 A receiver MUST NOT wait for one talker to reach a playout deadline before
 rendering another talker. Each talker enters and leaves the output mix only at
@@ -62,11 +63,18 @@ otherwise interrupt another talker's state.
 ### Source selection and limits
 
 The standard `MAX_MIX_TALKERS` is 16. Relays in an interoperable Version 1
-deployment MUST advertise no more than 16 active talkers, and receivers MUST
-support mixing at least 16 concurrent non-muted talkers. A receiver MAY impose
-a lower local limit only when resource constrained, but it MUST expose the
-resulting source-limit drops in diagnostics and SHOULD make that limitation
-visible to the user.
+deployment MUST advertise no more than 16 active talkers. A full-mix-capable
+Version 1 receiver MUST be capable of mixing at least 16 concurrent non-muted
+talkers under its supported normal operating conditions.
+
+A resource-constrained receiver MAY enforce a lower local source limit, either
+as a fixed implementation capability or temporarily during runtime CPU, memory,
+or device-resource exhaustion. This is local playout degradation only; it MUST
+NOT alter Relay authorization or terminate another talker. A receiver that
+drops eligible sources due to its local limit MUST use a deterministic local
+selection policy, expose every source-limit drop in diagnostics, and SHOULD make
+the active limitation visible to the user. A receiver with a lower configured
+limit is Version 1 conforming but MUST NOT claim the full-mix-capable profile.
 
 A source contributes to the mix when it has a renderable scheduled interval:
 ordinary media, timely FEC recovery, or PLC output. Locally muted sources,

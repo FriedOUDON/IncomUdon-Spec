@@ -121,7 +121,7 @@ speaker name. Locally muted sources are excluded from `active_sources`.
 | Field | Meaning |
 |---|---|
 | `active_sources` | Current number of contributing sources after local mute policy, 0 through 16 |
-| `maximum_sources` | Local concurrent mix capacity, 1 through 16 |
+| `maximum_sources` | Currently enforced local concurrent mix capacity, 1 through 16; it may be a fixed resource-constrained limit or a temporary runtime-degradation limit. |
 | `mix_intervals_rendered` | Count of 20 ms source-mix intervals rendered |
 | `gain_transition_ms` | Configured source-gain transition duration; standard value is 20 |
 | `limiter_activations` | Final peak-limiter activation count |

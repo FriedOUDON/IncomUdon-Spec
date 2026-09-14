@@ -32,8 +32,11 @@
     "expectedBaselineLimitedSample": 1.0
   },
   "sourceLimitCase": {
+    "receiverProfile": "resource-constrained",
     "localMaximumSources": 2,
     "eligibleSources": 3,
-    "expectedSourceLimitDrops": 1
+    "expectedSourceLimitDrops": 1,
+    "requiresDiagnostics": true,
+    "selectionPolicy": "deterministic local policy"
   }
 }
