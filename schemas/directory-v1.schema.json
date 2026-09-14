@@ -9,8 +9,8 @@
     "type": {"enum": ["snapshot", "participants", "request", "register", "heartbeat"]},
     "keyId": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Za-z0-9._-]+$"},
     "epoch": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$"},
-    "sequence": {"type": "integer", "minimum": 1, "maximum": 18446744073709551615},
-    "expiresAt": {"type": "integer", "minimum": 1, "maximum": 18446744073709551615},
+    "sequence": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+    "expiresAt": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
     "ciphertext": {"type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_-]+$"}
   },
   "additionalProperties": false

@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-- Aligns Directory UDP v1 and v2 JSON Schema integer bounds with their
-  `U64BE` AAD and nonce fields, rejecting `sequence` or `expiresAt` values
-  outside the unsigned 64-bit range.
+- Limits Directory UDP v1 and v2 JSON-number `sequence` and `expiresAt`
+  values to positive JavaScript-safe integers, preserving exact cross-language
+  `U64BE` nonce and AAD encoding without lossless JSON extensions.
 
 - Clarifies Multi-Talker Mixing receiver conformance: 16 concurrent sources
   define the full-mix-capable profile, while resource-constrained receivers
