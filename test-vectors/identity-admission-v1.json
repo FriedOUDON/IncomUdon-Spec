@@ -46,5 +46,30 @@
       "reason_byte": 5,
       "payload_hex": "05"
     }
-  ]
+  ],
+  "control_auth_counter_sequence": {
+    "client_session_id": 305419896,
+    "client_to_relay": [
+      {
+        "type": "AUTH_HELLO",
+        "counter": 0,
+        "nonce_hex": "1234567800000000"
+      },
+      {
+        "type": "IDENTITY_BEGIN",
+        "counter": 1,
+        "nonce_hex": "1234567800000001"
+      },
+      {
+        "type": "IDENTITY_PROOF",
+        "counter": 2,
+        "nonce_hex": "1234567800000002"
+      },
+      {
+        "type": "JOIN",
+        "counter": 3,
+        "nonce_hex": "1234567800000003"
+      }
+    ]
+  }
 }

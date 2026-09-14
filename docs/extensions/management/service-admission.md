@@ -90,9 +90,12 @@ key binding, and a datagram that exceeds the UDP MTU limit before creating
 durable membership state.
 
 A service completes the Control Authentication cookie challenge but does not
-send JOIN yet. It sends `SERVICE_ADMISSION_BEGIN`; the Relay verifies that the
-common-header channel ID and sender ID equal `ch` and `sid`, the grant permits
-`listen`, and the public-key digest equals `cnf.jkt`. The Relay then creates a
+send JOIN yet. For a fresh `client_session_id`, its client-to-Relay counters
+are zero for `AUTH_HELLO`, one for `SERVICE_ADMISSION_BEGIN`, two for
+`SERVICE_ADMISSION_PROOF`, and three for `JOIN`. It sends
+`SERVICE_ADMISSION_BEGIN`; the Relay verifies that the common-header channel
+ID and sender ID equal `ch` and `sid`, the grant permits `listen`, and the
+public-key digest equals `cnf.jkt`. The Relay then creates a
 pending record bound to the observed source IP, source port, channel ID,
 sender ID, grant hash, and random challenge. It returns a challenge with an
 expiry no more than 30 seconds ahead.
@@ -125,7 +128,8 @@ listen-only service. It MUST enforce all ordinary floor,
 membership, PTT timeout, MTU, media authentication, and media replay rules.
 
 The service renews before expiry by completing a new begin/challenge/proof
-flow from its current endpoint. Renewal MUST NOT reset an active PTT deadline.
+flow from its current endpoint. Renewal consumes the next two unused Control
+Authentication counters and MUST NOT reset an active PTT deadline.
 A Recorder Worker SHOULD renew at no later than half the granted lifetime. A
 Relay MUST NOT obtain or renew a grant itself.
 
@@ -192,6 +196,8 @@ signing key, or compromise of a Recorder Worker's channel credential.
 ## Deterministic vector
 
 `../../../test-vectors/management/service-admission-v1.json` contains synthetic Ed25519 keys,
-a signed grant, a begin payload, a challenge, and a proof. Implementations
-that support Managed Service Admission v1 MUST verify the grant and proof
-byte-for-byte before claiming compatibility.
+a signed grant, a begin payload, a challenge, and a proof.
+`../../../test-vectors/management/service-admission-control-auth-v1.json`
+defines the required client-to-Relay Control Authentication counter sequence.
+Implementations that support Managed Service Admission v1 MUST verify the
+grant, proof, and counter sequence before claiming compatibility.

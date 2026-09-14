@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Fixes Control Authentication v1 client nonce-counter allocation: all
+  authenticated pre-JOIN exchanges consume the next counter, JOIN no longer
+  assumes counter one after admission, and Relays retain a provisional replay
+  window through JOIN. Adds Identity and Managed Service Admission counter
+  sequences and replay-window interoperability requirements.
+
 - Expands the coordinated-release `CODEC_CONFIG` codec mode/bitrate field to
   a 32-bit big-endian bps value. The authenticated configuration payload is
   now 19 bytes, so Opus 96 kbps and 128 kbps are represented without

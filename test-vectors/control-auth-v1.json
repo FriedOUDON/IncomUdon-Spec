@@ -29,5 +29,73 @@
     "iterations": 3,
     "parallelism": 4,
     "outputBytes": 32
+  },
+  "counter_sequences": {
+    "client_session_id": 305419896,
+    "direct_join": [
+      {
+        "type": "AUTH_HELLO",
+        "counter": 0,
+        "nonce_hex": "1234567800000000"
+      },
+      {
+        "type": "JOIN",
+        "counter": 1,
+        "nonce_hex": "1234567800000001"
+      },
+      {
+        "type": "PTT_ON",
+        "counter": 2,
+        "nonce_hex": "1234567800000002"
+      }
+    ],
+    "identity_admission": [
+      {
+        "type": "AUTH_HELLO",
+        "counter": 0,
+        "nonce_hex": "1234567800000000"
+      },
+      {
+        "type": "IDENTITY_BEGIN",
+        "counter": 1,
+        "nonce_hex": "1234567800000001"
+      },
+      {
+        "type": "IDENTITY_PROOF",
+        "counter": 2,
+        "nonce_hex": "1234567800000002"
+      },
+      {
+        "type": "JOIN",
+        "counter": 3,
+        "nonce_hex": "1234567800000003"
+      }
+    ],
+    "managed_service_admission": [
+      {
+        "type": "AUTH_HELLO",
+        "counter": 0,
+        "nonce_hex": "1234567800000000"
+      },
+      {
+        "type": "SERVICE_ADMISSION_BEGIN",
+        "counter": 1,
+        "nonce_hex": "1234567800000001"
+      },
+      {
+        "type": "SERVICE_ADMISSION_PROOF",
+        "counter": 2,
+        "nonce_hex": "1234567800000002"
+      },
+      {
+        "type": "JOIN",
+        "counter": 3,
+        "nonce_hex": "1234567800000003"
+      }
+    ],
+    "rejection_cases": [
+      "A counter already accepted by the provisional or authenticated replay window is rejected.",
+      "A client MUST use a fresh client_session_id instead of restarting a counter at zero."
+    ]
   }
 }

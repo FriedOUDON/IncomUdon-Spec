@@ -91,17 +91,40 @@ or forwards its media:
 1. Send authenticated `AUTH_HELLO` (`0x10`) with an empty payload.
 2. Receive authenticated `AUTH_CHALLENGE` (`0x11`) from the Relay.
 3. When Identity Admission is enabled, complete `IDENTITY_BEGIN`,
-   `IDENTITY_CHALLENGE`, and `IDENTITY_PROOF` before JOIN.
+   `IDENTITY_CHALLENGE`, and `IDENTITY_PROOF` before JOIN. When Managed Service
+   Admission is enabled for a service endpoint, complete
+   `SERVICE_ADMISSION_BEGIN`, `SERVICE_ADMISSION_CHALLENGE`, and
+   `SERVICE_ADMISSION_PROOF` instead.
 4. Send authenticated `JOIN` containing the challenge expiry and cookie.
 5. Receive normal authenticated Relay state/configuration packets.
 
 Identity Admission is fully optional and defaults to off. Its additional
-admission flow is defined in `identity-admission.md`.
+admission flow is defined in `identity-admission.md`. Managed Service Admission
+is optional and defined in `../extensions/management/service-admission.md`.
 
 A client chooses a cryptographically random 32-bit `client_session_id`. The
-high 32 bits of every client-originated control nonce are this session ID; the
-low 32 bits are a monotonically increasing counter. `AUTH_HELLO` uses counter
-zero and the authenticated `JOIN` uses counter one.
+high 32 bits of every client-originated Control Authentication v1 nonce are
+this session ID; the low 32 bits are its control counter. This nonce is an
+authenticated replay identifier, not an AES-GCM media nonce.
+
+For one `client_session_id`, `AUTH_HELLO` MUST use counter zero. Every
+subsequent client-originated Control Authentication v1 packet MUST consume the
+next previously unused counter value. The counter MUST increase by exactly one
+when the client constructs another authenticated control packet, including
+pre-JOIN admission packets and post-JOIN traffic, and MUST NOT be reset or
+reused within that session. A dropped packet still consumes its counter.
+
+`JOIN` uses counter one only when no authenticated pre-JOIN exchange occurs.
+When Identity Admission, Managed Service Admission, or a future authenticated
+pre-JOIN extension is used, `JOIN` MUST use the next unused counter. Thus a
+fresh Identity or Managed Service Admission flow uses client-to-Relay counters
+zero for `AUTH_HELLO`, one for its `*_BEGIN`, two for its `*_PROOF`, and three
+for `JOIN`.
+
+A client MUST start a new authenticated handshake with a fresh random
+`client_session_id` before allocating counter `2^32`, after abandoning an
+incomplete pre-JOIN attempt, or when retrying `AUTH_HELLO`. It MUST NOT restart
+at counter zero under an existing session ID.
 
 `AUTH_CHALLENGE` has this payload:
 
@@ -129,11 +152,20 @@ seconds, be single-use, and be checked against the received source IP and
 port. The Relay cookie secret is Relay-local random key material and MUST NOT
 be exposed to clients.
 
-After successful JOIN, the Relay maintains a bounded 64-counter replay window
-per authenticated peer session. It accepts a counter at most once, tolerates
-limited UDP reordering within that window, and rejects packets from a different
-session ID or counters outside the window. A source-address change requires a
-new authenticated handshake.
+After verifying `AUTH_HELLO` with counter zero, the Relay MUST create a
+provisional bounded 64-counter replay window keyed by the observed source IP
+and port, channel ID, sender ID, Control Key ID, and `client_session_id`. It
+MUST record counter zero and apply that same window to every authenticated
+client-to-Relay packet before JOIN. The provisional state MUST expire no later
+than the associated cookie expiry and MUST be bounded against unauthenticated
+state exhaustion.
+
+On successful JOIN, the Relay MUST promote the exact provisional replay window
+to the authenticated peer session without clearing it. It accepts a counter at
+most once, tolerates limited UDP reordering within the 64-counter window, and
+rejects a different session ID or counters outside the window. This preserves
+replay protection for `AUTH_HELLO`, any admission packets, and JOIN itself. A
+source-address change requires a new authenticated handshake.
 
 The Relay uses its own cryptographically random 32-bit instance ID in the high
 32 bits of nonce values for Relay-originated control packets, with a
@@ -150,15 +182,19 @@ it is required for the channel:
 - `LEAVE`
 - `KEEPALIVE`
 - `PTT_ON`
+- `PTT_REQUEST`
 - `PTT_OFF`
 - `CODEC_CONFIG`
 - `PING`
 - `IDENTITY_BEGIN`
 - `IDENTITY_PROOF`
+- `SERVICE_ADMISSION_BEGIN`
+- `SERVICE_ADMISSION_PROOF`
 
 The Relay MUST apply Control Authentication v1 to its generated `AUTH_CHALLENGE`,
-`IDENTITY_CHALLENGE`, `IDENTITY_DENY`, `TALK_GRANT`, `TALK_RELEASE`,
-`TALK_DENY`, `SERVER_CONFIG`, and `PONG` packets.
+`IDENTITY_CHALLENGE`, `IDENTITY_DENY`, `SERVICE_ADMISSION_CHALLENGE`,
+`SERVICE_ADMISSION_DENY`, `TALK_GRANT`, `TALK_RELEASE`, `TALK_DENY`,
+`SERVER_CONFIG`, and `PONG` packets.
 It MUST verify authentication before caching a CodecConfig, granting/releasing
 talk, registering a peer, refreshing membership, or forwarding an authenticated
 client control packet. For AES-GCM v2, the Relay MUST cache the verified
@@ -214,4 +250,5 @@ rejection reason class such as `invalid_tag`, `expired_cookie`, or
 Implementations MUST verify the deterministic `control-auth-v1.json` vector
 and run tests for valid tags, tampering, wrong key IDs, incorrect channel or
 sender IDs, expired/reused cookies, source-address cookie mismatch, replayed
-nonces, and each Relay policy mode.
+nonces, provisional-window expiry, window promotion at JOIN, and direct,
+Identity Admission, and Managed Service Admission counter sequences.

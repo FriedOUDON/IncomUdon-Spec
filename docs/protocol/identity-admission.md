@@ -119,8 +119,11 @@ and messages exceeding the datagram limit in `mtu.md` before creating durable
 membership state.
 
 A client first completes the Control Authentication cookie challenge described
-in `control-auth.md`, but does not send JOIN yet. It then sends
-`IDENTITY_BEGIN`. The Relay validates the ticket and confirms that:
+in `control-auth.md`, but does not send JOIN yet. For a fresh
+`client_session_id`, its client-to-Relay counters are zero for `AUTH_HELLO`,
+one for `IDENTITY_BEGIN`, two for `IDENTITY_PROOF`, and three for `JOIN`.
+It then sends `IDENTITY_BEGIN`. The Relay validates the ticket and confirms
+that:
 
 1. the common-header channel ID and sender ID equal `ch` and `sid`;
 2. the SHA-256 digest of `client_public_key` equals `cnf.jkt`; and
@@ -150,8 +153,9 @@ payload. In `required` mode the Relay MUST reject JOIN unless this admission
 state is valid for the same endpoint, channel ID, and sender ID.
 
 A client renews admission before ticket expiry by repeating `IDENTITY_BEGIN`
-and `IDENTITY_PROOF` from its current endpoint. Renewal does not require a
-second JOIN and MUST NOT reset an active server-managed PTT deadline.
+and `IDENTITY_PROOF` from its current endpoint. Renewal consumes the next two
+unused Control Authentication counters; it does not require a second JOIN and
+MUST NOT reset an active server-managed PTT deadline.
 
 ## Authorization and expiry
 
@@ -209,21 +213,25 @@ URIs, and rotate signing keys through overlapping `kid` entries.
    JOIN behavior unchanged.
 2. `required` mode rejects an ordinary JOIN without current Identity Admission and rejects a service JOIN without current enabled Managed Service Admission.
 3. A valid listen-only ticket permits JOIN but rejects PTT.
-4. A valid talk ticket completes the cookie, ticket, proof, and JOIN flow.
+4. A valid talk ticket completes the cookie, ticket, proof, and JOIN flow
+   with counters zero, one, two, and three respectively; reused or reset
+   counters under the same session ID are rejected.
 5. An interrupt ticket with valid non-zero `pri` may use Floor Interrupt only
    when the Relay enables it; a talk-only ticket cannot preempt.
-5. An altered ticket, wrong `kid`, expired ticket, wrong channel/sender ID,
+6. An altered ticket, wrong `kid`, expired ticket, wrong channel/sender ID,
    wrong public key, replayed challenge, and invalid signature are rejected.
-6. Ticket renewal preserves membership without resetting an active PTT lease.
-7. Ticket expiry removes membership and releases an active talker with
+7. Ticket renewal preserves membership without resetting an active PTT lease
+   or the Control Authentication counter.
+8. Ticket expiry removes membership and releases an active talker with
    `IDENTITY_EXPIRED`.
-8. No normal log, diagnostics snapshot, or UI export contains a JWS, OIDC
+9. No normal log, diagnostics snapshot, or UI export contains a JWS, OIDC
    credential, challenge, public key, or full pseudonymous subject value.
 
 ## Deterministic vector
 
 `../../test-vectors/identity-admission-v1.json` contains synthetic RFC 8032
 Ed25519 keys, a signed compact JWS, an `IDENTITY_BEGIN` payload, an identity
-challenge, and a proof-of-possession signature. Implementations that support
-Identity Admission v1 MUST verify the JWS and proof byte-for-byte before
-claiming compatibility.
+challenge, a proof-of-possession signature, and the required client-to-Relay
+Control Authentication counter sequence. Implementations that support Identity
+Admission v1 MUST verify the JWS, proof, and counter sequence before claiming
+compatibility.
