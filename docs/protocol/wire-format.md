@@ -27,7 +27,11 @@ carry this header immediately after the fixed header:
 |---:|---:|---|
 | 16 | 12 | `media_nonce_base_96` |
 | 28 | 4 | `media_counter` (`u32`) |
-| 32 | 4 | `key_id` |
+| 32 | 4 | wire `key_id` (`media_key_id`) |
+
+In this 36-byte header, the wire `key_id` is the `media_key_id`. It belongs
+to the media-crypto namespace and is distinct from the Control Authentication
+`control_key_id` carried by the 28-byte header below.
 
 Ciphertext follows offset 36 and the final 16 bytes are the AES-GCM
 authentication tag. The AES-GCM nonce is
@@ -43,7 +47,11 @@ the fixed header:
 | Offset | Bytes | Field |
 |---:|---:|---|
 | 16 | 8 | `nonce` |
-| 24 | 4 | `key_id` |
+| 24 | 4 | wire `key_id` (`control_key_id`) |
+
+In this 28-byte header, the wire `key_id` is the `control_key_id`. It
+selects Control Authentication key material and MUST NOT be interpreted as a
+`media_key_id`.
 
 This form is used by Control Authentication v1 and documented in
 `control-auth.md`. It MUST NOT be used for AES-GCM v2 encrypted media. Legacy

@@ -77,7 +77,11 @@ and `FEC` header for this sender until the next configuration. A sender MUST
 create a fresh base whenever it changes the codec transport, mode, or FEC
 options and emits a replacement configuration. The packet MUST use Control
 Authentication v1. A receiver MUST authenticate this configuration before
-creating or replacing the sender's media replay domain.
+creating or replacing the sender's media replay domain. `CODEC_CONFIG` does not
+carry a `media_key_id`: an AES-GCM v2 receiver MUST use the `media_key_id`
+selected by its media security mode (`2` for AES-GCM v2). The
+`control_key_id` in the Control Authentication header authenticates this
+configuration but MUST NOT be used as its media replay-domain key ID.
 
 For `no-crypto`, `legacy-xor`, and legacy `aes-gcm`, bytes 5 through 16 MUST
 be all zero and receivers MUST ignore them. They remain present so the payload

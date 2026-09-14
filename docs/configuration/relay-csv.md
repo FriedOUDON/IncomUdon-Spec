@@ -104,9 +104,12 @@ The optional Control Authentication key store has this format:
 channel_id,key_id,control_key_base64
 ```
 
-`channel_id` is a `u32`. `key_id` is a non-zero `u32`, unique within its
-channel. `control_key_base64` is standard padded Base64 that decodes to exactly
-32 bytes. The semantic key `(channel_id, key_id)` MUST be unique.
+`channel_id` is a `u32`. The CSV column `key_id` is the non-zero
+`control_key_id`, unique within its channel. `control_key_base64` is standard
+padded Base64 that decodes to exactly 32 bytes. The semantic key
+`(channel_id, control_key_id)` MUST be unique. This Control Authentication
+identifier is distinct from the AES-GCM v2 `media_key_id` and does not select
+media key material.
 
 ```csv
 channel_id,key_id,control_key_base64

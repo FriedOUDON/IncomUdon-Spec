@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Separates Control Authentication `control_key_id` terminology from AES-GCM
+  v2 `media_key_id` terminology. Clarifies that authenticated
+  `CODEC_CONFIG` establishes media replay state with the mode-selected Media
+  Key ID, never its Control Key ID.
+
 - Clarifies that Managed Service Admission receive-only grace remains a
   bounded existing-membership exception when Identity Admission is `required`,
   without authorizing JOIN, PTT, endpoint changes, or ordinary endpoint access.

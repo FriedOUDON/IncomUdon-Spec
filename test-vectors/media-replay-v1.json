@@ -5,7 +5,7 @@
   "replayDomain": {
     "channelId": 1234,
     "senderId": 5678,
-    "keyId": 2,
+    "mediaKeyId": 2,
     "mediaNonceBase96Hex": "0102030405060708090a0b0c"
   },
   "cases": [

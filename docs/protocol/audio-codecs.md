@@ -48,9 +48,12 @@ two sequence bytes followed by the 320-byte PCM frame.
 
 Codec2 and Opus frames use the negotiated codec configuration. For AES-GCM v2,
 a receiver MUST accept media only after the matching authenticated 19-byte
-`CODEC_CONFIG` has established its `(sender_id, key_id, media_nonce_base_96)`
-replay domain. Receivers MUST maintain codec state by sender ID, not merely by
-channel ID.
+`CODEC_CONFIG` has established its media replay domain:
+`(channel_id, sender_id, media_key_id, media_nonce_base_96)`. The
+`media_key_id` is the mode-selected wire value from the `AUDIO` or `FEC` header
+(`2` for AES-GCM v2), not the
+`control_key_id` that authenticated `CODEC_CONFIG`. Receivers MUST maintain
+codec state by sender ID, not merely by channel ID.
 
 ## Real-time rules
 

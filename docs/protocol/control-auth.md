@@ -61,7 +61,7 @@ A Control Authentication v1 packet uses the normal 28-byte security header:
 | `header_len` | `28` |
 | `flags` | `CONTROL_AUTH_V1` (`0x0002`) set; AES-GCM v2 media AAD flag is clear |
 | `nonce` | control-session nonce defined below |
-| `key_id` | non-zero Control Key ID |
+| wire `key_id` (`control_key_id`) | non-zero Control Key ID |
 | payload | plaintext control payload |
 | trailing tag | first 16 bytes of the HMAC-SHA-256 result |
 
@@ -81,7 +81,9 @@ invalid tag before changing membership, floor-control, codec, or liveness
 state.
 
 `CONTROL_AUTH_V1` is not media encryption. Audio and FEC keep their existing
-AES-GCM v2 packet construction, key ID, and tag rules.
+AES-GCM v2 packet construction, `media_key_id`, and tag rules. The
+`control_key_id` in this packet authenticates control only; it neither selects
+a media key nor forms part of an AES-GCM v2 media replay domain.
 
 ## Authenticated join and replay protection
 
@@ -141,7 +143,7 @@ HMAC-SHA-256(
   relay_cookie_secret,
   "incomudon-control-cookie-v1\0" ||
   source_ip_16 || U16BE(source_port) ||
-  U32BE(channel_id) || U32BE(sender_id) || U32BE(key_id) ||
+  U32BE(channel_id) || U32BE(sender_id) || U32BE(control_key_id) ||
   U32BE(client_session_id) || U32BE(expiry)
 )[0:16]
 ```
@@ -216,9 +218,10 @@ channel_id,key_id,control_key_base64
 For a channel used by standard Control Authentication v1 clients, every
 `control_key_base64` value MUST be the exact 32-byte `control_key` that those
 clients derive from the configured channel credential and `channel_id` according
-to [Password and key derivation](#password-and-key-derivation). The `key_id`
-selects the provisioned row, but is not an input to the credential KDF or the
-Control Authentication HKDF.
+to [Password and key derivation](#password-and-key-derivation). The CSV
+`key_id` field is the `control_key_id`: it selects the provisioned row, but is
+not an input to the credential KDF or the Control Authentication HKDF. It is
+distinct from the AES-GCM v2 `media_key_id`.
 
 A trusted provisioning step MUST derive this value before it is placed in the
 Relay key file. The Relay key file MUST contain only `control_key`, never the
@@ -246,10 +249,11 @@ accepted by a Relay in `required` mode.
 
 ## Key rotation
 
-A Relay MAY hold an old and new Control Key ID simultaneously. Clients select
-the configured Key ID and its matching channel credential in their profile; the
-default Key ID is `1`. Because `key_id` is not a KDF input, changing only the
-Key ID while retaining a credential does not rotate cryptographic key material.
+A Relay MAY hold an old and new `control_key_id` simultaneously. Clients select
+the configured Control Key ID and its matching channel credential in their
+profile; the default `control_key_id` is `1`. Because `control_key_id` is not a
+KDF input, changing only it while retaining a credential does not rotate
+cryptographic key material.
 
 A cryptographic Control Authentication key rotation MUST use a distinct channel
 credential and a new Relay row containing the resulting derived `control_key`

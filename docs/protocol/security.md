@@ -2,7 +2,7 @@
 
 ## Crypto mode registry
 
-| Name | Status | `key_id` |
+| Name | Status | Media Key ID (wire `key_id`) |
 |---|---|---:|
 | `no-crypto` | Compatibility/testing only | 0 |
 | `legacy-xor` | Deprecated compatibility mode | 1 |
@@ -115,6 +115,25 @@ channel-password key. Managed Service Admission v1 uses the same authenticated
 control path for its signed grant and proof exchange. It likewise does not
 derive, disclose, or replace any channel-password key.
 
+### Key ID namespaces
+
+The fixed wire field name `key_id` has separate meanings in the two security
+headers:
+
+- `control_key_id` is the wire `key_id` in the 28-byte Control Authentication
+  v1 header. It selects the HMAC `control_key` used to authenticate control
+  packets.
+- `media_key_id` is the wire `key_id` in the 36-byte AES-GCM v2 media header.
+  It selects the media-crypto key/profile namespace and is part of the media
+  replay domain.
+
+These identifiers are independent. An authenticated `CODEC_CONFIG` carries a
+`control_key_id` in its Control Authentication header but does not carry a
+`media_key_id`. For AES-GCM v2, receivers obtain the expected `media_key_id`
+from the selected media mode; it is fixed at `2`. A `control_key_id` MUST NOT
+be substituted for a `media_key_id` when selecting or creating media replay
+state.
+
 ## AES-GCM nonce lifecycle and media anti-replay
 
 AES-256-GCM v2 identifies every encrypted-media session with a 12-byte
@@ -151,13 +170,15 @@ has been replayed. Each receiver MUST therefore maintain a 64-counter sliding
 replay window for every media replay domain:
 
 ```text
-(channel_id, sender_id, key_id, media_nonce_base_96)
+(channel_id, sender_id, media_key_id, media_nonce_base_96)
 ```
 
 A receiver creates a domain only after accepting the matching authenticated
 19-byte `CODEC_CONFIG`; the configuration's `media_nonce_base_96` binds the
-sender's announced session to its codec state. It MUST reject encrypted media
-whose base has not been announced for that sender/key/codec configuration.
+sender's announced session to its codec state. For AES-GCM v2, the domain uses
+the mode-selected `media_key_id` (`2`), never the `control_key_id` that
+authenticated `CODEC_CONFIG`. It MUST reject encrypted media whose base or
+`media_key_id` does not match that sender/media-key/codec configuration.
 When a newly accepted configuration changes the base, the receiver MUST discard
 the old replay window, jitter/FEC state, and codec ordering state for that
 sender before accepting the new domain.
@@ -197,11 +218,11 @@ extension.
 
 ## AES-GCM v2
 
-AES-GCM v2 sets flag `0x0001`, uses `key_id = 2`, requires `header_len = 36`
-for encrypted `AUDIO` and `FEC` packets, and authenticates the exact 36-byte
-packet prefix as AAD. The header carries `media_nonce_base_96`, `media_counter`,
-and `key_id`; the final 16 bytes of every encrypted payload are the GCM
-authentication tag.
+AES-GCM v2 sets flag `0x0001`, uses `media_key_id = 2` in its wire `key_id`
+field, requires `header_len = 36` for encrypted `AUDIO` and `FEC` packets, and
+authenticates the exact 36-byte packet prefix as AAD. The header carries
+`media_nonce_base_96`, `media_counter`, and `media_key_id`; the final 16 bytes
+of every encrypted payload are the GCM authentication tag.
 
 The 28-byte Control Authentication v1 header is a separate HMAC construction;
 it is not an AES-GCM v2 nonce format and MUST NOT be used for encrypted media.

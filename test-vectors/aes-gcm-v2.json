@@ -5,7 +5,25 @@
   "passwordKeyHex": "bcad701cf1a05f957d93aad27ea055a7d76f2d2650c89ab5bcb0790182854e4b",
   "hkdfInfoAscii": "incomudon-session-aesgcm-v2",
   "keyHex": "98d59cc1721c51b90c86f227c21953ecf96336ac848475ce5d2ea728ed954036",
-  "keyId": 2,
+  "mediaKeyId": 2,
+  "codecConfigAssociation": {
+    "controlKeyId": 1,
+    "mediaKeyId": 2,
+    "acceptedReplayDomain": {
+      "channelId": 1234,
+      "senderId": 5678,
+      "mediaKeyId": 2,
+      "mediaNonceBase96Hex": "0102030405060708090a0b0c"
+    },
+    "rejectionCases": [
+      {
+        "name": "control_key_id_is_not_media_key_id",
+        "codecConfigControlKeyId": 1,
+        "packetMediaKeyId": 1,
+        "expected": "reject: AES-GCM v2 requires media_key_id 2; control_key_id does not establish the media replay domain"
+      }
+    ]
+  },
   "packet": {
     "type": "AUDIO",
     "senderId": 5678,
