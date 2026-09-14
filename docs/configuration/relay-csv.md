@@ -113,11 +113,21 @@ channel_id,key_id,control_key_base64
 111,1,AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=
 ```
 
-This file contains secret key material. It MUST be stored outside source
-control, readable only by the Relay process identity, and excluded from normal
-configuration exports, diagnostics, and logs. Operators SHOULD use a dedicated
-Control Authentication key rather than a channel password-derived key. The
-control key itself is used according to `../protocol/control-auth.md`.
+For a channel used by standard Control Authentication v1 clients,
+`control_key_base64` MUST be the exact 32-byte `control_key` derived from the
+same channel credential and `channel_id` according to
+`../protocol/control-auth.md`. Operators MUST perform the credential-to-
+`password_key` derivation from `../protocol/security.md`, then the Control
+Authentication HKDF, before Base64-encoding the result for this file.
+
+This file contains the purpose-limited Control Authentication key, not an
+independently provisioned Control Authentication secret. It MUST NOT contain an
+unrelated random key that standard clients cannot derive. It MUST be stored
+outside source control, readable only by the Relay process identity, and excluded
+from normal configuration exports, diagnostics, and logs. The Relay key file
+MUST NOT contain channel credentials, `password_key`, `media_key`, or Directory
+keys. The control key itself is used according to
+`../protocol/control-auth.md`.
 
 ## Management Plane files
 

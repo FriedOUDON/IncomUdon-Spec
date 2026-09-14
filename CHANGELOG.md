@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Clarifies Control Authentication v1 Relay key provisioning: Relay CSV
+  keys are the credential-derived `control_key` values used by standard clients,
+  not independently provisioned random secrets. Documents that `key_id` alone
+  does not rotate key material and defines coordinated credential rotation.
+
 - Fixes Floor Interrupt v1 canonical vectors to carry the required 28-byte
   Control Authentication header and HMAC tag for both `PTT_REQUEST` and the
   Relay-generated `PREEMPTED` `TALK_RELEASE`; adds authentication rejection

@@ -213,9 +213,23 @@ channel_id,key_id,control_key_base64
 100,1,Base64Encoded32ByteControlKey
 ```
 
-The Relay MUST protect this file with owner-only read access. It stores only
-`control_key`, not the channel password or `media_key`. Multiple entries for a
-channel with distinct Key IDs permit key rotation.
+For a channel used by standard Control Authentication v1 clients, every
+`control_key_base64` value MUST be the exact 32-byte `control_key` that those
+clients derive from the configured channel credential and `channel_id` according
+to [Password and key derivation](#password-and-key-derivation). The `key_id`
+selects the provisioned row, but is not an input to the credential KDF or the
+Control Authentication HKDF.
+
+A trusted provisioning step MUST derive this value before it is placed in the
+Relay key file. The Relay key file MUST contain only `control_key`, never the
+channel credential, `password_key`, `media_key`, or another derived channel key.
+Control Authentication v1 does not define an explicit independently provisioned
+Control Authentication secret. An unrelated random 32-byte key is incompatible
+with standard clients and MUST NOT be configured for such a channel. This
+purpose-limited derived key is the Control Authentication dedicated key.
+
+The Relay MUST protect this file with owner-only read access. Multiple entries for
+a channel with distinct Key IDs support coordinated credential rotation.
 
 Relay policy has three modes:
 
@@ -233,9 +247,17 @@ accepted by a Relay in `required` mode.
 ## Key rotation
 
 A Relay MAY hold an old and new Control Key ID simultaneously. Clients select
-the configured Key ID in their profile; the default is `1`. The Relay SHOULD
-accept the old key only for a bounded migration period. Changing a client's
-Control Key ID requires a new authenticated JOIN.
+the configured Key ID and its matching channel credential in their profile; the
+default Key ID is `1`. Because `key_id` is not a KDF input, changing only the
+Key ID while retaining a credential does not rotate cryptographic key material.
+
+A cryptographic Control Authentication key rotation MUST use a distinct channel
+credential and a new Relay row containing the resulting derived `control_key`
+under a new Key ID. The client MUST update both its credential and Key ID before
+its new authenticated JOIN. This also rotates the credential-derived media and
+Directory keys; Control Authentication v1 does not define a control-only
+cryptographic rotation. The Relay SHOULD accept the old derived key only for a
+bounded coordinated migration period.
 
 ## Diagnostics and test requirements
 
