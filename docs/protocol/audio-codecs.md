@@ -64,8 +64,11 @@ deadlines are defined in `playout.md`.
 - Senders SHOULD drop stale frames instead of creating delayed speech.
 - Receivers SHOULD resynchronize near the live edge when jitter-buffer delay
   exceeds their configured limit.
-- A `TALK_RELEASE` flushes decodable queued media and then discards remaining
-  incomplete FEC state.
+- On `TALK_RELEASE` other than `PREEMPTED`, a receiver MUST flush decodable
+  queued media and then discard remaining incomplete FEC state. On
+  `TALK_RELEASE` with reason `PREEMPTED`, it MUST immediately discard unrendered
+  queued media, incomplete FEC state, and decoder ordering state without draining
+  them.
 - Opus in-band FEC receivers retain one 20 ms playout interval to allow
   reconstruction from the following packet.
 

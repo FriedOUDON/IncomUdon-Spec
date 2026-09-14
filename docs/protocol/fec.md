@@ -98,9 +98,12 @@ original length before passing it to the codec decoder.
 Receivers MUST key external FEC state by sender ID, codec configuration, and
 AES-GCM v2 `media_nonce_base_96` when encryption is active.
 They MUST bound FEC state and discard stale blocks rather than increasing
-playout latency without limit. On `TALK_RELEASE`, receivers MUST flush any
-available original or recovered media in sequence order and discard the
-remaining incomplete FEC state.
+playout latency without limit. On `TALK_RELEASE` other than `PREEMPTED`,
+receivers MUST flush any available original or recovered media in sequence
+order and discard the remaining incomplete FEC state. On `TALK_RELEASE` with
+reason `PREEMPTED`, receivers MUST immediately discard pending FEC blocks and
+original or recovered media that has not yet been rendered, without flushing
+them.
 
 ## Opus in-band FEC
 

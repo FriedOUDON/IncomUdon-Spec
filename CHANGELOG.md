@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Defines `PREEMPTED` `TALK_RELEASE` as immediate discard, rather than drain,
+  for queued media and FEC state.
+
 - Introduces `SPEC_VERSION` as the single source of the current specification
   snapshot, normalizes all vector `specVersion` values, and adds CI validation
   for development snapshots and tagged releases.

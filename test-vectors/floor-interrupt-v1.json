@@ -121,5 +121,23 @@
     "PTT_REQUEST with header_len other than 28 or without CONTROL_AUTH_V1 is rejected.",
     "PTT_REQUEST with an invalid Control Authentication tag or replayed nonce is rejected.",
     "PREEMPTED TALK_RELEASE with header_len other than 28 or an invalid Control Authentication tag is rejected."
+  ],
+  "receiver_release_cases": [
+    {
+      "name": "preempted_release_discards_not_drains",
+      "release_reason": "PREEMPTED",
+      "queued_unrendered_media_frames": 4,
+      "pending_fec_blocks": 1,
+      "recovered_not_rendered_frames": 1,
+      "expected": {
+        "fade_out_max_ms": 20,
+        "drain_queued_media": false,
+        "discard_unrendered_media": true,
+        "discard_pending_fec_blocks": true,
+        "discard_recovered_not_rendered_media": true,
+        "suppress_end_of_talk_cue": true,
+        "delay_replacement_talker": false
+      }
+    }
   ]
 }

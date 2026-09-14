@@ -149,8 +149,8 @@ source network addresses.
 6. Equal or lower priority requests are denied without ending any active talk.
 7. A full multi-talk channel replaces exactly one deterministically selected
    lowest-priority talker.
-8. Receivers flush only the preempted talker's unrendered audio and do not play
-   an end-of-talk cue for it.
+8. Receivers discard only the preempted talker's unrendered audio and do not
+   play an end-of-talk cue for it.
 9. A duplicate request from an already granted talker does not preempt another
    talker or extend its current talk deadline.
 10. `PTT_REQUEST` is rejected when its Control Authentication header, tag, or
