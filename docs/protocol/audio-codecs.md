@@ -8,8 +8,11 @@
 | `0x01` | Codec2 | one of 450, 700, 1600, 2400, 3200 bps |
 | `0x02` | Opus | one of 6000, 8000, 12000, 16000, 20000, 64000, 96000, 128000 bps |
 
-Unsupported mode values are normalized to the nearest supported value by the
-current PWA implementation. New clients SHOULD transmit only listed values.
+The `CODEC_CONFIG` codec mode/bitrate field is an exact `u32` bitrate in bps.
+Senders MUST transmit only a listed value for the selected non-PCM codec and
+MUST NOT clamp or truncate it to a smaller integer width. Receivers MUST reject
+an unsupported non-PCM codec mode/bitrate instead of normalizing it to a
+nearby value.
 
 `Opus (in-band FEC)` is a profile/UI mode, not a new transport codec ID. It
 uses transport ID `0x02` and advertises its FEC behavior through
@@ -44,7 +47,7 @@ MUST be accepted as an unsequenced PCM frame. Modern PCM carries 322 bytes:
 two sequence bytes followed by the 320-byte PCM frame.
 
 Codec2 and Opus frames use the negotiated codec configuration. For AES-GCM v2,
-a receiver MUST accept media only after the matching authenticated 17-byte
+a receiver MUST accept media only after the matching authenticated 19-byte
 `CODEC_CONFIG` has established its `(sender_id, key_id, media_nonce_base_96)`
 replay domain. Receivers MUST maintain codec state by sender ID, not merely by
 channel ID.

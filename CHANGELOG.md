@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Expands the coordinated-release `CODEC_CONFIG` codec mode/bitrate field to
+  a 32-bit big-endian bps value. The authenticated configuration payload is
+  now 19 bytes, so Opus 96 kbps and 128 kbps are represented without
+  truncation; packet vectors cover 128 kbps explicitly.
+
 - Defines Relay Operational CSV Configuration v1: UTF-8/RFC 4180 parsing,
   Directory channel/speaker metadata, Control Authentication key rows, and
   optional Management Plane service and channel ACL inputs with atomic reload,

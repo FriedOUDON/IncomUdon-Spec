@@ -20,7 +20,7 @@ resampler state separate for each sender ID, then mix eligible output under
    `SERVICE_ADMISSION_CHALLENGE`, and `SERVICE_ADMISSION_PROOF` when Managed
    Service Admission is enabled. Then send authenticated `JOIN` to register
    the observed UDP source endpoint. Otherwise send `JOIN`.
-2. Send authenticated 17-byte `CODEC_CONFIG` before the first media frame for
+2. Send authenticated 19-byte `CODEC_CONFIG` before the first media frame for
    a sender. For AES-GCM v2 it announces the fresh media nonce base and
    establishes the receiver replay domain.
 3. Send ordinary `PTT_ON`, or authorized `PTT_REQUEST` for Floor Interrupt;

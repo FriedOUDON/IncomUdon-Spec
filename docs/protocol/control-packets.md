@@ -56,15 +56,20 @@ other receivers' playout state or extend the server-managed talk deadline.
 
 ## Codec configuration
 
-The first coordinated client release uses this 17-byte payload:
+The first coordinated client release uses this 19-byte payload:
 
 | Offset | Bytes | Field |
 |---:|---:|---|
 | 0 | 1 | flags; bit 0 is `pcm_only` |
 | 1 | 1 | codec transport ID |
-| 2 | 2 | codec mode/bitrate (`u16`, big-endian) |
-| 4 | 1 | FEC options |
-| 5 | 12 | `media_nonce_base_96` |
+| 2 | 4 | codec mode/bitrate in bps (`u32`, big-endian) |
+| 6 | 1 | FEC options |
+| 7 | 12 | `media_nonce_base_96` |
+
+The codec mode/bitrate field carries the exact codec-specific bitrate in bps.
+A sender MUST encode a listed bitrate without unit conversion, clamping, or
+truncation. A receiver MUST reject a non-PCM `CODEC_CONFIG` whose codec ID or
+bitrate is unsupported locally. For PCM, receivers MUST ignore this field.
 
 For `aes-gcm-v2`, `media_nonce_base_96` MUST be a newly CSPRNG-generated,
 non-zero media session base and MUST match every subsequent encrypted `AUDIO`
@@ -94,7 +99,7 @@ It MUST apply FEC state separately for each sender ID.
 The historical three-, four-, and five-byte `CODEC_CONFIG` forms are not
 required for the first coordinated release because all clients are migrated
 together. Implementations may retain historical decoding as a local
-compatibility option, but MUST transmit the 17-byte form described above.
+compatibility option, but MUST transmit the 19-byte form described above.
 
 ## Server configuration
 

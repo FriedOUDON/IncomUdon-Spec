@@ -155,7 +155,7 @@ replay window for every media replay domain:
 ```
 
 A receiver creates a domain only after accepting the matching authenticated
-17-byte `CODEC_CONFIG`; the configuration's `media_nonce_base_96` binds the
+19-byte `CODEC_CONFIG`; the configuration's `media_nonce_base_96` binds the
 sender's announced session to its codec state. It MUST reject encrypted media
 whose base has not been announced for that sender/key/codec configuration.
 When a newly accepted configuration changes the base, the receiver MUST discard
