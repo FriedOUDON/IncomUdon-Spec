@@ -12,6 +12,8 @@
     "fec-v2-reorder",
     "fec-v2-late-original",
     "fec-v2-short-final",
+    "fec-v2-final-order",
+    "fec-v2-final-reorder",
     "fec-v2-release-incomplete",
     "fec-v2-oversize"
   ],

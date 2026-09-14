@@ -26,9 +26,11 @@ resampler state separate for each sender ID, then mix eligible output under
 3. Send ordinary `PTT_ON`, or authorized `PTT_REQUEST` for Floor Interrupt;
    wait for `TALK_GRANT` before treating media as authorized.
 4. Send `AUDIO` and optional `FEC` while granted and before any Relay-enforced
-   talk deadline.
-5. Send `PTT_OFF`; the Relay broadcasts `TALK_RELEASE`. The Relay may instead
-   release the talk at its server-managed deadline or on membership expiry.
+   talk deadline. On local PTT release, submit any final AUDIO and final FEC P/Q
+   block before `PTT_OFF`, as defined in `fec.md`.
+5. Send `PTT_OFF`; the Relay broadcasts `TALK_RELEASE` without waiting for
+   reordered final parity. The Relay may instead release the talk at its
+   server-managed deadline or on membership expiry.
 6. Send `KEEPALIVE` while idle and `LEAVE` during a clean disconnect.
 
 A joining client receives `SERVER_CONFIG`. If talkers are already active, the

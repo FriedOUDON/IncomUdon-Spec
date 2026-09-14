@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Defines FEC v2 final-block termination ordering: final AUDIO and P/Q parity
+  are sent before `PTT_OFF`; a Relay releases immediately on `PTT_OFF` and
+  treats reordered final parity as ordinary loss. Adds ordering and reorder
+  fault-injection cases.
+
 - Clarifies Control Authentication v1 Relay key provisioning: Relay CSV
   keys are the credential-derived `control_key` values used by standard clients,
   not independently provisioned random secrets. Documents that `key_id` alone

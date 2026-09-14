@@ -30,6 +30,27 @@ frame. When a talker releases PTT, an incomplete final group MUST also be
 emitted using its actual `block_size`, from 1 through 6. Both P and Q parity
 packets MUST be emitted for every complete and short final block.
 
+### PTT release ordering
+
+On local PTT release, a sender MUST finalize its current source frame, if any,
+and then close the active FEC group before signalling floor release. For an
+incomplete final group, it MUST submit datagrams to its UDP socket in this order:
+
+```text
+final AUDIO (if any) -> final FEC P -> final FEC Q -> PTT_OFF
+```
+
+The sender MUST submit both final parity packets before `PTT_OFF`, and MUST NOT
+submit additional AUDIO or FEC for that grant after `PTT_OFF`. P parity MUST be
+submitted before Q parity for deterministic capture and test behavior.
+
+UDP does not preserve datagram arrival order. A Relay processes `PTT_OFF` as the
+grant termination boundary and MUST NOT delay `TALK_RELEASE` or retain a grant
+while waiting for final parity. It MUST discard AUDIO or FEC that arrives after
+it processes `PTT_OFF` for that grant. Therefore, a final P or Q packet reordered
+behind `PTT_OFF` is treated as ordinary parity loss. This loss MUST NOT reopen or
+extend the grant, delay a release, or delay a subsequent floor grant.
+
 Unlike FEC v1, FEC v2 supports variable-size frames. Each codec frame is
 zero-padded to the greatest frame length in the block before parity is formed.
 The original frame lengths are carried in every parity packet.
@@ -141,7 +162,9 @@ in `playout.md`.
 
 `../../test-vectors/fec-v2-variable-6-2.json` is the deterministic
 interoperability vector for FEC v2. It covers variable-size frames, one-frame
-recovery, two-frame recovery, and a short final PTT block.
+recovery, two-frame recovery, and a short final PTT block. `fec-testing.md`
+additionally verifies final-block send ordering and the permitted loss of parity
+that UDP reorders behind `PTT_OFF`.
 
 All supported clients MUST run the common fault-injection cases defined in
 `fec-testing.md` before declaring FEC v2 interoperability.

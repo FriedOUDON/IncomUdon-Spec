@@ -68,6 +68,11 @@ processed for that grant and ignores later termination events. A duplicate
 `PTT_OFF` or `LEAVE` after release MUST be harmless and MUST NOT generate a
 second release broadcast.
 
+For a client-initiated release with external FEC v2 enabled, the client MUST
+submit its final AUDIO and final P/Q parity before `PTT_OFF` as defined in
+`fec.md`. Once the Relay processes `PTT_OFF`, it MUST release the grant without
+waiting for final parity and MUST discard later AUDIO or FEC for that grant.
+
 ## Floor-control interaction
 
 A `PTT_ON` received from an already granted sender remains idempotent: the

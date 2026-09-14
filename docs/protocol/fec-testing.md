@@ -25,6 +25,8 @@ fail a case if recovery requires replaying a media interval already rendered.
 | `fec-v2-reorder` | Deliver one or both parity packets before delayed audio frames. | Preserve sequence order, recover when possible, and keep bounded state. |
 | `fec-v2-late-original` | Recover a missing frame, then deliver its original late. | Do not render the interval twice. |
 | `fec-v2-short-final` | Send a PTT-final block of 1 through 5 frames with P and Q. | Parse its actual block size and recover up to two losses when mathematically possible. |
+| `fec-v2-final-order` | Locally release PTT with an incomplete final block. | Submit final AUDIO, P, Q, then `PTT_OFF` in that order; the Relay forwards the accepted final parity before release. |
+| `fec-v2-final-reorder` | Deliver final P, then `PTT_OFF`, then final Q to the Relay. | Process release without delay; discard Q as post-release parity and do not reopen or extend the grant. |
 | `fec-v2-release-incomplete` | Release talk before parity is received for a non-final incomplete block. | Flush available original audio and discard stale FEC state without unbounded delay. |
 | `fec-v2-oversize` | Advertise a frame length greater than `MAX_MEDIA_FRAME_BYTES`. | Reject the FEC block without allocating an over-limit buffer. |
 
