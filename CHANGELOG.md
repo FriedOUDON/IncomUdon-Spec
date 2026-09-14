@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Defines Managed Service Admission v1 natural expiry: effective membership
+  deadlines, receive-only grace limits, `SERVICE_ADMISSION_EXPIRED` release
+  reason `0x08`, renewal races, and deterministic expiry cases.
+
 - Defines FEC v2 final-block termination ordering: final AUDIO and P/Q parity
   are sent before `PTT_OFF`; a Relay releases immediately on `PTT_OFF` and
   treats reordered final parity as ordinary loss. Adds ordering and reorder

@@ -133,7 +133,8 @@ Authentication counters and MUST NOT reset an active PTT deadline.
 A Recorder Worker SHOULD renew at no later than half the granted lifetime. A
 Relay MUST NOT obtain or renew a grant itself.
 
-An existing receive-only service membership MAY remain until
+A receive-only service has `perm = 1` (`listen` only), with neither `talk` nor
+`interrupt`. An existing receive-only service membership MAY remain until
 `exp + grace_seconds` only when all of the following hold:
 
 1. `grace_seconds` is present and non-zero;
@@ -141,6 +142,30 @@ An existing receive-only service membership MAY remain until
 3. membership and source endpoint remained continuous from before `exp`;
 4. the Relay has not restarted and membership did not expire; and
 5. the grant was not revoked.
+
+A grant with `talk` or `interrupt` MUST NOT use this grace. Its service
+admission deadline is exactly `exp`.
+
+### Natural expiry
+
+The service admission deadline is `exp`, except that a continuous
+receive-only membership satisfying every grace condition above has a deadline of
+`exp + grace_seconds`. The effective membership expiry is the earlier of this
+service admission deadline and the normal membership deadline.
+
+At effective membership expiry, the Relay MUST invalidate the matching
+service-admitted state and remove membership. This is natural expiry, not
+revocation. If the endpoint is actively talking, the Relay MUST immediately stop
+forwarding AUDIO and FEC, then broadcast `TALK_RELEASE` with reason
+`SERVICE_ADMISSION_EXPIRED`. A receive-only service cannot be actively talking;
+when its grace deadline is reached, the Relay removes its membership without a
+talk release.
+
+A renewal that completes before the effective membership expiry replaces the
+current admission state without resetting an active PTT deadline. When renewal
+and expiry race, the Relay uses the first event it processes. If expiry is
+processed first, the endpoint is no longer a member and a later valid grant must
+complete the normal service-admission and JOIN flow.
 
 An expired grant MUST NOT authorize a new JOIN, source-endpoint change,
 privilege increase, or fresh service-admission flow. A Relay MUST NOT extend
@@ -200,4 +225,7 @@ a signed grant, a begin payload, a challenge, and a proof.
 `../../../test-vectors/management/service-admission-control-auth-v1.json`
 defines the required client-to-Relay Control Authentication counter sequence.
 Implementations that support Managed Service Admission v1 MUST verify the
-grant, proof, and counter sequence before claiming compatibility.
+grant, proof, and counter sequence before claiming compatibility. They MUST also
+verify the grant-expiry cases: expiry of a talk-capable service removes membership
+and releases an active talker with `SERVICE_ADMISSION_EXPIRED`; receive-only
+grace cannot exceed `exp + grace_seconds` or a normal membership deadline.
