@@ -83,9 +83,10 @@ selected by its media security mode (`2` for AES-GCM v2). The
 `control_key_id` in the Control Authentication header authenticates this
 configuration but MUST NOT be used as its media replay-domain key ID.
 
-For `no-crypto`, `legacy-xor`, and legacy `aes-gcm`, bytes 5 through 16 MUST
-be all zero and receivers MUST ignore them. They remain present so the payload
-length is unambiguous across the coordinated release.
+For `no-crypto`, `legacy-xor`, and legacy `aes-gcm`, the 12-byte
+`media_nonce_base_96` field (bytes 7 through 18) MUST be all zero and
+receivers MUST ignore it. It remains present so the payload length is
+unambiguous across the coordinated release.
 
 FEC option bits are:
 
