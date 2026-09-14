@@ -6,7 +6,7 @@
 |---:|---|---|
 | `0x00` | PCM | ignored; clients display no bitrate |
 | `0x01` | Codec2 | one of 450, 700, 1600, 2400, 3200 bps |
-| `0x02` | Opus | one of 6000, 8000, 12000, 16000, 20000, 64000, 96000, 128000 bps |
+| `0x02` | Opus | one of 6000, 8000, 12000, 16000, 20000, 24000, 64000, 96000, 128000 bps |
 
 The `CODEC_CONFIG` codec mode/bitrate field is an exact `u32` bitrate in bps.
 Senders MUST transmit only a listed value for the selected non-PCM codec and

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Adds the registered Opus `24000` bps mode, aligns the 24 kbps FEC
+  recommendation, and adds a canonical `CODEC_CONFIG` packet vector.
+
 - Limits Directory UDP v1 and v2 JSON-number `sequence` and `expiresAt`
   values to positive JavaScript-safe integers, preserving exact cross-language
   `U64BE` nonce and AAD encoding without lossless JSON extensions.

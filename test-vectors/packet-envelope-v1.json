@@ -17,6 +17,13 @@
       "notes": "19-byte CODEC_CONFIG proves the u32 bitrate field carries an Opus value above u16 range."
     },
     {
+      "name": "no_crypto_codec_config_opus_24000",
+      "fields": {"version": 1, "type": "CODEC_CONFIG", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 45, "flags": 0},
+      "payloadHex": "000200005dc000000000000000000000000000",
+      "datagramHex": "010b00100000006f000003ea002d0000000200005dc000000000000000000000000000",
+      "notes": "19-byte CODEC_CONFIG for the registered Opus 24 kbps mode."
+    },
+    {
       "name": "no_crypto_ptt_on",
       "fields": {"version": 1, "type": "PTT_ON", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 43, "flags": 0},
       "payloadHex": "",

@@ -151,6 +151,10 @@ latency budget.
 | Opus 24 kbps or higher | No FEC by default; consider external parity FEC on measured loss-prone links |
 | PCM / Codec2 | External parity FEC when loss protection is required |
 
+The Opus 24 kbps recommendation uses the registered `24000` bps mode.
+Opus in-band FEC remains selectable there only as an effectiveness-not-guaranteed
+option.
+
 External parity FEC adds two parity packets for each block of up to six audio
 frames. Opus in-band FEC trades part of the configured Opus bitrate for
 redundancy. Implementations SHOULD expose these trade-offs to users.
