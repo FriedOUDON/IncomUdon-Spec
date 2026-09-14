@@ -107,9 +107,11 @@ U64BE(sequence) || U64BE(expiresAt)
 
 Receivers MUST enforce the exact envelope schema, channel ID range, epoch
 size, expiration, allowed direction/type combination, AEAD authentication tag,
-and replay sequence before accepting a payload. A Relay MUST bind dynamic
-registrations to the observed UDP source address, never to an address in a
-payload.
+and replay sequence before accepting a payload. Envelope `sequence` and
+`expiresAt` are unsigned 64-bit integers and MUST be in the inclusive range
+1 through 18446744073709551615 so they can be encoded as `U64BE`. A Relay
+MUST bind dynamic registrations to the observed UDP source address, never to
+an address in a payload.
 
 ### Payload scope
 
@@ -175,6 +177,10 @@ Its AAD is the concatenation of:
 U8(v) || U8(len(type)) || type || U8(len(keyId)) || keyId || epoch ||
 U64BE(sequence) || U64BE(expiresAt)
 ```
+
+The v1 `sequence` and `expiresAt` fields are unsigned 64-bit integers
+in the inclusive range 1 through 18446744073709551615 and MUST be
+representable as `U64BE`.
 
 The v1 `snapshot` may contain configured data across channels. Its use is
 therefore appropriate only when that visibility is intended. See

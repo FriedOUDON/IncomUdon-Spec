@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Aligns Directory UDP v1 and v2 JSON Schema integer bounds with their
+  `U64BE` AAD and nonce fields, rejecting `sequence` or `expiresAt` values
+  outside the unsigned 64-bit range.
+
 - Clarifies Multi-Talker Mixing receiver conformance: 16 concurrent sources
   define the full-mix-capable profile, while resource-constrained receivers
   may enforce a lower deterministic local limit with visible diagnostics.
