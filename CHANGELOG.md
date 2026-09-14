@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Adds canonical paginated `GET /audit-records` retrieval for redacted
+  Management Plane audit records.
+
 - Defines `PREEMPTED` `TALK_RELEASE` as immediate discard, rather than drain,
   for queued media and FEC state.
 

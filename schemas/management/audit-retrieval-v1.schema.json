@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://friedoudon.github.io/incomudon-spec/schemas/management/audit-retrieval-v1.schema.json",
+  "title": "IncomUdon Management Plane audit retrieval v1 page",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "records",
+    "next_cursor"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "audit-retrieval-v1"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/auditRecord"
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "u32": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "auditRecord": {
+      "type": "object",
+      "required": [
+        "record_id",
+        "timestamp",
+        "service_id",
+        "channel_id",
+        "action",
+        "result"
+      ],
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "service_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "channel_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/u32"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "action": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "result": {
+          "enum": [
+            "success",
+            "denied",
+            "failed"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

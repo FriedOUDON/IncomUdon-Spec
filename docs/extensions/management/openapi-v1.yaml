@@ -66,6 +66,58 @@ paths:
                     items: { $ref: '#/components/schemas/Participant' }
                 additionalProperties: false
         '403': { $ref: '#/components/responses/Forbidden' }
+  /audit-records:
+    get:
+      operationId: listAuditRecords
+      summary: List retained redacted audit records visible to the authenticated service.
+      description: |
+        This is a paginated, read-only audit-retrieval resource. It is distinct
+        from the SSE /events stream. The caller requires the auditor operation for
+        each returned channel, or an explicitly configured global audit permission
+        for records whose channel_id is null.
+      parameters:
+        - name: channel_id
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/U32' }
+        - name: since
+          in: query
+          required: false
+          description: Inclusive RFC 3339 UTC lower timestamp bound.
+          schema: { type: string, format: date-time }
+        - name: until
+          in: query
+          required: false
+          description: Exclusive RFC 3339 UTC upper timestamp bound.
+          schema: { type: string, format: date-time }
+        - name: action
+          in: query
+          required: false
+          schema: { type: string, pattern: '^[a-z][a-z0-9_]{0,63}$' }
+        - name: result
+          in: query
+          required: false
+          schema: { enum: [success, denied, failed] }
+        - name: cursor
+          in: query
+          required: false
+          description: Opaque continuation token bound to the authenticated service and filters.
+          schema: { type: string, minLength: 1, maxLength: 512 }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 1000, default: 100 }
+      responses:
+        '200':
+          description: Audit records ordered newest first with a stable record_id tie-breaker.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditRecordPage' }
+        '400':
+          description: Invalid time range, filter, or cursor/filter combination.
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '410':
+          description: Requested audit cursor is no longer retained; start a new query.
   /events:
     get:
       operationId: streamEvents
@@ -182,7 +234,7 @@ components:
       schema: { $ref: '#/components/schemas/U32' }
   responses:
     Forbidden:
-      description: The mTLS identity lacks the required channel-scoped permission.
+      description: The mTLS identity lacks the required Management Plane permission.
   schemas:
     U32:
       type: integer
@@ -201,4 +253,30 @@ components:
       properties:
         sender_id: { $ref: '#/components/schemas/U32' }
         state: { enum: [joined, talking, idle] }
+      additionalProperties: false
+    AuditRecord:
+      type: object
+      required: [record_id, timestamp, service_id, channel_id, action, result]
+      properties:
+        record_id: { type: string, minLength: 1, maxLength: 128 }
+        timestamp: { type: string, format: date-time }
+        service_id: { type: string, minLength: 1, maxLength: 128 }
+        channel_id:
+          oneOf:
+            - { $ref: '#/components/schemas/U32' }
+            - { type: 'null' }
+        action: { type: string, pattern: '^[a-z][a-z0-9_]{0,63}$' }
+        result: { enum: [success, denied, failed] }
+      additionalProperties: false
+    AuditRecordPage:
+      type: object
+      required: [records, next_cursor]
+      properties:
+        records:
+          type: array
+          items: { $ref: '#/components/schemas/AuditRecord' }
+        next_cursor:
+          oneOf:
+            - { type: string, minLength: 1, maxLength: 512 }
+            - { type: 'null' }
       additionalProperties: false

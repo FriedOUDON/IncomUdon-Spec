@@ -1,0 +1,23 @@
+{
+  "specVersion": "unreleased",
+  "schema_version": "audit-retrieval-v1",
+  "query": {
+    "channel_id": 111,
+    "since": "2026-09-15T00:00:00Z",
+    "until": "2026-09-16T00:00:00Z",
+    "action": "recording_start",
+    "result": "success",
+    "limit": 100
+  },
+  "records": [
+    {
+      "record_id": "audit-000000000042",
+      "timestamp": "2026-09-15T12:34:56Z",
+      "service_id": "recorder-01",
+      "channel_id": 111,
+      "action": "recording_start",
+      "result": "success"
+    }
+  ],
+  "next_cursor": "audit-cursor-example-0001"
+}

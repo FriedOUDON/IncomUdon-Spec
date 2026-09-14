@@ -50,7 +50,10 @@ The external Management API uses HTTPS over TCP. It provides:
 - JSON request and response bodies encoded as UTF-8.
 
 `docs/extensions/management/openapi-v1.yaml` defines the initial HTTP contract.
+`GET /audit-records` is the canonical paginated read API for retained audit records;
+it is distinct from the transient redacted SSE `/events` stream.
 `schemas/management/management-event-v1.schema.json` defines the common event envelope.
+`schemas/management/audit-retrieval-v1.schema.json` defines the audit retrieval page.
 Management APIs MUST use explicit `/v1/` versioning and MUST NOT return channel
 passwords, derived keys, media plaintext, OIDC credentials, or client certificate private keys. The grant-issuance endpoint is the only API response permitted to return a Service Admission Grant; it MUST use `Cache-Control: no-store`, and grants MUST NOT appear in logs, audit records, or event streams.
 
@@ -101,7 +104,7 @@ an administrator explicitly grants it.
 | `viewer` | Read health, channel state, participant state, and events for allowed channels. |
 | `recorder` | `viewer` operations plus recording-job lifecycle and Managed Service Admission with receive-only permissions. |
 | `operator` | `viewer` operations plus explicitly configured channel operations. |
-| `auditor` | Read retained audit records and redacted events only. |
+| `auditor` | Read retained audit records and redacted events for explicitly authorized channels; unscoped records require an explicit global audit permission. |
 | `admin` | Manage Management Plane ACLs and signing-key configuration. |
 
 The initial `recorder` role MUST NOT grant PTT, media transmission, ordinary
@@ -191,6 +194,35 @@ Management API controls recording jobs and reports their state; it MUST NOT
 place channel credentials or media keys in ordinary API responses. See
 `recording-integration.md`.
 
+## Audit retrieval
+
+`GET /audit-records` is a canonical, read-only Management Plane v1 resource.
+It MUST require the `auditor` operation in the authenticated mTLS ACL. For a
+channel-scoped record, the service MUST also be authorized for that channel.
+For a record with `channel_id = null`, the service MUST have an explicitly
+configured global audit permission; a certificate MUST NOT gain global audit
+access implicitly.
+
+The Management Service MUST durably retain redacted audit records for its
+documented deployment retention period. Records are append-only through the
+v1 API: no endpoint may modify or delete them. Each returned record MUST
+contain an opaque `record_id`, RFC 3339 UTC `timestamp`, actor `service_id`,
+nullable `channel_id`, `action`, and `result`. It MUST NOT contain channel
+passwords, derived keys, admission grants, certificate contents, source
+addresses, media payloads, or unredacted request bodies.
+
+The endpoint returns records newest first, using `record_id` as a stable
+tie-breaker. It accepts optional `channel_id`, inclusive `since`, exclusive
+`until`, `action`, `result`, `limit`, and opaque `cursor` query parameters.
+`limit` defaults to 100 and MUST NOT exceed 1000. A cursor MUST be bound to
+the authenticated service and query filters. A changed filter or invalid time
+range MUST return `400`; a cursor outside the retained window MUST return
+`410 Gone`; an unauthorized requested channel MUST return `403`.
+
+`/events` remains an SSE lifecycle feed and MUST NOT be used as an audit
+record substitute. Audit retrieval is pull-based and paginated so it can
+safely support long-lived organization-operated audit consumers.
+
 ## Audit and non-goals
 
 Grant issuance, grant renewal, revocation, recording start/stop, ACL changes,
@@ -219,3 +251,7 @@ management extension. Those functions require separate versioned proposals.
 8. API responses, SSE events, audit records, and normal Relay logs contain no
    channel password, derived key, admission grant, certificate private key,
    or media payload.
+9. An `auditor` retrieves only records for explicitly authorized channels; a
+   request for another channel is rejected.
+10. Audit pagination is stable, and an audit cursor outside the retained window
+    returns `410 Gone` rather than silently skipping history.
