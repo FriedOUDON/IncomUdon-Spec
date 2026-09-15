@@ -54,6 +54,9 @@ The external Management API uses HTTPS over TCP. It provides:
 it is distinct from the transient redacted SSE `/events` stream.
 `schemas/management/management-event-v1.schema.json` defines the common event envelope.
 `schemas/management/audit-retrieval-v1.schema.json` defines the audit retrieval page.
+Every `GET /audit-records` response MUST include
+`schema_version: "audit-retrieval-v1"`; the OpenAPI `AuditRecordPage` schema
+and JSON Schema define the same canonical response object.
 Management APIs MUST use explicit `/v1/` versioning and MUST NOT return channel
 passwords, derived keys, media plaintext, OIDC credentials, or client certificate private keys. The grant-issuance endpoint is the only API response permitted to return a Service Admission Grant; it MUST use `Cache-Control: no-store`, and grants MUST NOT appear in logs, audit records, or event streams.
 

@@ -285,8 +285,11 @@ components:
       additionalProperties: false
     AuditRecordPage:
       type: object
-      required: [records, next_cursor]
+      required: [schema_version, records, next_cursor]
       properties:
+        schema_version:
+          type: string
+          const: audit-retrieval-v1
         records:
           type: array
           items: { $ref: '#/components/schemas/AuditRecord' }

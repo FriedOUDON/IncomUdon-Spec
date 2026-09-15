@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Aligns the Management Plane `AuditRecordPage` OpenAPI response with its JSON
+  Schema by requiring `schema_version: "audit-retrieval-v1"`.
 - Defines Relay-advertised membership leases, idle keepalive cadence, explicit
   refresh-eligible packet classes, and independent PING/PONG liveness timing.
 - Requires Relays to reauthenticate verified `CODEC_CONFIG` payloads as fresh
