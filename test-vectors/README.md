@@ -22,6 +22,7 @@ MUST NOT be used in production.
 | `identity-admission-v1.json` | Ed25519 JWS ticket, proof-of-possession, and denial payloads |
 | `management/service-admission-v1.json` | Managed Service Admission Ed25519 JWS grant, proof-of-possession, and denial payloads |
 | `management/service-admission-control-auth-v1.json` | Managed Service Admission pre-JOIN Control Authentication counter sequence |
+| `management/event-stream-resume-v1.json` | SSE cursor precedence and role-aware `410 Gone` recovery |
 | `configuration/relay-csv-v1.json` | Relay Directory, Control Authentication, and Management Plane CSV parser fixture |
 | `mtu-v1.json` | MTU-safe AUDIO and FEC v2 datagram budget cases |
 | `multi-talker-mixing-v1.json` | Concurrent-talker gain, limiter, transition, and source-limit cases |

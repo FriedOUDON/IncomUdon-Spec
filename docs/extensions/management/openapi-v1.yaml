@@ -149,7 +149,7 @@ paths:
           description: Selected since or Last-Event-ID cursor is malformed.
         '403': { $ref: '#/components/responses/Forbidden' }
         '410':
-          description: Selected event cursor is unknown, belongs to another Management Service instance, or is no longer retained; fetch a fresh snapshot.
+          description: Selected event cursor is unknown, belongs to another Management Service instance, or is no longer retained. Discard it; viewer-authorized callers refresh participant snapshots, while auditor-only callers record a gap and reconnect without a cursor.
   /service-admission-grants:
     post:
       operationId: issueServiceAdmissionGrant

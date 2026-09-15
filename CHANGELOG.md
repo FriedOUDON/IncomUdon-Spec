@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Defines role-aware Management SSE `410 Gone` recovery: viewer-authorized
+  callers refresh participant snapshots, while auditor-only callers record the
+  explicit event-history gap and reconnect cursor-free without gaining viewer
+  state access.
+
 - Defines Relay Control Authentication counter exhaustion handling: a Relay
   rotates to a fresh non-zero instance ID after allocating `0xffffffff`, never
   wraps or reuses the retired nonce domain, and clients create a separate

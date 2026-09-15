@@ -62,6 +62,18 @@
       ]
     },
     {
+      "name": "auditor_only_participant_snapshot_is_denied",
+      "operation": "GET /channels/{channel_id}/participants",
+      "service_id": "auditor-01",
+      "target_channel_id": 100,
+      "channel_roles": {
+        "100": [
+          "auditor"
+        ]
+      },
+      "expected": "deny"
+    },
+    {
       "name": "health_requires_explicit_global_permission",
       "operation": "GET /health",
       "service_id": "recorder-01",

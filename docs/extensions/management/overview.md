@@ -68,16 +68,32 @@ to one Management Service instance.
 `since` is an optional query parameter for an initial connection or an
 explicit historical replay. `Last-Event-ID` is the authoritative resume cursor
 for SSE reconnection. Both cursors are exclusive: when either is selected, the
-first replay candidate is the first retained event ordered after that cursor. Clients
-SHOULD omit `since` when reconnecting an established stream.
+first replay candidate is the first retained event ordered after that cursor. A
+request with neither cursor starts a live stream and MUST NOT imply historical
+replay. Clients SHOULD omit `since` when reconnecting an established stream.
 
 If both `Last-Event-ID` and `since` are present, the Management Service MUST
 use `Last-Event-ID` and MUST ignore `since`. A malformed cursor MUST return
 `400 Bad Request`. A syntactically valid cursor that is unknown, belongs to a
 different Management Service instance, or is no longer retained MUST return
-`410 Gone`; the service MUST NOT silently start from the newest event. Callers
-that receive `410 Gone` fetch a fresh participant snapshot before opening a
-new stream.
+`410 Gone`; the service MUST NOT silently start from the newest event. A caller
+that receives `410 Gone` MUST discard the expired cursor before opening a new
+stream. It MUST then resynchronize according to its authorized scope:
+
+- For every channel where the caller has `viewer` scope, it MUST fetch a fresh
+  participant snapshot before opening a cursor-free live stream.
+- For a channel visible only through `auditor` scope, a participant snapshot is
+  neither required nor authorized. The caller MUST record that the SSE history
+  is discontinuous for that channel, and MAY retrieve retained authorized audit
+  records through `GET /audit-records`; audit retrieval does not reconstruct
+  omitted redacted events.
+- An auditor-only caller MUST NOT be required to call a viewer-only state
+  resource to recover. It records the discontinuity and opens a new stream
+  without `Last-Event-ID` or `since`, receiving only subsequently emitted
+  authorized events.
+
+This recovery rule preserves the viewer/auditor information boundary while
+making the loss of a retained SSE cursor explicit.
 
 ## mTLS and service identity
 

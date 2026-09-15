@@ -42,13 +42,43 @@
       "expected_status": 400
     },
     {
-      "name": "unavailable_selected_cursor_requires_resynchronization",
+      "name": "unavailable_selected_cursor_viewer_resynchronizes_from_snapshot",
       "request": {
         "last_event_id": "150"
       },
+      "caller_channel_roles": ["viewer"],
       "cursor_state": "different_management_service_instance",
       "expected_status": 410,
-      "required_client_action": "fetch_fresh_participant_snapshot"
+      "required_client_actions": [
+        "discard_expired_cursor",
+        "fetch_fresh_participant_snapshot",
+        "open_cursor_free_live_stream"
+      ]
+    },
+    {
+      "name": "unavailable_selected_cursor_auditor_only_resynchronizes_without_snapshot",
+      "request": {
+        "last_event_id": "150"
+      },
+      "caller_channel_roles": ["auditor"],
+      "cursor_state": "no_longer_retained",
+      "expected_status": 410,
+      "forbidden_client_actions": [
+        "fetch_participant_snapshot"
+      ],
+      "required_client_actions": [
+        "discard_expired_cursor",
+        "record_event_history_discontinuity",
+        "open_cursor_free_live_stream"
+      ],
+      "optional_client_actions": [
+        "retrieve_authorized_audit_records"
+      ],
+      "expected_recovery_stream": {
+        "request": {},
+        "replay": "none",
+        "event_scope": "subsequently_emitted_authorized_events_only"
+      }
     }
   ]
 }
