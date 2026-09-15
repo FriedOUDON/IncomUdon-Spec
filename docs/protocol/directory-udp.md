@@ -191,6 +191,10 @@ maintain a 64-entry sliding window of authenticated accepted `sequence` values:
 - an unseen sequence within the window is accepted to tolerate UDP reordering;
 - a duplicate sequence or a sequence older than the window is rejected.
 
+For a high watermark `H`, the 64-entry window includes `H - 63` through `H`,
+inclusive. A candidate `S` is stale when `S < H - 63`; equivalently, accepted
+in-window values have `0 <= H - S <= 63` before duplicate checking.
+
 A sender MUST use each sequence at most once in its replay domain. All fragments
 of one data response use the same epoch, distinct sequences, common
 `issuedAt`/`expiresAt`, and ascending fragment indexes. The sender MUST NOT

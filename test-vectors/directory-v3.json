@@ -222,15 +222,15 @@
   ],
   "replayWindowCases": [
     {
-      "name": "accepts_reordered_sequence_inside_window",
+      "name": "accepts_oldest_sequence_inside_window",
       "acceptedHighWatermark": 100,
-      "candidateSequence": 38,
+      "candidateSequence": 37,
       "expected": "accept_unseen_sequence"
     },
     {
-      "name": "rejects_sequence_outside_window",
+      "name": "rejects_sequence_just_outside_window",
       "acceptedHighWatermark": 100,
-      "candidateSequence": 37,
+      "candidateSequence": 36,
       "expected": "reject_stale_sequence"
     },
     {
