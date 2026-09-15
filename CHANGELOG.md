@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Extends canonical Management Plane audit records with required recording-job
+  details, preserving both `job_id` and the assigned Recorder Worker service
+  independently from the action actor.
+
 - Defines Managed Service Admission expiry attribution: normal membership
   expiry wins equal deadlines and releases with `MEMBERSHIP_TIMEOUT`; only a
   strictly earlier service-admission deadline releases with

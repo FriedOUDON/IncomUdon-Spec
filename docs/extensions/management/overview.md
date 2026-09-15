@@ -262,6 +262,14 @@ the requester's effective priority, nullable replaced sender ID, and nullable
 replaced effective priority. Both replaced fields MUST be non-null for a
 preemption and MUST be null when the request did not actually preempt an
 active talker.
+
+`recording_create`, `recording_start`, `recording_stop`, `recording_failure`,
+`recording_grant_issued`, `recording_grant_renewed`, and
+`recording_grant_revoked` records MUST include `recording_job` details. Those
+details contain the opaque `job_id` and `recorder_service_id` for the Recorder
+Worker assigned to that job. `actor_type` and `actor_id` identify the principal
+that caused the recorded operation; they MUST NOT be treated as the Recorder
+Worker identity unless they actually identify that worker.
 This canonical record format applies to Relay audit storage even when the
 optional Management API listener is disabled; when that listener is enabled,
 the records are retrieved through `GET /audit-records` subject to the caller's

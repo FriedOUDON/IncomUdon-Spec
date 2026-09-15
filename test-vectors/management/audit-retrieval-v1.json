@@ -12,10 +12,14 @@
       "record_id": "audit-000000000042",
       "timestamp": "2026-09-15T12:34:56Z",
       "actor_type": "service",
-      "actor_id": "recorder-01",
+      "actor_id": "recording-controller-01",
       "channel_id": 111,
       "action": "recording_start",
-      "result": "success"
+      "result": "success",
+      "recording_job": {
+        "job_id": "recording-job-0001",
+        "recorder_service_id": "recorder-worker-01"
+      }
     },
     {
       "record_id": "audit-000000000043",

@@ -77,9 +77,18 @@ revocation; it MUST NOT attempt to reuse an expired grant for a new JOIN.
 ## Audit and privacy
 
 The Management Service MUST audit job creation, start, stop, failure, grant
-issuance, renewal, and revocation using `job_id`, `service_id`, channel ID,
-timestamp, actor, and outcome. Events and ordinary logs MUST NOT include media
-content, channel credentials, keys, full grants, or certificate private keys.
+issuance, renewal, and revocation using the canonical Management Plane v1
+`AuditRecord`. The corresponding actions are `recording_create`,
+`recording_start`, `recording_stop`, `recording_failure`,
+`recording_grant_issued`, `recording_grant_renewed`, and
+`recording_grant_revoked`. Each such record MUST contain `recording_job` details
+with the opaque `job_id` and the assigned Recorder Worker
+`recorder_service_id`, in addition to channel ID, timestamp, actor, and result.
+`actor_type` and `actor_id` identify the principal that caused the operation;
+the separate `recorder_service_id` identifies the Worker associated with the
+job even when it did not initiate that operation. Events and ordinary logs MUST
+NOT include media content, channel credentials, keys, full grants, or
+certificate private keys.
 
 Retention, consent, export format, access to recorded media, legal hold, and
 regional privacy requirements are deployment policy. They are intentionally

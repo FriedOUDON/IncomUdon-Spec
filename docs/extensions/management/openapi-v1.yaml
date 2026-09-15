@@ -288,6 +288,7 @@ components:
         action: { type: string, pattern: '^[a-z][a-z0-9_]{0,63}$' }
         result: { enum: [success, denied, failed] }
         floor_interrupt: { $ref: '#/components/schemas/FloorInterruptAuditDetails' }
+        recording_job: { $ref: '#/components/schemas/RecordingJobAuditDetails' }
       additionalProperties: false
       allOf:
         - if:
@@ -298,6 +299,13 @@ components:
             required: [floor_interrupt]
             properties:
               actor_type: { enum: [identity, service] }
+        - if:
+            properties:
+              action:
+                enum: [recording_create, recording_start, recording_stop, recording_failure, recording_grant_issued, recording_grant_renewed, recording_grant_revoked]
+            required: [action]
+          then:
+            required: [recording_job]
     FloorInterruptAuditDetails:
       type: object
       required: [requester_priority, replaced_sender_id, replaced_priority]
@@ -327,6 +335,13 @@ components:
           then:
             properties:
               replaced_priority: { $ref: '#/components/schemas/Priority' }
+    RecordingJobAuditDetails:
+      type: object
+      required: [job_id, recorder_service_id]
+      properties:
+        job_id: { type: string, minLength: 1, maxLength: 128 }
+        recorder_service_id: { type: string, minLength: 1, maxLength: 128 }
+      additionalProperties: false
     AuditRecordPage:
       type: object
       required: [schema_version, records, next_cursor]

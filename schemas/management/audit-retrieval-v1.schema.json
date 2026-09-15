@@ -166,6 +166,26 @@
               }
             }
           ]
+        },
+        "recording_job": {
+          "type": "object",
+          "required": [
+            "job_id",
+            "recorder_service_id"
+          ],
+          "properties": {
+            "job_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "recorder_service_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false,
@@ -193,6 +213,31 @@
                 ]
               }
             }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "enum": [
+                  "recording_create",
+                  "recording_start",
+                  "recording_stop",
+                  "recording_failure",
+                  "recording_grant_issued",
+                  "recording_grant_renewed",
+                  "recording_grant_revoked"
+                ]
+              }
+            },
+            "required": [
+              "action"
+            ]
+          },
+          "then": {
+            "required": [
+              "recording_job"
+            ]
           }
         }
       ]
