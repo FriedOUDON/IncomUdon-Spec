@@ -256,9 +256,17 @@ The Relay MUST apply Control Authentication v1 to its generated `AUTH_CHALLENGE`
 `IDENTITY_CHALLENGE`, `IDENTITY_DENY`, `SERVICE_ADMISSION_CHALLENGE`,
 `SERVICE_ADMISSION_DENY`, `TALK_GRANT`, `TALK_RELEASE`, `TALK_DENY`,
 `SERVER_CONFIG`, `PONG`, and Relay-reauthenticated `CODEC_CONFIG` packets.
-It MUST verify authentication before caching a CodecConfig, granting/releasing
-talk, registering a peer, refreshing membership, or constructing downstream
-state from an authenticated client control packet. For AES-GCM v2, the Relay
+Before caching a CodecConfig, granting or releasing talk, registering a peer,
+refreshing membership, or constructing downstream state from a client control
+packet, the Relay MUST apply the current channel policy. When that policy
+requires Control Authentication, it MUST verify authentication before taking any
+of those actions. A packet rejected by the current policy MUST NOT refresh
+membership. Membership refresh eligibility for accepted `KEEPALIVE`,
+`CODEC_CONFIG`, and PTT control is defined in `membership-lease.md`; this also
+includes valid unauthenticated control accepted for an `optional` unconfigured
+legacy channel or an `off` channel.
+
+For AES-GCM v2, the Relay
 MUST cache the verified CodecConfig and reauthenticate it before forwarding the
 configuration, including before forwarding `AUDIO` or `FEC` with that sender's
 announced `media_nonce_base_96`; it MUST NOT forward media for an unconfigured

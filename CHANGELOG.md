@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Defines Membership Lease control-packet refresh by current channel policy:
+  accepted `KEEPALIVE`, `CODEC_CONFIG`, and PTT control refresh in
+  `optional` unconfigured legacy and `off` channels as well as authenticated
+  channels; rejected or malformed controls never refresh. Adds compatibility
+  policy transition vectors.
+
 - Defines Identity Admission expiry attribution: normal membership expiry wins
   equal deadlines and releases with `MEMBERSHIP_TIMEOUT`; only a strictly
   earlier Identity ticket deadline releases with `IDENTITY_EXPIRED`. Adds

@@ -18,6 +18,7 @@ MUST NOT be used in production.
 | `directory-channel-v2.json` | Primary channel-password-derived Directory v2 request envelope |
 | `diagnostics-v1.json` | Redacted local debug-metrics snapshot |
 | `ptt-timeout-v1.json` | `TALK_RELEASE` reason payloads and timeout timelines |
+| `membership-lease-v1.json` | Membership lease timing, keepalive cadence, and Control Authentication policy refresh cases |
 | `floor-interrupt-v1.json` | Admission-required interrupt request, preemption release, and priority-selection cases |
 | `identity-admission-v1.json` | Ed25519 JWS ticket, proof-of-possession, denial payloads, and membership-expiry tie-break cases |
 | `management/service-admission-v1.json` | Managed Service Admission Ed25519 JWS grant, proof-of-possession, and denial payloads |

@@ -60,12 +60,23 @@ it MUST set:
 deadline = receive_monotonic_time + L
 ```
 
+Control Authentication determines whether a control packet is accepted under the
+current channel policy; it does not independently determine refresh eligibility.
+For each refresh-eligible control packet below, the Relay MUST first validate it
+under that policy and refresh membership only after accepting it. Thus a channel
+that requires Control Authentication accepts only authenticated controls, while
+an `optional` unconfigured legacy channel or an `off` channel may accept a
+valid unauthenticated control packet.
+
 Only these incoming packet classes refresh an established membership:
 
-1. `KEEPALIVE` from the registered endpoint.
-2. An authenticated, valid `CODEC_CONFIG` from the registered endpoint.
-3. An authenticated, valid `PTT_ON`, `PTT_REQUEST`, or `PTT_OFF` from the
-   registered endpoint, whether the floor decision is grant or deny.
+1. An empty, valid `KEEPALIVE` accepted from the registered endpoint under the
+   current channel policy.
+2. A valid `CODEC_CONFIG` accepted from the registered endpoint under the
+   current channel policy.
+3. A valid `PTT_ON`, `PTT_REQUEST`, or `PTT_OFF` accepted from the registered
+   endpoint under the current channel policy, whether the floor decision is
+   grant or deny.
 4. `AUDIO` or `FEC` accepted from the registered endpoint while it holds the
    corresponding current talk grant and, where applicable, matches the
    announced media nonce base.
@@ -79,10 +90,11 @@ refresh membership unless a future extension explicitly updates this list.
 
 While a client considers its membership established, it MUST transmit at least
 one refresh-eligible packet in every interval `K`. When it has not transmitted
-another refresh-eligible packet during that interval, it MUST transmit an empty
-`KEEPALIVE`. A client MAY suppress a redundant `KEEPALIVE` while it is already
-sending valid `AUDIO`, `FEC`, codec configuration, or PTT control at that
-cadence. `PING` does not satisfy this requirement.
+another packet that is expected to refresh membership under the current channel
+policy during that interval, it MUST transmit an empty `KEEPALIVE`. A client
+MAY suppress a redundant `KEEPALIVE` only while it is already sending `AUDIO`,
+`FEC`, codec configuration, or PTT control that is expected to be accepted and
+refresh membership under that policy. `PING` does not satisfy this requirement.
 
 Clients SHOULD use a monotonic local scheduler and SHOULD send before the end
 of each interval rather than scheduling exactly at its boundary. They MUST NOT
@@ -114,3 +126,10 @@ Implementations MUST test at least the following cases:
    or with `K > floor(L / 3)`.
 7. A policy reload does not silently shorten the membership snapshot of an
    already joined endpoint.
+8. A Control-Authentication-required channel rejects an unauthenticated
+   refresh-eligible control packet and does not refresh membership, while its
+   accepted authenticated equivalent refreshes membership.
+9. An `optional` unconfigured legacy channel and an `off` channel refresh
+   membership after accepting a valid unauthenticated refresh-eligible control
+   packet, but do not refresh membership for a malformed or otherwise rejected
+   control packet.

@@ -94,5 +94,110 @@
         "keepaliveIntervalSeconds": 20
       }
     }
+  ],
+  "controlAuthenticationRefreshCases": [
+    {
+      "name": "required_unauthenticated_ptt_on_does_not_refresh",
+      "controlAuthentication": {
+        "mode": "required",
+        "channelHasConfiguredControlKey": true
+      },
+      "leaseSeconds": 30,
+      "joinAcceptedAtSeconds": 0,
+      "packet": {
+        "type": "PTT_ON",
+        "receivedAtSeconds": 10,
+        "authenticated": false
+      },
+      "expectedPacketAcceptance": false,
+      "expectedMembershipRefresh": false,
+      "expectedDeadlineSeconds": 30
+    },
+    {
+      "name": "required_authenticated_ptt_request_refreshes",
+      "controlAuthentication": {
+        "mode": "required",
+        "channelHasConfiguredControlKey": true
+      },
+      "leaseSeconds": 30,
+      "joinAcceptedAtSeconds": 0,
+      "packet": {
+        "type": "PTT_REQUEST",
+        "receivedAtSeconds": 10,
+        "authenticated": true
+      },
+      "expectedPacketAcceptance": true,
+      "expectedMembershipRefresh": true,
+      "expectedDeadlineSeconds": 40
+    },
+    {
+      "name": "optional_unconfigured_unauthenticated_keepalive_refreshes",
+      "controlAuthentication": {
+        "mode": "optional",
+        "channelHasConfiguredControlKey": false
+      },
+      "leaseSeconds": 30,
+      "joinAcceptedAtSeconds": 0,
+      "packet": {
+        "type": "KEEPALIVE",
+        "receivedAtSeconds": 10,
+        "authenticated": false
+      },
+      "expectedPacketAcceptance": true,
+      "expectedMembershipRefresh": true,
+      "expectedDeadlineSeconds": 40
+    },
+    {
+      "name": "optional_unconfigured_unauthenticated_codec_config_refreshes",
+      "controlAuthentication": {
+        "mode": "optional",
+        "channelHasConfiguredControlKey": false
+      },
+      "leaseSeconds": 30,
+      "joinAcceptedAtSeconds": 0,
+      "packet": {
+        "type": "CODEC_CONFIG",
+        "receivedAtSeconds": 10,
+        "authenticated": false
+      },
+      "expectedPacketAcceptance": true,
+      "expectedMembershipRefresh": true,
+      "expectedDeadlineSeconds": 40
+    },
+    {
+      "name": "off_unauthenticated_ptt_off_refreshes",
+      "controlAuthentication": {
+        "mode": "off",
+        "channelHasConfiguredControlKey": false
+      },
+      "leaseSeconds": 30,
+      "joinAcceptedAtSeconds": 0,
+      "packet": {
+        "type": "PTT_OFF",
+        "receivedAtSeconds": 10,
+        "authenticated": false
+      },
+      "expectedPacketAcceptance": true,
+      "expectedMembershipRefresh": true,
+      "expectedDeadlineSeconds": 40
+    },
+    {
+      "name": "off_malformed_ptt_on_does_not_refresh",
+      "controlAuthentication": {
+        "mode": "off",
+        "channelHasConfiguredControlKey": false
+      },
+      "leaseSeconds": 30,
+      "joinAcceptedAtSeconds": 0,
+      "packet": {
+        "type": "PTT_ON",
+        "receivedAtSeconds": 10,
+        "authenticated": false,
+        "valid": false
+      },
+      "expectedPacketAcceptance": false,
+      "expectedMembershipRefresh": false,
+      "expectedDeadlineSeconds": 30
+    }
   ]
 }
