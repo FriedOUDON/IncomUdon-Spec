@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Aligns Diagnostics v1 platform-dependent metrics with unavailable-value
+  handling: MTU send-error classification, output underruns, and applied QoS
+  may be omitted or null and are never fabricated as zero.
+
 - Extends canonical Management Plane audit records with required recording-job
   details, preserving both `job_id` and the assigned Recorder Worker service
   independently from the action actor.

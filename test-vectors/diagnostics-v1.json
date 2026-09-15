@@ -20,7 +20,7 @@
     "frames_dropped_backpressure": 0,
     "frames_dropped_oversize": 0,
     "datagrams_dropped_oversize": 0,
-    "send_errors_mtu": 0,
+    "send_errors_mtu": null,
     "send_errors": 0,
     "tx_queue_frames": 0,
     "tx_queue_age_ms": 0,
@@ -62,7 +62,6 @@
         "playout_effective_ms": 82,
         "playout_queue_frames": 4,
         "playout_resyncs": 0,
-        "output_underruns": 0,
         "external_fec": {
           "enabled": false,
           "parity_packets_received": 0,
@@ -92,8 +91,7 @@
       "mix_intervals_rendered": 248,
       "gain_transition_ms": 20,
       "limiter_activations": 0,
-      "source_limit_drops": 0,
-      "output_underruns": 0
+      "source_limit_drops": 0
     },
     "overflow_talkers": {
       "talker_count": 0,
@@ -132,7 +130,7 @@
     "udp_bytes_sent_per_second": 12000,
     "udp_bytes_received_per_second": 12600,
     "qos_requested": true,
-    "qos_applied": true,
+    "qos_applied": null,
     "rx_datagrams_rejected_oversize": 0
   }
 }

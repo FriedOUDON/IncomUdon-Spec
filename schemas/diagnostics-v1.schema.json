@@ -120,7 +120,6 @@
         "frames_dropped_backpressure",
         "frames_dropped_oversize",
         "datagrams_dropped_oversize",
-        "send_errors_mtu",
         "send_errors",
         "tx_queue_frames",
         "tx_queue_age_ms",
@@ -164,7 +163,7 @@
           "$ref": "#/$defs/counter"
         },
         "send_errors_mtu": {
-          "$ref": "#/$defs/counter"
+          "$ref": "#/$defs/nullableCounter"
         },
         "send_errors": {
           "$ref": "#/$defs/counter"
@@ -276,8 +275,7 @@
         "mix_intervals_rendered",
         "gain_transition_ms",
         "limiter_activations",
-        "source_limit_drops",
-        "output_underruns"
+        "source_limit_drops"
       ],
       "properties": {
         "active_sources": {
@@ -336,7 +334,6 @@
         "playout_effective_ms",
         "playout_queue_frames",
         "playout_resyncs",
-        "output_underruns",
         "external_fec",
         "opus_inband_fec"
       ],
@@ -630,7 +627,6 @@
         "udp_bytes_sent_per_second",
         "udp_bytes_received_per_second",
         "qos_requested",
-        "qos_applied",
         "rx_datagrams_rejected_oversize"
       ],
       "properties": {

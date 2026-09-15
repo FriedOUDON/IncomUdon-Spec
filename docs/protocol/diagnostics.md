@@ -38,10 +38,14 @@ The canonical JSON shape is defined by
 process-local monotonic clock and MUST NOT be interpreted as wall-clock time.
 Counters are non-negative and reset when the local session is recreated.
 
-Fields unavailable on a platform MUST be omitted or set to `null`; they MUST
-NOT be fabricated. Values shown as `*_per_second` are calculated over the most
-recent completed one-second interval. Counter values remain cumulative for the
-current session.
+Platform-dependent fields that are optional and nullable in the canonical
+schema MAY be omitted or set to `null` when unavailable; they MUST NOT be
+fabricated. They are `tx.send_errors_mtu`,
+`rx.talkers[*].output_underruns`, `rx.mixer.output_underruns`, and
+`network.qos_applied`. For those fields, a reported zero means the client
+observed zero events or a negative result, not that the metric was unavailable.
+Values shown as `*_per_second` are calculated over the most recent completed
+one-second interval. Counter values remain cumulative for the current session.
 
 ## Connection metrics
 
@@ -70,7 +74,7 @@ No connection metric may expose the resolved Relay address.
 | `frames_dropped_backpressure` | Frames dropped because send queue/socket backpressure was excessive |
 | `frames_dropped_oversize` | Encoded/source frames rejected before packetization because they exceed the transmit media limit |
 | `datagrams_dropped_oversize` | Fully built datagrams rejected because they exceed the UDP datagram limit |
-| `send_errors_mtu` | Local UDP send failures that indicate an MTU/path-MTU error, when distinguishable |
+| `send_errors_mtu` | Local UDP send failures that indicate an MTU/path-MTU error, when distinguishable; omit or null when the platform cannot classify the error |
 | `send_errors` | All UDP send errors, including `send_errors_mtu` |
 | `tx_queue_frames` / `tx_queue_age_ms` | Current queued-frame count and oldest-frame age |
 | `audio_packets_per_second` / `audio_bytes_per_second` | Latest one-second transmit rates |
@@ -110,7 +114,7 @@ the standard cap is 16. Additional talkers are aggregated in
 | `playout_target_ms` / `playout_effective_ms` | Configured target and current effective playout delay |
 | `playout_queue_frames` | Current eligible playout queue depth |
 | `playout_resyncs` | Stale-audio resynchronizations |
-| `output_underruns` | Audio output stream underruns, when observable |
+| `output_underruns` | Audio output stream underruns, when observable; omit or null when unavailable |
 
 ## Multi-Talker Mixer Metrics
 
@@ -126,7 +130,7 @@ speaker name. Locally muted sources are excluded from `active_sources`.
 | `gain_transition_ms` | Configured source-gain transition duration; standard value is 20 |
 | `limiter_activations` | Final peak-limiter activation count |
 | `source_limit_drops` | Talker intervals omitted because the local source limit was reached |
-| `output_underruns` | Aggregate final-output stream underruns, when observable |
+| `output_underruns` | Aggregate final-output stream underruns, when observable; omit or null when unavailable |
 
 `rx.talkers[*].output_underruns`, when a platform can attribute it, remains a
 per-talker observation. `rx.mixer.output_underruns` is the authoritative
@@ -187,8 +191,8 @@ The `network` object records `udp_packets_sent`, `udp_packets_received`,
 also records `rx_datagrams_rejected_oversize`: locally received datagrams
 rejected before packet processing because they exceed the protocol MTU limit.
 It records `qos_requested` and `qos_applied` when the platform exposes the
-result of DSCP EF socket configuration. `qos_applied` is null when the result
-cannot be observed.
+result of DSCP EF socket configuration. `qos_applied` is omitted or null when
+the result cannot be observed.
 
 ## UI presentation
 
