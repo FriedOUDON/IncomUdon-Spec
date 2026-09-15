@@ -19,6 +19,7 @@ requirements for compatible implementations.
 - `docs/protocol/overview.md`: scope and transport lifecycle.
 - `docs/protocol/wire-format.md`: Version 1 packet envelope.
 - `docs/protocol/control-packets.md`: control payload layouts and relay rules.
+- `docs/protocol/membership-lease.md`: Relay-advertised membership lease and keepalive cadence.
 - `docs/protocol/ptt-timeout.md`: Relay-enforced maximum talk duration and release behavior.
 - `docs/protocol/floor-interrupt.md`: admission-required authorized floor preemption.
 - `docs/protocol/audio-codecs.md`: media payloads and codec negotiation.

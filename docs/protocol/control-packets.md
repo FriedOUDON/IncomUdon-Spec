@@ -112,17 +112,24 @@ compatibility option, but MUST transmit the 19-byte form described above.
 
 ## Server configuration
 
-`SERVER_CONFIG` has a four-byte payload:
+`SERVER_CONFIG` has an eight-byte payload:
 
 | Offset | Bytes | Field |
 |---:|---:|---|
-| 0 | 2 | `maximum_talk_seconds` in whole seconds; zero disables the server-managed limit |
+| 0 | 2 | `maximum_talk_seconds` in whole seconds; zero disables the server-managed talk limit |
 | 2 | 1 | flags; bit 0 is `multi_talk_enabled`; bits 1-7 are reserved and MUST be zero |
 | 3 | 1 | maximum active talkers; value MUST be in the range 1 through 16 |
+| 4 | 2 | `membership_lease_seconds` (`u16`, big-endian); 15 through 300 |
+| 6 | 2 | `keepalive_interval_seconds` (`u16`, big-endian); 1 through `floor(membership_lease_seconds / 3)` |
 
-The timeout is a Relay-enforced monotonic talk lease. Its complete semantics,
-release reasons, configuration-update handling, and client obligations are
-specified in `ptt-timeout.md`.
+The standard default membership values are a 30-second lease and a 10-second
+idle keepalive interval. A Relay MUST send the eight-byte form and MUST NOT
+send the predecessor four-byte form. A client MUST reject an invalid payload
+length or invalid membership timing relationship rather than silently
+normalizing it. The membership lease and refresh rules are defined in
+`membership-lease.md`. The maximum talk timeout is a separate Relay-enforced
+monotonic talk lease; its release reasons, configuration-update handling, and
+client obligations are specified in `ptt-timeout.md`.
 
 ## Security note
 

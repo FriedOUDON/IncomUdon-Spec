@@ -8,6 +8,11 @@ registered by `JOIN` for the same channel and sender ID. It echoes the eight
 payload bytes to that same endpoint and MUST NOT broadcast or reflect a ping
 from an unknown endpoint.
 
+`PING` and `PONG` are independent of the membership lease. Neither packet
+refreshes membership and neither satisfies the client `KEEPALIVE` cadence.
+Implementations MAY schedule both functions from one local timer, but they MUST
+still send membership-refreshing traffic according to `membership-lease.md`.
+
 Recommended client intervals:
 
 - idle: every 10 seconds;

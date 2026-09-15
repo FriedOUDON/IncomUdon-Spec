@@ -122,8 +122,10 @@ cue-suppression rule in `floor-interrupt.md`.
 The Relay MUST send `SERVER_CONFIG` after each successful `JOIN` before it
 sends a `TALK_GRANT` for that endpoint. It MAY send a new `SERVER_CONFIG` to
 joined endpoints after a policy reload. Clients MUST use the most recently
-received configuration only for user feedback and for future floor requests;
-they MUST NOT assume it changes a currently granted lease.
+received maximum-talk configuration only for user feedback and future floor
+requests; they MUST NOT assume it changes a currently granted talk lease. The
+separate membership timing fields and their per-membership configuration
+snapshot are defined in `membership-lease.md`.
 
 ## Required interoperability cases
 

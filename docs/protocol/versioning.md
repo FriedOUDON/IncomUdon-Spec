@@ -72,12 +72,13 @@ checkout.
 The PWA, Qt, and Rust clients covered by the current coordinated draft have not
 yet reached a formal production release. They therefore MUST migrate together
 to the 19-byte `CODEC_CONFIG` with a media nonce base, five-byte
-`TALK_RELEASE` with release reason, FEC v2, Control Authentication v1, optional
-Identity Admission v1, the 1200-byte UDP datagram limit, the AES-GCM v2
-36-byte media header with an explicit 96-bit session base and 32-bit
-anti-replay counter, and the `argon2id-v1`/`raw-secret-v1` channel credential
-KDF defined in this draft. First-release clients MUST NOT transmit or require
-support for the predecessor draft AES-GCM v2 28-byte media header with its
+`TALK_RELEASE` with release reason, eight-byte `SERVER_CONFIG` with membership
+lease timing, FEC v2, Control Authentication v1, optional Identity Admission
+v1, the 1200-byte UDP datagram limit, the AES-GCM v2 36-byte media header with
+an explicit 96-bit session base and 32-bit anti-replay counter, and the
+`argon2id-v1`/`raw-secret-v1` channel credential KDF defined in this draft.
+First-release clients MUST NOT transmit or require support for the predecessor
+draft AES-GCM v2 28-byte media header with its
 zero-prefixed 64-bit nonce, the predecessor 32-byte direct-nonce header, old
 `CODEC_CONFIG` payload forms, or the removed `sha256:` and implicit bare-64-hex
 password normalization forms. Supporting FEC v1 or unauthenticated secure

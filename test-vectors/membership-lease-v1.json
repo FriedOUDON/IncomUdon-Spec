@@ -1,0 +1,98 @@
+{
+  "specVersion": "unreleased",
+  "scheme": "membership-lease-v1",
+  "serverConfig": {
+    "maximumTalkSeconds": 60,
+    "multiTalkEnabled": false,
+    "maximumActiveTalkers": 1,
+    "membershipLeaseSeconds": 30,
+    "keepaliveIntervalSeconds": 10,
+    "payloadHex": "003c0001001e000a"
+  },
+  "bootstrap": {
+    "keepaliveIntervalSeconds": 5,
+    "appliesUntil": "valid_SERVER_CONFIG_received"
+  },
+  "cases": [
+    {
+      "name": "idle_keepalive_refreshes_membership",
+      "leaseSeconds": 30,
+      "keepaliveIntervalSeconds": 10,
+      "joinAcceptedAtSeconds": 0,
+      "refreshPackets": [
+        {
+          "type": "KEEPALIVE",
+          "receivedAtSeconds": 10,
+          "expectedDeadlineSeconds": 40
+        },
+        {
+          "type": "KEEPALIVE",
+          "receivedAtSeconds": 20,
+          "expectedDeadlineSeconds": 50
+        }
+      ],
+      "expectedMembershipAtSeconds": 49
+    },
+    {
+      "name": "accepted_active_media_refreshes_membership",
+      "leaseSeconds": 30,
+      "keepaliveIntervalSeconds": 10,
+      "joinAcceptedAtSeconds": 0,
+      "refreshPackets": [
+        {
+          "type": "AUDIO",
+          "receivedAtSeconds": 8,
+          "expectedDeadlineSeconds": 38
+        },
+        {
+          "type": "FEC",
+          "receivedAtSeconds": 18,
+          "expectedDeadlineSeconds": 48
+        }
+      ],
+      "expectedMembershipAtSeconds": 47
+    },
+    {
+      "name": "ping_does_not_refresh_membership",
+      "leaseSeconds": 30,
+      "joinAcceptedAtSeconds": 0,
+      "nonRefreshPackets": [
+        {
+          "type": "PING",
+          "receivedAtSeconds": 10
+        },
+        {
+          "type": "PING",
+          "receivedAtSeconds": 20
+        }
+      ],
+      "expectedExpiryAtSeconds": 30,
+      "expectedActiveTalkReleaseReason": "MEMBERSHIP_TIMEOUT"
+    },
+    {
+      "name": "invalid_keepalive_ratio_is_rejected",
+      "membershipLeaseSeconds": 30,
+      "keepaliveIntervalSeconds": 11,
+      "expectedServerConfigAcceptance": false
+    },
+    {
+      "name": "existing_membership_uses_join_snapshot_after_reload",
+      "joinSnapshot": {
+        "membershipLeaseSeconds": 30,
+        "keepaliveIntervalSeconds": 10
+      },
+      "reloadedPolicy": {
+        "membershipLeaseSeconds": 60,
+        "keepaliveIntervalSeconds": 20
+      },
+      "expectedExistingMembership": {
+        "membershipLeaseSeconds": 30,
+        "keepaliveIntervalSeconds": 10
+      },
+      "expectedNewMembership": {
+        "membershipLeaseSeconds": 60,
+        "keepaliveIntervalSeconds": 20
+      }
+    }
+  ]
+}

@@ -31,7 +31,9 @@ resampler state separate for each sender ID, then mix eligible output under
 5. Send `PTT_OFF`; the Relay broadcasts `TALK_RELEASE` without waiting for
    reordered final parity. The Relay may instead release the talk at its
    server-managed deadline or on membership expiry.
-6. Send `KEEPALIVE` while idle and `LEAVE` during a clean disconnect.
+6. Maintain the advertised membership lease by sending `KEEPALIVE` while
+   idle and `LEAVE` during a clean disconnect, as defined in
+   `membership-lease.md`.
 
 A joining client receives `SERVER_CONFIG`. If talkers are already active, the
 Relay sends each active talker's `CODEC_CONFIG` before its `TALK_GRANT`.
@@ -51,11 +53,11 @@ that talker when the deadline or membership lease expires. See
 
 | Class | Types | Purpose |
 |---|---|---|
-| Membership | `JOIN`, `LEAVE`, `KEEPALIVE` | Endpoint registration and liveness |
+| Membership | `JOIN`, `LEAVE`, `KEEPALIVE` | Endpoint registration, lease refresh, and expiry |
 | Floor control | `PTT_ON`, `PTT_REQUEST`, `PTT_OFF`, `TALK_*` | Talk request and Relay decision |
 | Media | `AUDIO`, `FEC`, `CODEC_CONFIG` | Voice frames and decoder configuration |
-| Server | `SERVER_CONFIG` | Talk timeout and multi-talk policy |
-| Diagnostics | `PING`, `PONG` | Endpoint liveness and RTT |
+| Server | `SERVER_CONFIG` | Talk, multi-talk, and membership timing policy |
+| Diagnostics | `PING`, `PONG` | RTT/liveness measurement; independent of membership refresh |
 | Compatibility | `KEY_EXCHANGE` | Legacy handshake marker |
 | Authentication | `AUTH_HELLO`, `AUTH_CHALLENGE` | Relay cookie challenge for authenticated membership |
 | Identity admission | `IDENTITY_*` | Optional OIDC-derived per-user Relay authorization |
