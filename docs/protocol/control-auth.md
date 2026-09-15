@@ -106,10 +106,12 @@ Identity Admission is fully optional and defaults to off. Its additional
 admission flow is defined in `identity-admission.md`. Managed Service Admission
 is optional and defined in `../extensions/management/service-admission.md`.
 
-A client chooses a cryptographically random 32-bit `client_session_id`. The
-high 32 bits of every client-originated Control Authentication v1 nonce are
+A client chooses a cryptographically random, non-zero 32-bit
+`client_session_id`. It MUST regenerate the value if its CSPRNG returns zero.
+The high 32 bits of every client-originated Control Authentication v1 nonce are
 this session ID; the low 32 bits are its control counter. This nonce is an
-authenticated replay identifier, not an AES-GCM media nonce.
+authenticated replay identifier, not an AES-GCM media nonce. In particular,
+the `AUTH_HELLO` counter zero then cannot form the prohibited all-zero nonce.
 
 For one `client_session_id`, `AUTH_HELLO` MUST use counter zero. Every
 subsequent client-originated Control Authentication v1 packet MUST consume the
@@ -171,10 +173,11 @@ rejects a different session ID or counters outside the window. This preserves
 replay protection for `AUTH_HELLO`, any admission packets, and JOIN itself. A
 source-address change requires a new authenticated handshake.
 
-The Relay uses its own cryptographically random 32-bit instance ID in the high
-32 bits of nonce values for Relay-originated control packets, with a
-monotonically increasing low 32-bit counter. Clients maintain a bounded replay
-window for each Relay instance ID.
+The Relay uses its own cryptographically random, non-zero 32-bit instance ID
+in the high 32 bits of nonce values for Relay-originated control packets. It
+MUST regenerate the instance ID if its CSPRNG returns zero. Relay-originated
+nonces use a monotonically increasing low 32-bit counter. Clients maintain a
+bounded replay window for each Relay instance ID.
 
 ## Relay-reauthenticated CODEC_CONFIG
 

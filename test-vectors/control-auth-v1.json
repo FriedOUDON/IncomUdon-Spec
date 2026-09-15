@@ -33,6 +33,22 @@
   },
   "counter_sequences": {
     "client_session_id": 305419896,
+    "nonce_identifier_constraints": {
+      "client_session_id_range": [
+        1,
+        4294967295
+      ],
+      "relay_instance_id_range": [
+        1,
+        4294967295
+      ],
+      "zero_client_id_auth_hello": {
+        "client_session_id": 0,
+        "counter": 0,
+        "nonce_hex": "0000000000000000",
+        "expected": "reject"
+      }
+    },
     "direct_join": [
       {
         "type": "AUTH_HELLO",
@@ -96,7 +112,8 @@
     ],
     "rejection_cases": [
       "A counter already accepted by the provisional or authenticated replay window is rejected.",
-      "A client MUST use a fresh client_session_id instead of restarting a counter at zero."
+      "A client MUST use a fresh client_session_id instead of restarting a counter at zero.",
+      "A client and Relay MUST regenerate their high-32-bit nonce identifier when a CSPRNG returns zero."
     ]
   }
 }

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Requires non-zero CSPRNG-generated Control Authentication client session and
+  Relay instance IDs, preventing `AUTH_HELLO` counter zero from producing the
+  prohibited all-zero control nonce.
+
 - Clarifies Directory UDP v1 `epoch` processing: canonical base64url text
   decodes to a fresh 16-byte `epoch_raw`, which is the only representation
   used for HMAC derivation, AAD, and replay domains.
