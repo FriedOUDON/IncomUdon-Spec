@@ -16,6 +16,10 @@
   eviction, silent uncorrelated drops, expiry cleanup, diagnostics, and state
   transition vectors.
 
+- Corrects Directory UDP v3 heartbeat lifecycle coverage: a matching heartbeat
+  refreshes only before registration expiry, while an expired matching heartbeat
+  is silently dropped and cannot recreate the registration.
+
 - Defines the mandatory Directory UDP v3 mapping between authenticated envelope
   `type` and decrypted payload variant. Type/payload mismatches are rejected
   before replay or semantic state changes; vectors cover schema-valid negative

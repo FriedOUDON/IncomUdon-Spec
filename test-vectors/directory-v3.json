@@ -412,12 +412,27 @@
         "input": {
           "type": "heartbeat",
           "sourceEndpoint": "192.0.2.10:40000",
-          "acceptedAtRelayMonotonicMs": 200000
+          "acceptedAtRelayMonotonicMs": 120000
         },
         "expected": {
           "state": "registered",
-          "registrationExpiresAtRelayMonotonicMs": 290000
+          "registrationExpiresAtRelayMonotonicMs": 210000
         }
+      },
+      {
+        "name": "expired_matching_heartbeat_is_silently_dropped",
+        "initial": {
+          "channelId": 111,
+          "instanceId": "ICEiIyQlJicoKSorLC0uLw",
+          "sourceEndpoint": "192.0.2.10:40000",
+          "registrationExpiresAtRelayMonotonicMs": 190000
+        },
+        "input": {
+          "type": "heartbeat",
+          "sourceEndpoint": "192.0.2.10:40000",
+          "acceptedAtRelayMonotonicMs": 200000
+        },
+        "expected": "silent_drop_expired_no_registration_created_no_error"
       },
       {
         "name": "unknown_heartbeat_is_silently_dropped",
