@@ -126,7 +126,10 @@ paths:
     get:
       operationId: streamEvents
       summary: Subscribe to redacted management events using SSE.
-      description: Delivers only events whose channel scope authorizes the caller.
+      description: >
+        Delivers channel-scoped events only within viewer or auditor channel scope,
+        and global events only when the event type's explicit global permission
+        authorizes the caller. relay_health_changed requires health.read.
       parameters:
         - name: since
           in: query

@@ -139,13 +139,17 @@ global access from possession of a certificate or channel-scoped role.
    stop, MUST resolve that resource's authoritative stored `channel_id` before
    authorization. A caller-supplied channel ID MUST NOT override the stored
    scope.
-3. A multi-channel list or stream operation MUST filter every returned resource
-   or event to channels for which the authenticated service has the required
-   channel-scoped operation. A service with no matching channel scope MUST
-   receive `403`, not an unfiltered or implicitly global result.
-4. A global operation has no channel ID and MUST require an explicitly
-   configured global permission. A channel-scoped role MUST NOT imply that
-   permission.
+3. A multi-channel list operation MUST filter every returned resource to channels
+   for which the authenticated service has the required channel-scoped operation.
+   A service with no matching channel scope MUST receive `403`, not an unfiltered
+   or implicitly global result.
+4. A multi-channel event stream MUST filter each channel-scoped event with a
+   non-null `channel_id` to channels for which the authenticated service has the
+   required event role. A caller with neither a matching event channel scope nor
+   an explicit global event permission MUST receive `403` for the stream.
+5. A global operation or global event has no channel ID and MUST require an
+   explicitly configured global permission. A channel-scoped role MUST NOT imply
+   that permission.
 
 | Role | Permitted operations |
 |---|---|
@@ -156,10 +160,12 @@ global access from possession of a certificate or channel-scoped role.
 | `admin` | Manage Management Plane ACLs and signing-key configuration. |
 
 For the initial HTTP contract, `GET /channels` filters its channel summaries
-to the caller's `viewer` scope, and `GET /events` filters every event to the
-caller's `viewer` or `auditor` scope. `GET /health` instead requires the
-explicit global `health.read` permission. `GET /audit-records` follows the
-additional `auditor` and global-audit rules below. The
+to the caller's `viewer` scope. `GET /events` filters every channel-scoped
+event to the caller's `viewer` or `auditor` scope, while global event delivery
+uses the explicit event-type permissions defined in
+[Global event authorization](#global-event-authorization). `GET /health`
+requires the explicit global `health.read` permission. `GET /audit-records`
+follows the additional `auditor` and global-audit rules below. The
 `POST /recording-jobs/{job_id}/stop` endpoint resolves the stored job channel
 before applying the recorder or operator permission; it never trusts an
 inferred or client-supplied replacement channel scope.
@@ -209,10 +215,41 @@ private control link. The initial event set is:
 - `service_admission_revoked`
 
 Events MUST include a monotonic per-Management-Service `event_id`, an RFC 3339
-UTC timestamp, an event type, and the relevant channel ID. They MAY include a
-sender ID, service ID, reason code, or recording job ID. Events MUST NOT
-include IP addresses, UDP ports, media payloads, channel passwords, derived
-keys, OIDC material, admission grants, certificate contents, or private keys.
+UTC timestamp, an event type, and a channel ID or explicit `null` for a global
+event. They MAY include a sender ID, service ID, reason code, or recording job
+ID. Events MUST NOT include IP addresses, UDP ports, media payloads, channel
+passwords, derived keys, OIDC material, admission grants, certificate contents,
+or private keys.
+
+### Global event authorization
+
+A channel-scoped event MUST carry a non-null `channel_id`; delivery requires the
+caller's `viewer` or `auditor` scope for that exact channel and uses the normal
+redacted event representation. A global event MUST carry `channel_id: null`.
+It is never authorized merely because the caller has a role for one or more
+channels.
+
+Every global event type MUST define an explicit global permission before it is
+emitted or delivered. A global event with no specified permission mapping MUST
+NOT be emitted or delivered. Version 1 defines this mapping:
+
+| Global event type | Required global permission |
+|---|---|
+| `relay_health_changed` | `health.read` |
+
+`relay_health_changed` is always a global event. It MUST carry
+`channel_id: null` and a `state` of `healthy`, `degraded`, or `unhealthy`.
+It has the same authorization boundary as `GET /health`: a caller without
+explicit `health.read` MUST NOT receive it, including through an otherwise
+permitted `GET /events` stream. Conversely, `health.read` authorizes delivery
+only of this mapped global event; it grants no channel-scoped event, participant,
+or channel-state access.
+
+A caller MAY open `GET /events` when it has at least one authorized
+channel-scoped event role or an explicit global event permission. On every
+delivery, the Management Service MUST independently apply the channel scope for
+a non-null `channel_id` or the event-type-specific global permission for a null
+`channel_id`. This rule applies equally to `viewer` and `auditor` callers.
 
 The Management Service MUST durably retain events for its documented retention
 period before acknowledging them to an external subscriber. Implementations
@@ -322,19 +359,24 @@ management extension. Those functions require separate versioned proposals.
 2. An untrusted, expired, or ACL-unmapped mTLS client cannot access the API.
 3. A channel-scoped role does not authorize `GET /health` unless the service
    also has explicit global `health.read` permission.
-4. A `recorder` ACL can issue only a receive-only grant for an allowed channel.
-5. A service grant cannot join a different channel, use another sender ID, or
+4. A caller with channel-scoped `viewer` or `auditor` access but no
+   `health.read` does not receive a global `relay_health_changed` SSE event.
+5. A caller with explicit `health.read` receives `relay_health_changed` with
+   `channel_id: null`, but receives no channel-scoped event without the matching
+   channel role.
+6. A `recorder` ACL can issue only a receive-only grant for an allowed channel.
+7. A service grant cannot join a different channel, use another sender ID, or
    be used by a different proof-of-possession key.
-6. A valid Managed Service Admission can satisfy a required identity policy
+8. A valid Managed Service Admission can satisfy a required identity policy
    only for that service endpoint while managed-service admission is enabled.
-7. Revocation removes the affected membership without affecting unrelated
+9. Revocation removes the affected membership without affecting unrelated
    channel members.
-8. A Management API outage denies new grants while an uninterrupted existing
-   receive-only membership follows the bounded grace rule.
-9. API responses, SSE events, audit records, and normal Relay logs contain no
-   channel password, derived key, admission grant, certificate private key,
-   or media payload.
-10. An `auditor` retrieves only records for explicitly authorized channels; a
+10. A Management API outage denies new grants while an uninterrupted existing
+    receive-only membership follows the bounded grace rule.
+11. API responses, SSE events, audit records, and normal Relay logs contain no
+    channel password, derived key, admission grant, certificate private key,
+    or media payload.
+12. An `auditor` retrieves only records for explicitly authorized channels; a
     request for another channel is rejected.
-11. Audit pagination is stable, and an audit cursor outside the retained window
+13. Audit pagination is stable, and an audit cursor outside the retained window
     returns `410 Gone` rather than silently skipping history.

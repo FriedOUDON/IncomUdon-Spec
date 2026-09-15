@@ -62,6 +62,52 @@
       ]
     },
     {
+      "name": "global_relay_health_event_requires_explicit_health_read",
+      "operation": "GET /events",
+      "service_id": "viewer-100",
+      "channel_roles": {
+        "100": [
+          "viewer"
+        ]
+      },
+      "global_permissions": [],
+      "candidate_event": {
+        "type": "relay_health_changed",
+        "channel_id": null,
+        "state": "degraded"
+      },
+      "expected": "do_not_deliver"
+    },
+    {
+      "name": "global_relay_health_event_is_delivered_with_health_read",
+      "operation": "GET /events",
+      "service_id": "health-monitor-01",
+      "channel_roles": {},
+      "global_permissions": [
+        "health.read"
+      ],
+      "candidate_event": {
+        "type": "relay_health_changed",
+        "channel_id": null,
+        "state": "degraded"
+      },
+      "expected": "deliver"
+    },
+    {
+      "name": "health_read_does_not_grant_channel_scoped_event_access",
+      "operation": "GET /events",
+      "service_id": "health-monitor-01",
+      "channel_roles": {},
+      "global_permissions": [
+        "health.read"
+      ],
+      "candidate_event": {
+        "type": "talk_started",
+        "channel_id": 100
+      },
+      "expected": "do_not_deliver"
+    },
+    {
       "name": "auditor_only_participant_snapshot_is_denied",
       "operation": "GET /channels/{channel_id}/participants",
       "service_id": "auditor-01",

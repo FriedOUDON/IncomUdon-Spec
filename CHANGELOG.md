@@ -47,6 +47,11 @@
   explicit event-history gap and reconnect cursor-free without gaining viewer
   state access.
 
+- Defines Management SSE global-event authorization: channel-scoped events use
+  viewer/auditor channel ACLs, while `relay_health_changed` is a null-channel
+  global event requiring explicit `health.read`. Global permissions do not grant
+  channel event access; vectors cover both delivery and filtering.
+
 - Defines Relay Control Authentication counter exhaustion handling: a Relay
   rotates to a fresh non-zero instance ID after allocating `0xffffffff`, never
   wraps or reuses the retired nonce domain, and clients create a separate
