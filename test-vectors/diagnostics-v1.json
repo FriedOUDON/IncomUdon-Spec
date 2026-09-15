@@ -1,157 +1,159 @@
 {
   "specVersion": "unreleased",
-  "schema_version": "diagnostics-v1",
-  "snapshot_monotonic_ms": 123456,
-  "connection": {
-    "state": "connected",
-    "control_auth_policy": "required",
-    "control_auth_state": "joined",
-    "relay_rtt_ms": 28.5,
-    "last_relay_rx_age_ms": 12,
-    "reconnect_attempts": 0
-  },
-  "tx": {
-    "ptt_state": "granted",
-    "frames_captured": 200,
-    "frames_encoded": 198,
-    "audio_packets_sent": 198,
-    "audio_bytes_sent": 45678,
-    "frames_dropped_stale": 1,
-    "frames_dropped_backpressure": 0,
-    "frames_dropped_oversize": 0,
-    "datagrams_dropped_oversize": 0,
-    "send_errors_mtu": null,
-    "send_errors": 0,
-    "tx_queue_frames": 0,
-    "tx_queue_age_ms": 0,
-    "audio_packets_per_second": 50,
-    "audio_bytes_per_second": 11520,
-    "fec": {
-      "enabled": true,
-      "blocks_emitted": 33,
-      "short_final_blocks_emitted": 0,
-      "parity_p_packets_sent": 33,
-      "parity_q_packets_sent": 33,
-      "parity_bytes_sent": 7680
+  "snapshot": {
+    "schema_version": "diagnostics-v1",
+    "snapshot_monotonic_ms": 123456,
+    "connection": {
+      "state": "connected",
+      "control_auth_policy": "required",
+      "control_auth_state": "joined",
+      "relay_rtt_ms": 28.5,
+      "last_relay_rx_age_ms": 12,
+      "reconnect_attempts": 0
     },
-    "opus_inband_fec": {
-      "enabled": true,
-      "expected_loss_percent": 10,
-      "supported_bitrate": true
-    }
-  },
-  "rx": {
-    "talkers": [
-      {
-        "sender_id": 1002,
-        "active": true,
-        "codec_id": 2,
-        "codec_mode": 128000,
-        "last_packet_age_ms": 8,
-        "audio_packets_received": 250,
-        "audio_bytes_received": 55400,
-        "sequence_gaps": 2,
-        "packets_duplicate": 0,
-        "packets_reordered": 1,
-        "packets_late_dropped": 1,
-        "frames_rendered": 248,
-        "frames_plc": 1,
-        "frames_silence": 0,
-        "decode_errors": 0,
-        "playout_target_ms": 80,
-        "playout_effective_ms": 82,
-        "playout_queue_frames": 4,
-        "playout_resyncs": 0,
-        "external_fec": {
-          "enabled": false,
-          "parity_packets_received": 0,
-          "blocks_completed": 0,
-          "frames_recovered": 0,
-          "blocks_unrecoverable": 0,
-          "invalid_packets": 0,
-          "deadline_misses": 0,
-          "late_results_discarded": 0
-        },
-        "opus_inband_fec": {
-          "advertised_enabled": true,
-          "recovery_attempts": 1,
-          "frames_recovered": 1,
-          "not_eligible_gaps": 1,
-          "late_results_discarded": 0
-        },
-        "media_auth_failures": 0,
-        "media_replay_rejections": 0,
-        "media_stale_counter_drops": 0,
-        "media_unannounced_session_rejections": 0
+    "tx": {
+      "ptt_state": "granted",
+      "frames_captured": 200,
+      "frames_encoded": 198,
+      "audio_packets_sent": 198,
+      "audio_bytes_sent": 45678,
+      "frames_dropped_stale": 1,
+      "frames_dropped_backpressure": 0,
+      "frames_dropped_oversize": 0,
+      "datagrams_dropped_oversize": 0,
+      "send_errors_mtu": null,
+      "send_errors": 0,
+      "tx_queue_frames": 0,
+      "tx_queue_age_ms": 0,
+      "audio_packets_per_second": 50,
+      "audio_bytes_per_second": 11520,
+      "fec": {
+        "enabled": true,
+        "blocks_emitted": 33,
+        "short_final_blocks_emitted": 0,
+        "parity_p_packets_sent": 33,
+        "parity_q_packets_sent": 33,
+        "parity_bytes_sent": 7680
+      },
+      "opus_inband_fec": {
+        "enabled": true,
+        "expected_loss_percent": 10,
+        "supported_bitrate": true
       }
-    ],
-    "mixer": {
-      "active_sources": 1,
-      "maximum_sources": 16,
-      "mix_intervals_rendered": 248,
-      "gain_transition_ms": 20,
-      "limiter_activations": 0,
-      "source_limit_drops": 0
     },
-    "overflow_talkers": {
-      "talker_count": 0,
-      "audio_packets_received": 0,
-      "frames_rendered": 0
+    "rx": {
+      "talkers": [
+        {
+          "sender_id": 1002,
+          "active": true,
+          "codec_id": 2,
+          "codec_mode": 128000,
+          "last_packet_age_ms": 8,
+          "audio_packets_received": 250,
+          "audio_bytes_received": 55400,
+          "sequence_gaps": 2,
+          "packets_duplicate": 0,
+          "packets_reordered": 1,
+          "packets_late_dropped": 1,
+          "frames_rendered": 248,
+          "frames_plc": 1,
+          "frames_silence": 0,
+          "decode_errors": 0,
+          "playout_target_ms": 80,
+          "playout_effective_ms": 82,
+          "playout_queue_frames": 4,
+          "playout_resyncs": 0,
+          "external_fec": {
+            "enabled": false,
+            "parity_packets_received": 0,
+            "blocks_completed": 0,
+            "frames_recovered": 0,
+            "blocks_unrecoverable": 0,
+            "invalid_packets": 0,
+            "deadline_misses": 0,
+            "late_results_discarded": 0
+          },
+          "opus_inband_fec": {
+            "advertised_enabled": true,
+            "recovery_attempts": 1,
+            "frames_recovered": 1,
+            "not_eligible_gaps": 1,
+            "late_results_discarded": 0
+          },
+          "media_auth_failures": 0,
+          "media_replay_rejections": 0,
+          "media_stale_counter_drops": 0,
+          "media_unannounced_session_rejections": 0
+        }
+      ],
+      "mixer": {
+        "active_sources": 1,
+        "maximum_sources": 16,
+        "mix_intervals_rendered": 248,
+        "gain_transition_ms": 20,
+        "limiter_activations": 0,
+        "source_limit_drops": 0
+      },
+      "overflow_talkers": {
+        "talker_count": 0,
+        "audio_packets_received": 0,
+        "frames_rendered": 0
+      }
+    },
+    "control_auth": {
+      "authenticated_joins": 1,
+      "control_packets_accepted": 18,
+      "invalid_tag_rejections": 0,
+      "unknown_key_rejections": 0,
+      "cookie_rejections": 0,
+      "replay_rejections": 0,
+      "authentication_failures": 0
+    },
+    "identity_admission": {
+      "mode": "required",
+      "state": "admitted",
+      "listen_permitted": true,
+      "talk_permitted": true,
+      "ticket_lifetime_remaining_ms": 240000,
+      "tickets_accepted": 1,
+      "tickets_denied": 0,
+      "proof_failures": 0,
+      "renewals": 0,
+      "admission_expirations": 0
+    },
+    "network": {
+      "udp_packets_sent": 280,
+      "udp_packets_received": 300,
+      "udp_bytes_sent": 62000,
+      "udp_bytes_received": 67100,
+      "udp_packets_sent_per_second": 52,
+      "udp_packets_received_per_second": 54,
+      "udp_bytes_sent_per_second": 12000,
+      "udp_bytes_received_per_second": 12600,
+      "qos_requested": true,
+      "qos_applied": null,
+      "rx_datagrams_rejected_oversize": 0
+    },
+    "directory": {
+      "enabled": true,
+      "transport": "media-port",
+      "fragments_sent": 6,
+      "fragments_received": 8,
+      "reassembly_sets_completed": 2,
+      "reassembly_timeouts": 1,
+      "reassembly_conflicts": 0,
+      "reassembly_limit_drops": 0,
+      "replay_rejections": 1,
+      "active_registrations": 2,
+      "registrations_created": 3,
+      "registrations_replaced": 1,
+      "registrations_refreshed": 8,
+      "registration_expirations": 1,
+      "registration_capacity_drops": 0,
+      "heartbeat_unknown_drops": 1,
+      "heartbeat_source_mismatch_drops": 1,
+      "media_port_pre_auth_drops": 3,
+      "media_port_budget_drops": 1
     }
-  },
-  "control_auth": {
-    "authenticated_joins": 1,
-    "control_packets_accepted": 18,
-    "invalid_tag_rejections": 0,
-    "unknown_key_rejections": 0,
-    "cookie_rejections": 0,
-    "replay_rejections": 0,
-    "authentication_failures": 0
-  },
-  "identity_admission": {
-    "mode": "required",
-    "state": "admitted",
-    "listen_permitted": true,
-    "talk_permitted": true,
-    "ticket_lifetime_remaining_ms": 240000,
-    "tickets_accepted": 1,
-    "tickets_denied": 0,
-    "proof_failures": 0,
-    "renewals": 0,
-    "admission_expirations": 0
-  },
-  "network": {
-    "udp_packets_sent": 280,
-    "udp_packets_received": 300,
-    "udp_bytes_sent": 62000,
-    "udp_bytes_received": 67100,
-    "udp_packets_sent_per_second": 52,
-    "udp_packets_received_per_second": 54,
-    "udp_bytes_sent_per_second": 12000,
-    "udp_bytes_received_per_second": 12600,
-    "qos_requested": true,
-    "qos_applied": null,
-    "rx_datagrams_rejected_oversize": 0
-  },
-  "directory": {
-    "enabled": true,
-    "transport": "media-port",
-    "fragments_sent": 6,
-    "fragments_received": 8,
-    "reassembly_sets_completed": 2,
-    "reassembly_timeouts": 1,
-    "reassembly_conflicts": 0,
-    "reassembly_limit_drops": 0,
-    "replay_rejections": 1,
-    "active_registrations": 2,
-    "registrations_created": 3,
-    "registrations_replaced": 1,
-    "registrations_refreshed": 8,
-    "registration_expirations": 1,
-    "registration_capacity_drops": 0,
-    "heartbeat_unknown_drops": 1,
-    "heartbeat_source_mismatch_drops": 1,
-    "media_port_pre_auth_drops": 3,
-    "media_port_budget_drops": 1
   }
 }

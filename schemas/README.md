@@ -17,6 +17,7 @@ unauthenticated ciphertext.
 - `directory-v3-client-payload.schema.json`: decrypted v3 request, registration, or heartbeat.
 - `directory-v3-response-fragment.schema.json`: decrypted v3 participants or snapshot-page fragment.
 - `directory-v3-error-payload.schema.json`: decrypted v3 request error response.
-- `diagnostics-v1.schema.json`: local client debug-metrics snapshot.
+- `diagnostics-v1.schema.json`: local client debug-metrics runtime snapshot; the
+  `test-vectors/diagnostics-v1.json` wrapper validates its `snapshot` member.
 - `management/service-admission-grant-v1.schema.json`: signed Managed Service Admission claim set after JWS verification.
 - `management/management-event-v1.schema.json`: redacted Management Plane SSE event envelope.

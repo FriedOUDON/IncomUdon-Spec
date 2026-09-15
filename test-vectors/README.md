@@ -15,7 +15,7 @@ MUST NOT be used in production.
 | `fec-v2-variable-6-2.json` | FEC v2 variable-size and short-final-block parity/recovery cases |
 | `fec-fault-cases.json` | Machine-readable index of common FEC fault-injection cases |
 | `directory-v3.json` | Directory UDP v3 crypto, fragmentation, pagination, replay, media-port carrier, registration-lifecycle, type/payload, and canonical identifier cases |
-| `diagnostics-v1.json` | Redacted local debug-metrics snapshot |
+| `diagnostics-v1.json` | Test-vector metadata plus a redacted local debug-metrics `snapshot` |
 | `ptt-timeout-v1.json` | `TALK_RELEASE` reason payloads and timeout timelines |
 | `membership-lease-v1.json` | Membership lease timing, keepalive cadence, and Control Authentication policy refresh cases |
 | `floor-interrupt-v1.json` | Admission-required interrupt request, preemption release, and priority-selection cases |

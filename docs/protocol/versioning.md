@@ -24,6 +24,12 @@ string equal to `SPEC_VERSION`. A vector's `specVersion` describes the complete
 specification snapshot to which that file currently belongs; it does not record
 when the vector or feature was first introduced.
 
+`specVersion` is test-vector metadata, not an implicit runtime protocol field.
+When a vector contains a runtime JSON instance governed by a schema that rejects
+additional properties, the vector MUST place that instance in a named wrapper
+member. The owning protocol document MUST identify that member as the schema
+validation target.
+
 An optional `introducedIn` field MAY record introduction history only after the
 referenced release tag exists. It MUST NOT be used as a substitute for the
 current `specVersion`.

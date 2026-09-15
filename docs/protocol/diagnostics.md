@@ -39,6 +39,12 @@ The canonical JSON shape is defined by
 process-local monotonic clock and MUST NOT be interpreted as wall-clock time.
 Counters are non-negative and reset when the local session is recreated.
 
+`../../test-vectors/diagnostics-v1.json` is a test-vector wrapper: its root
+`specVersion` is repository metadata, and its `snapshot` member is the complete
+runtime Diagnostics v1 object. Only `snapshot` is validated against the
+canonical Diagnostics schema; `specVersion` MUST NOT appear in a runtime
+snapshot.
+
 Platform-dependent fields that are optional and nullable in the canonical
 schema MAY be omitted or set to `null` when unavailable; they MUST NOT be
 fabricated. They are `tx.send_errors_mtu`,
@@ -242,7 +248,9 @@ an error state.
 
 ## Validation requirements
 
-Implementations MUST validate the sample
-`../../test-vectors/diagnostics-v1.json`. Tests MUST cover counter increments,
-per-talker separation, released-talker expiry, 16-talker retention cap, Directory fragment/reassembly
-counters, missing-platform fields, and redaction of prohibited values.
+Implementations MUST validate the `snapshot` member of
+`../../test-vectors/diagnostics-v1.json` against the canonical schema and
+validate the vector root metadata under `versioning.md`. Tests MUST cover counter
+increments, per-talker separation, released-talker expiry, 16-talker retention
+cap, Directory fragment/reassembly counters, missing-platform fields, and
+redaction of prohibited values.
