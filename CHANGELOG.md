@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Clarified independent reference-validator suite scopes and strengthened the
+  structural suite with OpenAPI 3.1 validation for the Management API,
+  including component and `$ref` resolution.
+
 - Adds the first independent Specification CI validator. The structural suite
   checks vector `specVersion` metadata, all repository JSON Schemas, the
   Management OpenAPI document, and manifest-mapped runtime JSON targets without

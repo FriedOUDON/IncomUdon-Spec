@@ -8,6 +8,10 @@ from typing import Any
 
 import yaml
 from jsonschema import Draft202012Validator, SchemaError
+from openapi_spec_validator import OpenAPIV31SpecValidator, validate as validate_openapi
+from openapi_spec_validator.exceptions import OpenAPISpecValidatorError
+from openapi_spec_validator.validation.exceptions import OpenAPIValidationError
+from referencing.exceptions import Unresolvable
 
 from .loader import VectorValidationError, load_json, repository_path, resolve_json_pointer
 
@@ -36,17 +40,27 @@ def validate_schema_documents(root: Path) -> list[str]:
 
 def validate_openapi_document(root: Path) -> list[str]:
     path = root / "docs/extensions/management/openapi-v1.yaml"
+    relative = path.relative_to(root).as_posix()
     try:
         document = yaml.safe_load(path.read_text(encoding="utf-8"))
     except (OSError, yaml.YAMLError) as exc:
-        return [f"{path.relative_to(root).as_posix()}: invalid OpenAPI YAML: {exc}"]
+        return [f"{relative}: invalid OpenAPI YAML: {exc}"]
 
     if not isinstance(document, dict):
-        return [f"{path.relative_to(root).as_posix()}: OpenAPI document must be an object"]
+        return [f"{relative}: OpenAPI document must be an object"]
     if document.get("openapi") != "3.1.0":
-        return [f"{path.relative_to(root).as_posix()}: expected openapi 3.1.0"]
+        return [f"{relative}: expected openapi 3.1.0"]
     if not isinstance(document.get("paths"), dict):
-        return [f"{path.relative_to(root).as_posix()}: paths must be an object"]
+        return [f"{relative}: paths must be an object"]
+
+    try:
+        validate_openapi(
+            document,
+            base_uri=path.resolve().as_uri(),
+            cls=OpenAPIV31SpecValidator,
+        )
+    except (OpenAPISpecValidatorError, OpenAPIValidationError, Unresolvable) as exc:
+        return [f"{relative}: OpenAPI 3.1 validation failed: {exc}"]
     return []
 
 

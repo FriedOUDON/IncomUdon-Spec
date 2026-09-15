@@ -1,4 +1,5 @@
 jsonschema>=4.23,<5
 PyYAML>=6.0,<7
+openapi-spec-validator>=0.7,<1
 argon2-cffi>=23,<26
 cryptography>=44,<47

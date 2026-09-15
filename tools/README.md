@@ -3,18 +3,35 @@
 `validate_vectors.py` is an independent reference validator. It MUST NOT import
 Relay, PWA, Qt, or Rust implementation code.
 
-## Structural suite
+## Run all suites
 
-Run the first-stage suite with:
+Run every independent reference validation suite with:
 
 ```powershell
 python -m pip install -r tools/requirements-ci.txt
 python tools/validate_vectors.py --suite all
 ```
 
+`--suite all` runs the `structural`, `packet`, `crypto`, `fec`, and `lifecycle`
+suites. Use it for CI and before submitting a specification change.
+
+## Structural suite
+
+Run only repository metadata, schema, and contract validation with:
+
+```powershell
+python tools/validate_vectors.py --suite structural
+```
+
 The structural suite validates vector `specVersion` metadata, every repository
-JSON Schema, the Management OpenAPI YAML document, and runtime JSON targets
-listed in `vector-schema-targets.json`.
+JSON Schema, the Management OpenAPI 3.1 document (including component and
+`$ref` validation), and runtime JSON targets listed in
+`vector-schema-targets.json`.
+
+OpenAPI validation resolves references relative to
+`docs/extensions/management/openapi-v1.yaml` and checks the document against
+the OpenAPI 3.1 specification. It validates the API contract, not the runtime
+behavior of an HTTP implementation.
 
 The manifest maps a test vector and RFC 6901 JSON Pointer to its canonical
 schema. A vector root is metadata or a scenario container, not automatically a
