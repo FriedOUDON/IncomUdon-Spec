@@ -3,6 +3,7 @@
   "pskAscii": "01234567890123456789012345678901",
   "keyId": "pwa-1",
   "epochAscii": "directory-epoch!",
+  "epochRawHex": "6469726563746f72792d65706f636821",
   "epochBase64Url": "ZGlyZWN0b3J5LWVwb2NoIQ",
   "sequence": 1,
   "expiresAt": 1700000010,

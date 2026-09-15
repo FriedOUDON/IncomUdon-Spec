@@ -180,9 +180,15 @@ administrative directory. Its envelope conforms to
 `schemas/directory-v1.schema.json` and includes `keyId`. It is selected only
 by explicit `shared-psk` configuration.
 
+The JSON `epoch` is the canonical unpadded base64url encoding of a 16-byte
+binary value. Let `epoch_raw = BASE64URL-DECODE(envelope.epoch)`. `epoch_raw`
+MUST be exactly 16 bytes, and `BASE64URL-ENCODE(epoch_raw)` MUST exactly equal
+`envelope.epoch`. All cryptographic references to `epoch` in Directory v1 use
+`epoch_raw`, never the UTF-8 or ASCII bytes of the JSON base64url string.
+
 ```text
 directory_key = HMAC-SHA-256(psk,
-  "IncomUdon directory PSK v1 relay-to-pwa" || epoch)
+  "IncomUdon directory PSK v1 relay-to-pwa" || epoch_raw)
 nonce = "IDP1" || U64BE(sequence)
 ```
 
@@ -190,9 +196,18 @@ Its AAD is the concatenation of:
 
 ```text
 "IncomUdon Directory Envelope AAD v1\0"
-U8(v) || U8(len(type)) || type || U8(len(keyId)) || keyId || epoch ||
+U8(v) || U8(len(type)) || type || U8(len(keyId)) || keyId || epoch_raw ||
 U64BE(sequence) || U64BE(expiresAt)
 ```
+
+Each sender MUST choose a fresh random 16-byte `epoch_raw` before its first
+message and whenever its sequence state is reset, then set `envelope.epoch` to
+its canonical unpadded base64url encoding. A receiver MUST base64url-decode
+`envelope.epoch` before key derivation or AAD construction, reject a decode
+failure, reject a result other than exactly 16 bytes, and reject a non-canonical
+encoding for which re-encoding the raw bytes does not exactly reproduce
+`envelope.epoch`. It MUST use that 16-byte `epoch_raw` for the HMAC input, AAD,
+and replay domain.
 
 Because v1 envelopes use JSON numbers, `sequence` and `expiresAt` MUST be
 positive JavaScript-safe integers in the inclusive range
@@ -203,4 +218,5 @@ construction.
 
 The v1 `snapshot` may contain configured data across channels. Its use is
 therefore appropriate only when that visibility is intended. See
-`../../test-vectors/directory-psk-v1.json` for a deterministic v1 request.
+`../../test-vectors/directory-psk-v1.json` for a deterministic v1 request and
+its decoded `epoch_raw` value.

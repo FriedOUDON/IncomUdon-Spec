@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Clarifies Directory UDP v1 `epoch` processing: canonical base64url text
+  decodes to a fresh 16-byte `epoch_raw`, which is the only representation
+  used for HMAC derivation, AAD, and replay domains.
+
 - Unifies Floor Interrupt audit requirements with the canonical Management
   Plane `AuditRecord`: generalized identity/service/Relay actors and required
   preemption details now preserve requester and replaced-talker priorities in
