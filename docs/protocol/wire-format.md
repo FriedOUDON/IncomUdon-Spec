@@ -15,8 +15,12 @@ All multibyte integers use network byte order (big endian).
 | 14 | 2 | `flags` |
 
 The fixed header is 16 bytes. `seq` increments for every packet sent by a
-client and wraps modulo 65536. Receivers MUST tolerate wrapping and MUST NOT
-assume that the sequence field alone is a cryptographic nonce.
+client and wraps modulo 65536. A Relay MUST likewise assign `seq` from its own
+outbound counter to every Relay-originated or Relay-reauthenticated downstream
+control packet; this counter is independent of client sequence spaces and MAY
+be shared across original talker sender IDs. Receivers MUST tolerate wrapping
+and MUST NOT assume that the sequence field alone is a cryptographic nonce or
+replay identifier.
 
 ## AES-GCM v2 media security header
 

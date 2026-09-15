@@ -4,8 +4,10 @@
 
 Control Authentication v1 protects Version 1 Relay control traffic against
 network parties that do not know the channel password. It authenticates
-client-to-Relay control requests and Relay-forwarded or Relay-generated
-control packets. It is separate from AES-GCM v2 media encryption.
+client-to-Relay control requests and Relay-originated control packets. A
+Relay re-authenticates verified `CODEC_CONFIG` payloads before sending them
+downstream; it never forwards the client-authenticated datagram byte-for-byte.
+Control Authentication is separate from AES-GCM v2 media encryption.
 
 This is **group authentication**. Every client that knows a channel password
 can derive the same control key. Consequently, it does not identify individual
@@ -174,6 +176,36 @@ The Relay uses its own cryptographically random 32-bit instance ID in the high
 monotonically increasing low 32-bit counter. Clients maintain a bounded replay
 window for each Relay instance ID.
 
+## Relay-reauthenticated CODEC_CONFIG
+
+After verifying a client-originated authenticated `CODEC_CONFIG`, the Relay
+MUST cache its exact verified 19-byte payload, original `channel_id` and
+`sender_id`, and verified `control_key_id`. When forwarding that configuration
+to a receiver, including active-talker synchronization after a new JOIN, the
+Relay MUST construct a new Relay-originated Control Authentication v1 packet.
+It MUST NOT forward the client datagram, client control nonce, fixed-header
+`seq`, or client HMAC tag byte-for-byte.
+
+The reauthenticated downstream packet MUST use the original `channel_id`,
+original talker `sender_id`, packet type `CODEC_CONFIG`, the exact cached
+payload, the verified `control_key_id`, `header_len = 28`, and
+`CONTROL_AUTH_V1`. It MUST use a fresh unused Relay control nonce and a newly
+computed HMAC tag over the reconstructed fixed and security headers plus the
+cached payload. The Relay MUST assign a fresh downstream fixed-header `seq`
+as defined in `wire-format.md`. A cached configuration re-emitted to another
+receiver or at a later time MUST consume another Relay counter and produce a
+new tag even when its payload is unchanged.
+
+A receiver MUST process the downstream configuration as Relay-originated
+control: verify its HMAC and enforce replay protection only in the Relay
+instance-ID nonce domain. It MUST NOT create a replay window for the original
+client session ID. After successful verification, the receiver applies the
+original talker `sender_id` and payload to codec and media-replay state as
+specified in `control-packets.md`, `audio-codecs.md`, and `security.md`.
+Reauthentication standardizes replay handling and cached delivery; because the
+control key is group-shared, it does not provide cryptographic proof that only
+the Relay could have created the packet.
+
 ## Authenticated packet classes
 
 The following client-to-Relay packets MUST use Control Authentication v1 when
@@ -198,11 +230,12 @@ The Relay MUST apply Control Authentication v1 to its generated `AUTH_CHALLENGE`
 `SERVICE_ADMISSION_DENY`, `TALK_GRANT`, `TALK_RELEASE`, `TALK_DENY`,
 `SERVER_CONFIG`, and `PONG` packets.
 It MUST verify authentication before caching a CodecConfig, granting/releasing
-talk, registering a peer, refreshing membership, or forwarding an authenticated
-client control packet. For AES-GCM v2, the Relay MUST cache the verified
-CodecConfig and forward it before forwarding `AUDIO` or `FEC` with that
-sender's announced `media_nonce_base_96`; it MUST NOT forward media for an
-unconfigured base. Audio and FEC packets are accepted only from an
+talk, registering a peer, refreshing membership, or constructing downstream
+state from an authenticated client control packet. For AES-GCM v2, the Relay
+MUST cache the verified CodecConfig and reauthenticate it before forwarding the
+configuration, including before forwarding `AUDIO` or `FEC` with that sender's
+announced `media_nonce_base_96`; it MUST NOT forward media for an unconfigured
+base. Audio and FEC packets are accepted only from an
 authenticated peer session that currently holds a valid membership.
 
 ## Relay key provisioning and policy
@@ -273,8 +306,10 @@ control tags, cookies, or Relay cookie secrets. Debug logs MAY identify a
 rejection reason class such as `invalid_tag`, `expired_cookie`, or
 `replayed_nonce`, but MUST NOT include secret material.
 
-Implementations MUST verify the deterministic `control-auth-v1.json` vector
-and run tests for valid tags, tampering, wrong key IDs, incorrect channel or
+Implementations MUST verify the deterministic `control-auth-v1.json` and
+`relay-reauthenticated-codec-config-v1.json` vectors and run tests for valid
+tags, tampering, wrong key IDs, incorrect channel or
 sender IDs, expired/reused cookies, source-address cookie mismatch, replayed
-nonces, provisional-window expiry, window promotion at JOIN, and direct,
-Identity Admission, and Managed Service Admission counter sequences.
+nonces, provisional-window expiry, window promotion at JOIN, direct,
+Identity Admission, and Managed Service Admission counter sequences, and
+Relay-reauthenticated `CODEC_CONFIG` delivery with a fresh Relay nonce and tag.

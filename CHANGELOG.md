@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Requires Relays to reauthenticate verified `CODEC_CONFIG` payloads as fresh
+  Relay-originated control packets, separating downstream replay protection
+  from client control-session nonces and cached source datagrams.
 - Defines Management Plane SSE replay and reconnection cursor precedence,
   including `Last-Event-ID` handling and deterministic malformed or unavailable
   cursor errors.

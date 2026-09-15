@@ -77,10 +77,14 @@ and `FEC` header for this sender until the next configuration. A sender MUST
 create a fresh base whenever it changes the codec transport, mode, or FEC
 options and emits a replacement configuration. The packet MUST use Control
 Authentication v1. A receiver MUST authenticate this configuration before
-creating or replacing the sender's media replay domain. `CODEC_CONFIG` does not
-carry a `media_key_id`: an AES-GCM v2 receiver MUST use the `media_key_id`
-selected by its media security mode (`2` for AES-GCM v2). The
-`control_key_id` in the Control Authentication header authenticates this
+creating or replacing the sender's media replay domain. When the Relay forwards
+or replays a verified configuration, it reauthenticates the original talker's
+19-byte payload as Relay-originated control under `control-auth.md`; the
+receiver uses the Relay nonce domain for control replay protection while still
+using the original talker `sender_id` and payload for media state.
+`CODEC_CONFIG` does not carry a `media_key_id`: an AES-GCM v2 receiver MUST use
+the `media_key_id` selected by its media security mode (`2` for AES-GCM v2).
+The `control_key_id` in the Control Authentication header authenticates this
 configuration but MUST NOT be used as its media replay-domain key ID.
 
 For `no-crypto`, `legacy-xor`, and legacy `aes-gcm`, the 12-byte
