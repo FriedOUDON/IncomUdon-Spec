@@ -1,0 +1,21 @@
+{
+  "specVersion": "unreleased",
+  "events": [
+    {
+      "schema_version": "management-event-v1",
+      "event_id": "1001",
+      "occurred_at": "2026-09-16T12:00:00Z",
+      "type": "talk_started",
+      "channel_id": 111,
+      "sender_id": 1001
+    },
+    {
+      "schema_version": "management-event-v1",
+      "event_id": "1002",
+      "occurred_at": "2026-09-16T12:00:01Z",
+      "type": "relay_health_changed",
+      "channel_id": null,
+      "state": "degraded"
+    }
+  ]
+}

@@ -27,6 +27,13 @@
         "seq": 42,
         "flags": 0
       },
+      "codecConfig": {
+        "flags": 0,
+        "codecTransportId": 2,
+        "codecModeBps": 12000,
+        "fecOptions": 0,
+        "mediaNonceBase96Hex": "000000000000000000000000"
+      },
       "payloadHex": "000200002ee000000000000000000000000000",
       "datagramHex": "010b00100000006f000003ea002a0000000200002ee000000000000000000000000000",
       "notes": "19-byte CODEC_CONFIG; no-crypto reserves the media_nonce_base_96 bytes as zero."
@@ -42,6 +49,13 @@
         "seq": 44,
         "flags": 0
       },
+      "codecConfig": {
+        "flags": 0,
+        "codecTransportId": 2,
+        "codecModeBps": 128000,
+        "fecOptions": 0,
+        "mediaNonceBase96Hex": "000000000000000000000000"
+      },
       "payloadHex": "00020001f40000000000000000000000000000",
       "datagramHex": "010b00100000006f000003ea002c000000020001f40000000000000000000000000000",
       "notes": "19-byte CODEC_CONFIG proves the u32 bitrate field carries an Opus value above u16 range."
@@ -56,6 +70,13 @@
         "senderId": 1002,
         "seq": 45,
         "flags": 0
+      },
+      "codecConfig": {
+        "flags": 0,
+        "codecTransportId": 2,
+        "codecModeBps": 24000,
+        "fecOptions": 0,
+        "mediaNonceBase96Hex": "000000000000000000000000"
       },
       "payloadHex": "000200005dc000000000000000000000000000",
       "datagramHex": "010b00100000006f000003ea002d0000000200005dc000000000000000000000000000",
@@ -86,6 +107,7 @@
         "seq": 0,
         "flags": 0
       },
+      "talkerId": 1002,
       "payloadHex": "000003ea",
       "datagramHex": "010700100000006f000003ea00000000000003ea"
     },
@@ -100,6 +122,7 @@
         "seq": 3,
         "flags": 0
       },
+      "talkerId": 0,
       "payloadHex": "00000000",
       "datagramHex": "010900100000006f000000000003000000000000",
       "notes": "Both header senderId and payload talker_id are the zero Relay/System sentinel when no active talker can be selected."
@@ -115,6 +138,8 @@
         "seq": 1,
         "flags": 0
       },
+      "talkerId": 1001,
+      "releaseReason": 1,
       "payloadHex": "000003e901",
       "datagramHex": "010800100000006f000003e900010000000003e901"
     },
@@ -151,6 +176,7 @@
         "seq": 44,
         "flags": 0
       },
+      "pingNonceHex": "1020304050607080",
       "payloadHex": "1020304050607080",
       "datagramHex": "010e00100000006f000003ea002c00001020304050607080"
     },

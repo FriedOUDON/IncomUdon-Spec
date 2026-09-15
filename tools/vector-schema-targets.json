@@ -1,0 +1,80 @@
+{
+  "manifestVersion": 1,
+  "targets": [
+    {
+      "name": "Diagnostics v1 runtime snapshot",
+      "vector": "test-vectors/diagnostics-v1.json",
+      "pointer": "/snapshot",
+      "schema": "schemas/diagnostics-v1.schema.json"
+    },
+    {
+      "name": "Management audit retrieval response",
+      "vector": "test-vectors/management/audit-retrieval-v1.json",
+      "pointer": "/response",
+      "schema": "schemas/management/audit-retrieval-v1.schema.json"
+    },
+    {
+      "name": "Management event samples",
+      "vector": "test-vectors/management/management-event-v1.json",
+      "pointer": "/events",
+      "each": true,
+      "schema": "schemas/management/management-event-v1.schema.json"
+    },
+    {
+      "name": "Managed Service Admission grant claims",
+      "vector": "test-vectors/management/service-admission-v1.json",
+      "pointer": "/grant/payload_json",
+      "encoding": "json-string",
+      "schema": "schemas/management/service-admission-grant-v1.schema.json"
+    },
+    {
+      "name": "Directory v3 dedicated request envelope",
+      "vector": "test-vectors/directory-v3.json",
+      "pointer": "/crypto/dedicatedRequest/envelope",
+      "schema": "schemas/directory-v3.schema.json"
+    },
+    {
+      "name": "Directory v3 dedicated request payload",
+      "vector": "test-vectors/directory-v3.json",
+      "pointer": "/crypto/dedicatedRequest/plaintextUtf8",
+      "encoding": "json-string",
+      "schema": "schemas/directory-v3-client-payload.schema.json"
+    },
+    {
+      "name": "Directory v3 media request envelope",
+      "vector": "test-vectors/directory-v3.json",
+      "pointer": "/crypto/mediaPortRequest/envelope",
+      "schema": "schemas/directory-v3.schema.json"
+    },
+    {
+      "name": "Directory v3 media request payload",
+      "vector": "test-vectors/directory-v3.json",
+      "pointer": "/crypto/mediaPortRequest/plaintextUtf8",
+      "encoding": "json-string",
+      "schema": "schemas/directory-v3-client-payload.schema.json"
+    },
+    {
+      "name": "Directory v3 participant fragment envelopes",
+      "vector": "test-vectors/directory-v3.json",
+      "pointer": "/crypto/mediaPortParticipantsFragments",
+      "each": true,
+      "itemPointer": "/envelope",
+      "schema": "schemas/directory-v3.schema.json"
+    },
+    {
+      "name": "Directory v3 participant fragment payloads",
+      "vector": "test-vectors/directory-v3.json",
+      "pointer": "/crypto/mediaPortParticipantsFragments",
+      "each": true,
+      "itemPointer": "/plaintextUtf8",
+      "encoding": "json-string",
+      "schema": "schemas/directory-v3-response-fragment.schema.json"
+    },
+    {
+      "name": "Directory v3 error payload",
+      "vector": "test-vectors/directory-v3.json",
+      "pointer": "/typePayloadVariantCases/cases/7/payload",
+      "schema": "schemas/directory-v3-error-payload.schema.json"
+    }
+  ]
+}

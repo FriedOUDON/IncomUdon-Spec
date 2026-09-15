@@ -57,6 +57,11 @@ it is distinct from the transient redacted SSE `/events` stream.
 Every `GET /audit-records` response MUST include
 `schema_version: "audit-retrieval-v1"`; the OpenAPI `AuditRecordPage` schema
 and JSON Schema define the same canonical response object.
+`test-vectors/management/management-event-v1.json` contains canonical event
+instances under its `events` scenario array. Its root `specVersion` is test
+metadata, not part of an SSE event. `test-vectors/management/audit-retrieval-v1.json`
+likewise keeps query scenario inputs at its root and places the canonical API
+response object under `response`.
 Management APIs MUST use explicit `/v1/` versioning and MUST NOT return channel
 passwords, derived keys, media plaintext, OIDC credentials, or client certificate private keys. The grant-issuance endpoint is the only API response permitted to return a Service Admission Grant; it MUST use `Cache-Control: no-store`, and grants MUST NOT appear in logs, audit records, or event streams.
 

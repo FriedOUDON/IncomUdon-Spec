@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IncomUdon reference validator schema-target manifest",
+  "type": "object",
+  "required": ["manifestVersion", "targets"],
+  "properties": {
+    "manifestVersion": { "const": 1 },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "vector", "pointer", "schema"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "vector": { "type": "string", "pattern": "^test-vectors/.+\\.json$" },
+          "pointer": { "type": "string", "pattern": "^(?:/.*)?$" },
+          "schema": { "type": "string", "pattern": "^schemas/.+\\.schema\\.json$" },
+          "each": { "type": "boolean" },
+          "itemPointer": { "type": "string", "pattern": "^(?:/.*)?$" },
+          "encoding": { "enum": ["object", "json-string"] },
+          "expected": { "enum": ["valid", "invalid"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

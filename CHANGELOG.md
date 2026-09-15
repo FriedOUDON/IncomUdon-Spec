@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- Adds the first independent Specification CI validator. The structural suite
+  checks vector `specVersion` metadata, all repository JSON Schemas, the
+  Management OpenAPI document, and manifest-mapped runtime JSON targets without
+  importing a Relay or client implementation. Adds canonical Management event
+  samples and separates audit query metadata from the schema-governed response.
+
+- Extends the independent validator with a deterministic Version 1 packet
+  suite. It re-encodes fixed headers and semantic `CODEC_CONFIG`, talk,
+  `SERVER_CONFIG`, `PING`, and AUDIO fixtures before comparing canonical payload
+  and datagram bytes; Specification CI now runs all available suites.
+
+- Extends the independent validator with a crypto golden suite. It recomputes
+  Argon2id/HKDF root and separated keys, Control Authentication HMAC tags and
+  cookies, AES-256-GCM media and Directory AEAD values, and Ed25519 JWS and
+  admission proof signatures using only Specification fixtures.
+
+- Extends the independent validator with a GF(256) FEC suite. It recomputes
+  P/Q parity, FEC v2 variable-frame padding and payload bytes, and one-/two-
+  frame recovery for complete, short-final, and `audio_seq` wrap-boundary
+  blocks without importing a client or Relay FEC implementation.
+
+- Extends the independent validator with a lifecycle semantic suite. It
+  evaluates PTT and membership deadlines, admission expiry attribution,
+  Directory v3 reassembly/replay/pagination/registration, media anti-replay,
+  and Floor Interrupt authorization/preemption transitions from their
+  deterministic inputs and policy rules.
+
 - Replaces the draft Directory UDP v1/v2 formats with channel-password-derived
   Directory UDP v3. Adds bounded application-level fragmentation, atomic
   reassembly, revision-pinned snapshot pagination, and an optional

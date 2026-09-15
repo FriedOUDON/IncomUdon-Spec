@@ -1,54 +1,56 @@
 {
   "specVersion": "unreleased",
-  "schema_version": "audit-retrieval-v1",
   "query": {
     "channel_id": 111,
     "since": "2026-09-15T00:00:00Z",
     "until": "2026-09-16T00:00:00Z",
     "limit": 100
   },
-  "records": [
-    {
-      "record_id": "audit-000000000042",
-      "timestamp": "2026-09-15T12:34:56Z",
-      "actor_type": "service",
-      "actor_id": "recording-controller-01",
-      "channel_id": 111,
-      "action": "recording_start",
-      "result": "success",
-      "recording_job": {
-        "job_id": "recording-job-0001",
-        "recorder_service_id": "recorder-worker-01"
+  "response": {
+    "schema_version": "audit-retrieval-v1",
+    "records": [
+      {
+        "record_id": "audit-000000000042",
+        "timestamp": "2026-09-15T12:34:56Z",
+        "actor_type": "service",
+        "actor_id": "recording-controller-01",
+        "channel_id": 111,
+        "action": "recording_start",
+        "result": "success",
+        "recording_job": {
+          "job_id": "recording-job-0001",
+          "recorder_service_id": "recorder-worker-01"
+        }
+      },
+      {
+        "record_id": "audit-000000000043",
+        "timestamp": "2026-09-15T12:35:00Z",
+        "actor_type": "identity",
+        "actor_id": "identity-subject-7f3a",
+        "channel_id": 111,
+        "action": "floor_interrupt",
+        "result": "success",
+        "floor_interrupt": {
+          "requester_priority": 200,
+          "replaced_sender_id": 5678,
+          "replaced_priority": 100
+        }
+      },
+      {
+        "record_id": "audit-000000000044",
+        "timestamp": "2026-09-15T12:35:05Z",
+        "actor_type": "service",
+        "actor_id": "dispatch-automation-01",
+        "channel_id": 111,
+        "action": "floor_interrupt",
+        "result": "denied",
+        "floor_interrupt": {
+          "requester_priority": 100,
+          "replaced_sender_id": null,
+          "replaced_priority": null
+        }
       }
-    },
-    {
-      "record_id": "audit-000000000043",
-      "timestamp": "2026-09-15T12:35:00Z",
-      "actor_type": "identity",
-      "actor_id": "identity-subject-7f3a",
-      "channel_id": 111,
-      "action": "floor_interrupt",
-      "result": "success",
-      "floor_interrupt": {
-        "requester_priority": 200,
-        "replaced_sender_id": 5678,
-        "replaced_priority": 100
-      }
-    },
-    {
-      "record_id": "audit-000000000044",
-      "timestamp": "2026-09-15T12:35:05Z",
-      "actor_type": "service",
-      "actor_id": "dispatch-automation-01",
-      "channel_id": 111,
-      "action": "floor_interrupt",
-      "result": "denied",
-      "floor_interrupt": {
-        "requester_priority": 100,
-        "replaced_sender_id": null,
-        "replaced_priority": null
-      }
-    }
-  ],
-  "next_cursor": "audit-cursor-example-0001"
+    ],
+    "next_cursor": "audit-cursor-example-0001"
+  }
 }
