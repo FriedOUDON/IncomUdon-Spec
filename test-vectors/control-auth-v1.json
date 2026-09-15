@@ -49,6 +49,35 @@
         "expected": "reject"
       }
     },
+    "relay_counter_rollover": {
+      "old_relay_instance_id": 2596069104,
+      "old_relay_instance_id_hex": "9abcdef0",
+      "final_old_domain_allocations": [
+        {
+          "counter": 4294967294,
+          "nonce_hex": "9abcdef0fffffffe",
+          "expected": "allocate"
+        },
+        {
+          "counter": 4294967295,
+          "nonce_hex": "9abcdef0ffffffff",
+          "expected": "allocate_final_counter"
+        }
+      ],
+      "next_allocation": {
+        "required_action": "rollover_to_new_relay_instance_id",
+        "new_relay_instance_id": 610839776,
+        "new_relay_instance_id_hex": "2468ace0",
+        "counter": 0,
+        "nonce_hex": "2468ace000000000",
+        "expected": "allocate_in_new_replay_domain"
+      },
+      "forbidden": [
+        "Wrap the old relay counter to zero.",
+        "Allocate nonce 9abcdef000000000 under the retired relay_instance_id.",
+        "Merge the new Relay replay window with the retired Relay replay window."
+      ]
+    },
     "direct_join": [
       {
         "type": "AUTH_HELLO",
@@ -113,7 +142,8 @@
     "rejection_cases": [
       "A counter already accepted by the provisional or authenticated replay window is rejected.",
       "A client MUST use a fresh client_session_id instead of restarting a counter at zero.",
-      "A client and Relay MUST regenerate their high-32-bit nonce identifier when a CSPRNG returns zero."
+      "A client and Relay MUST regenerate their high-32-bit nonce identifier when a CSPRNG returns zero.",
+      "A Relay MUST roll over to a fresh relay_instance_id after allocating counter 0xffffffff and before allocating another Relay-originated authenticated control nonce."
     ]
   }
 }

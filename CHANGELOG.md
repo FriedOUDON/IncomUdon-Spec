@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Defines Relay Control Authentication counter exhaustion handling: a Relay
+  rotates to a fresh non-zero instance ID after allocating `0xffffffff`, never
+  wraps or reuses the retired nonce domain, and clients create a separate
+  bounded replay domain for the new instance. Adds canonical rollover-boundary
+  coverage.
+
 - Reserves `sender_id = 0` for Relay/System packets and protocol sentinels;
   endpoint sender IDs, Identity and Managed Service Admission `sid` claims,
   management API resources, diagnostics, directory speakers, and Relay CSV

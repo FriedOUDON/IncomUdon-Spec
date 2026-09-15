@@ -9,7 +9,7 @@ MUST NOT be used in production.
 | `password-kdf-v1.json` | Argon2id-v1 and raw-secret-v1 root-key derivation |
 | `aes-gcm-v2.json` | Channel credential derivation, AES-GCM v2 base/counter AAD, ciphertext, and tag |
 | `media-replay-v1.json` | AES-GCM v2 authenticated media replay-window acceptance and rejection cases |
-| `control-auth-v1.json` | Password/control-key derivation, authenticated control tag, and pre-JOIN counter sequences |
+| `control-auth-v1.json` | Password/control-key derivation, authenticated control tag, pre-JOIN counter sequences, and Relay counter-rollover boundaries |
 | `relay-reauthenticated-codec-config-v1.json` | Relay reconstruction of authenticated `CODEC_CONFIG` with a fresh Relay nonce, sequence, and tag |
 | `fec-rs-6-2.json` | Historical fixed-size six-frame two-parity FEC case |
 | `fec-v2-variable-6-2.json` | FEC v2 variable-size and short-final-block parity/recovery cases |

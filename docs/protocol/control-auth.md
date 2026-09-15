@@ -179,6 +179,30 @@ MUST regenerate the instance ID if its CSPRNG returns zero. Relay-originated
 nonces use a monotonically increasing low 32-bit counter. Clients maintain a
 bounded replay window for each Relay instance ID.
 
+A Relay MUST NOT allow its low 32-bit control counter to wrap. Counter
+`0xffffffff` is the final value that MAY be allocated in one Relay nonce
+domain. Before allocating another Relay-originated authenticated control
+packet, the Relay MUST atomically begin a new Relay nonce domain: it selects a
+fresh CSPRNG-generated non-zero `relay_instance_id` different from the active
+one, resets the low counter to zero, and allocates the next nonce from that new
+domain. It MUST NOT allocate another nonce under the retired instance ID. An
+in-process rollover MUST NOT reuse an earlier Relay instance ID. If the Relay
+cannot obtain a new usable instance ID, it MUST fail closed for
+Relay-originated authenticated control rather than reuse or wrap a nonce.
+
+The rollover is self-describing in the high 32 bits of the authenticated
+control nonce and does not require client reauthentication, membership changes,
+or a Relay process restart. A Relay process start or restart likewise begins a
+new Relay nonce domain with a fresh non-zero CSPRNG-generated instance ID and
+low counter zero. On a valid Relay-originated authenticated control packet with
+a previously unseen `relay_instance_id`, a client MUST initialize a separate
+bounded replay window for that instance ID; it MUST NOT merge counters or replay
+state with another Relay instance ID. A client MAY evict inactive Relay domains
+to maintain its bounded state. After accepting a new Relay instance ID as
+active, a client MUST mark the previously active domain retired and MUST NOT let
+a later packet from that retired instance ID replace its active Relay nonce
+domain or roll back control-derived state.
+
 ## Relay-reauthenticated CODEC_CONFIG
 
 After verifying a client-originated authenticated `CODEC_CONFIG`, the Relay
@@ -315,4 +339,5 @@ tags, tampering, wrong key IDs, incorrect channel or
 sender IDs, expired/reused cookies, source-address cookie mismatch, replayed
 nonces, provisional-window expiry, window promotion at JOIN, direct,
 Identity Admission, and Managed Service Admission counter sequences, and
-Relay-reauthenticated `CODEC_CONFIG` delivery with a fresh Relay nonce and tag.
+Relay-reauthenticated `CODEC_CONFIG` delivery with a fresh Relay nonce and tag,
+and Relay counter exhaustion rollover without nonce reuse or counter wrap.
