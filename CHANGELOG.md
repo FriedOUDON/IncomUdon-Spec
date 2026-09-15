@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Unifies Floor Interrupt audit requirements with the canonical Management
+  Plane `AuditRecord`: generalized identity/service/Relay actors and required
+  preemption details now preserve requester and replaced-talker priorities in
+  retained `GET /audit-records` data.
+
 - Aligns the Management Plane `AuditRecordPage` OpenAPI response with its JSON
   Schema by requiring `schema_version: "audit-retrieval-v1"`.
 - Defines Relay-advertised membership leases, idle keepalive cadence, explicit

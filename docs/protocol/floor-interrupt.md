@@ -131,10 +131,19 @@ claim from that ACL; it MUST NOT accept a caller-selected priority value.
 
 A Relay SHOULD expose redacted diagnostics counters for interrupt requests,
 grants, denials, preemptions, and rejected unauthorized requests. Audit records
-MUST contain the requesting admitted identity/service, channel ID, replaced
-sender ID when applicable, effective priorities, result, and timestamp. They
-MUST NOT contain channel credentials, keys, full tickets, full grants, or
-source network addresses.
+for every admission-identified `PTT_REQUEST` MUST use the canonical Management
+Plane v1 `AuditRecord` model with `action: "floor_interrupt"`. The record MUST
+contain the requesting admitted identity/service as `actor_type` and `actor_id`,
+the channel ID, requester effective priority, result, and timestamp. Its
+`floor_interrupt.replaced_sender_id` and
+`floor_interrupt.replaced_priority` MUST identify the preempted talker and its
+effective priority when a preemption occurs; both fields MUST be `null` when a
+request is granted without replacement or does not actually preempt a talker.
+The Relay MUST retain this canonical record in its configured audit sink. When
+Management Plane v1 is enabled, it MUST expose the retained record through
+`GET /audit-records` subject to the caller's audit ACL. Audit records MUST NOT
+contain channel credentials, keys, full tickets, full grants, raw identity
+claims, or source network addresses.
 
 ## Required interoperability cases
 

@@ -5,18 +5,45 @@
     "channel_id": 111,
     "since": "2026-09-15T00:00:00Z",
     "until": "2026-09-16T00:00:00Z",
-    "action": "recording_start",
-    "result": "success",
     "limit": 100
   },
   "records": [
     {
       "record_id": "audit-000000000042",
       "timestamp": "2026-09-15T12:34:56Z",
-      "service_id": "recorder-01",
+      "actor_type": "service",
+      "actor_id": "recorder-01",
       "channel_id": 111,
       "action": "recording_start",
       "result": "success"
+    },
+    {
+      "record_id": "audit-000000000043",
+      "timestamp": "2026-09-15T12:35:00Z",
+      "actor_type": "identity",
+      "actor_id": "identity-subject-7f3a",
+      "channel_id": 111,
+      "action": "floor_interrupt",
+      "result": "success",
+      "floor_interrupt": {
+        "requester_priority": 200,
+        "replaced_sender_id": 5678,
+        "replaced_priority": 100
+      }
+    },
+    {
+      "record_id": "audit-000000000044",
+      "timestamp": "2026-09-15T12:35:05Z",
+      "actor_type": "service",
+      "actor_id": "dispatch-automation-01",
+      "channel_id": 111,
+      "action": "floor_interrupt",
+      "result": "denied",
+      "floor_interrupt": {
+        "requester_priority": 100,
+        "replaced_sender_id": null,
+        "replaced_priority": null
+      }
     }
   ],
   "next_cursor": "audit-cursor-example-0001"

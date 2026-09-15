@@ -247,10 +247,25 @@ access implicitly.
 The Management Service MUST durably retain redacted audit records for its
 documented deployment retention period. Records are append-only through the
 v1 API: no endpoint may modify or delete them. Each returned record MUST
-contain an opaque `record_id`, RFC 3339 UTC `timestamp`, actor `service_id`,
-nullable `channel_id`, `action`, and `result`. It MUST NOT contain channel
-passwords, derived keys, admission grants, certificate contents, source
-addresses, media payloads, or unredacted request bodies.
+contain an opaque `record_id`, RFC 3339 UTC `timestamp`, `actor_type`,
+privacy-preserving `actor_id`, nullable `channel_id`, `action`, and `result`.
+`actor_type` is `identity`, `service`, or `relay`. An `identity` actor uses the
+stable admitted identity identifier; a `service` actor uses the authenticated
+Management Service `service_id`; and a `relay` actor uses a deployment-local,
+opaque Relay identifier. An audit record MUST NOT contain channel passwords,
+derived keys, admission grants, certificate contents, source addresses, media
+payloads, unredacted request bodies, or raw OIDC claims beyond the configured
+privacy-preserving identity identifier.
+
+`action: "floor_interrupt"` records MUST include `floor_interrupt` details:
+the requester's effective priority, nullable replaced sender ID, and nullable
+replaced effective priority. Both replaced fields MUST be non-null for a
+preemption and MUST be null when the request did not actually preempt an
+active talker.
+This canonical record format applies to Relay audit storage even when the
+optional Management API listener is disabled; when that listener is enabled,
+the records are retrieved through `GET /audit-records` subject to the caller's
+audit ACL.
 
 The endpoint returns records newest first, using `record_id` as a stable
 tie-breaker. It accepts optional `channel_id`, inclusive `since`, exclusive
@@ -268,8 +283,9 @@ safely support long-lived organization-operated audit consumers.
 
 Grant issuance, grant renewal, revocation, recording start/stop, ACL changes,
 and administrative requests MUST produce an auditable, redacted record that
-identifies the authenticated `service_id`, requested channel, action, result,
-and timestamp.
+identifies the authenticated actor, requested channel, action, result, and
+timestamp. Management-originated records use `actor_type: "service"` and the
+authenticated `service_id` as `actor_id`.
 
 Management Plane v1 does not define media upload, media proxying, centralized
 key escrow, general user login, browser client replacement, or a Directory UDP

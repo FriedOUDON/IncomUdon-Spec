@@ -34,12 +34,18 @@
       "minimum": 0,
       "maximum": 4294967295
     },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
     "auditRecord": {
       "type": "object",
       "required": [
         "record_id",
         "timestamp",
-        "service_id",
+        "actor_type",
+        "actor_id",
         "channel_id",
         "action",
         "result"
@@ -54,7 +60,14 @@
           "type": "string",
           "format": "date-time"
         },
-        "service_id": {
+        "actor_type": {
+          "enum": [
+            "identity",
+            "service",
+            "relay"
+          ]
+        },
+        "actor_id": {
           "type": "string",
           "minLength": 1,
           "maxLength": 128
@@ -79,9 +92,110 @@
             "denied",
             "failed"
           ]
+        },
+        "floor_interrupt": {
+          "type": "object",
+          "required": [
+            "requester_priority",
+            "replaced_sender_id",
+            "replaced_priority"
+          ],
+          "properties": {
+            "requester_priority": {
+              "$ref": "#/$defs/priority"
+            },
+            "replaced_sender_id": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/u32"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "replaced_priority": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/priority"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replaced_sender_id": {
+                    "type": "null"
+                  }
+                },
+                "required": [
+                  "replaced_sender_id"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "replaced_priority": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "replaced_sender_id": {
+                    "$ref": "#/$defs/u32"
+                  }
+                },
+                "required": [
+                  "replaced_sender_id"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "replaced_priority": {
+                    "$ref": "#/$defs/priority"
+                  }
+                }
+              }
+            }
+          ]
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "floor_interrupt"
+              }
+            },
+            "required": [
+              "action"
+            ]
+          },
+          "then": {
+            "required": [
+              "floor_interrupt"
+            ],
+            "properties": {
+              "actor_type": {
+                "enum": [
+                  "identity",
+                  "service"
+                ]
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
