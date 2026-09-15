@@ -255,7 +255,7 @@ it is required for the channel:
 The Relay MUST apply Control Authentication v1 to its generated `AUTH_CHALLENGE`,
 `IDENTITY_CHALLENGE`, `IDENTITY_DENY`, `SERVICE_ADMISSION_CHALLENGE`,
 `SERVICE_ADMISSION_DENY`, `TALK_GRANT`, `TALK_RELEASE`, `TALK_DENY`,
-`SERVER_CONFIG`, and `PONG` packets.
+`SERVER_CONFIG`, `PONG`, and Relay-reauthenticated `CODEC_CONFIG` packets.
 It MUST verify authentication before caching a CodecConfig, granting/releasing
 talk, registering a peer, refreshing membership, or constructing downstream
 state from an authenticated client control packet. For AES-GCM v2, the Relay

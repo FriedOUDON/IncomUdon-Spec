@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Adds Relay-reauthenticated `CODEC_CONFIG` to the normative Relay-generated
+  Control Authentication packet-class list, aligning it with its forwarding
+  requirements and canonical vector.
+
 - Defines role-aware Management SSE `410 Gone` recovery: viewer-authorized
   callers refresh participant snapshots, while auditor-only callers record the
   explicit event-history gap and reconnect cursor-free without gaining viewer
