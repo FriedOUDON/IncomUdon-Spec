@@ -215,6 +215,36 @@ conform to `../../schemas/directory-v3-client-payload.schema.json`; `request`,
 seconds. Relay-originated `snapshot`, `participants`, and `error` payloads MUST
 have a lifetime no greater than 90 seconds.
 
+The envelope and the decrypted payload are distinct JSON documents. Their
+schemas validate each document's structure, but cannot by themselves validate
+the relation between `envelope.type` and the decrypted payload. After successful
+AEAD authentication and JSON parsing, a receiver MUST validate this normative
+mapping before applying state or committing the sequence to its replay window:
+
+| Authenticated envelope `type` | Required decrypted payload variant | Schema |
+|---|---|---|
+| `request` | Request variant: `requestId` and `resource`; optional `cursor` only for `snapshot` | `directory-v3-client-payload.schema.json` request branch |
+| `register` | Registration variant: `instanceId` and no request fields | `directory-v3-client-payload.schema.json` registration/heartbeat branch |
+| `heartbeat` | Heartbeat variant: `instanceId` and no request fields | `directory-v3-client-payload.schema.json` registration/heartbeat branch |
+| `snapshot` | Snapshot-page fragment: `revision`, `page`, `channels`, and `speakers` | `directory-v3-response-fragment.schema.json` snapshot branch |
+| `participants` | Participant fragment: `participants` | `directory-v3-response-fragment.schema.json` participants branch |
+| `error` | Error variant: `requestId` and `code` | `directory-v3-error-payload.schema.json` |
+
+`register` and `heartbeat` intentionally share one structural payload variant;
+the authenticated envelope `type` selects creation/replacement or existing
+registration refresh semantics. A structurally valid payload whose variant does
+not match the authenticated type MUST cause the datagram to be rejected. It
+MUST NOT create, replace, refresh, reassemble, or apply state, and it MUST NOT
+advance replay state.
+
+Receiver processing is: validate outer size/carrier/envelope and direction;
+validate expiration and canonical epoch; derive the direction key and authenticate
+AEAD; parse and validate plaintext JSON; validate the type/payload mapping and
+cross-document values such as `expiresAt`; then update replay and semantic
+state. Implementations MAY use a preliminary replay lookup to reject an already
+accepted sequence, but MUST NOT commit a new sequence before all of these
+checks succeed.
+
 A `request` has a CSPRNG-generated 16-byte canonical base64url `requestId` and
 a `resource` value of `participants` or `snapshot`. A snapshot request may
 include an opaque `cursor` received from a prior page. The Relay MUST echo
@@ -406,4 +436,6 @@ Implementations MUST validate `../../test-vectors/directory-v3.json` and test:
    scheduling regression;
 9. registration creation, replacement, matching-source heartbeat refresh,
    unknown/mismatched heartbeat drops, capacity handling, expiry cleanup, and
-   periodic re-registration recovery after lost Relay state.
+   periodic re-registration recovery after lost Relay state;
+10. authenticated envelope type to plaintext-payload variant matching, including
+    schema-valid negative mismatch cases.

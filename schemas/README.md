@@ -4,7 +4,9 @@
 envelope. `directory-v3-client-payload.schema.json`,
 `directory-v3-response-fragment.schema.json`, and
 `directory-v3-error-payload.schema.json` validate decrypted Directory payloads
-after AES-GCM authentication succeeds.
+after AES-GCM authentication succeeds. The encrypted envelope and decrypted
+payload are separate JSON documents; the normative `envelope.type` to payload
+variant mapping is defined in `../docs/protocol/directory-udp.md`.
 Neither schema validates unauthenticated ciphertext.
 
 - `directory-v3.schema.json`: channel-password-derived Directory UDP v3 envelope.

@@ -16,6 +16,11 @@
   eviction, silent uncorrelated drops, expiry cleanup, diagnostics, and state
   transition vectors.
 
+- Defines the mandatory Directory UDP v3 mapping between authenticated envelope
+  `type` and decrypted payload variant. Type/payload mismatches are rejected
+  before replay or semantic state changes; vectors cover schema-valid negative
+  mismatch cases.
+
 - Defines Membership Lease control-packet refresh by current channel policy:
   accepted `KEEPALIVE`, `CODEC_CONFIG`, and PTT control refresh in
   `optional` unconfigured legacy and `off` channels as well as authenticated

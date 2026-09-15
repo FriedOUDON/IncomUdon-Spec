@@ -530,5 +530,167 @@
       "maximumHeartbeatIntervalSeconds": 30,
       "maximumReregistrationIntervalSeconds": 60
     }
+  },
+  "typePayloadVariantCases": {
+    "precondition": "Each case begins after outer envelope validation, correct direction, expiration validation, and successful AEAD authentication. The payload is decrypted JSON.",
+    "cases": [
+      {
+        "name": "request_type_accepts_request_variant",
+        "envelopeType": "request",
+        "payloadVariant": "request",
+        "payload": {
+          "version": 3,
+          "issuedAt": 1700000000,
+          "expiresAt": 1700000010,
+          "requestId": "AAECAwQFBgcICQoLDA0ODw",
+          "resource": "participants"
+        },
+        "expected": "accept"
+      },
+      {
+        "name": "request_type_rejects_schema_valid_registration_variant",
+        "envelopeType": "request",
+        "payloadVariant": "registration_heartbeat",
+        "payload": {
+          "version": 3,
+          "issuedAt": 1700000000,
+          "expiresAt": 1700000030,
+          "instanceId": "ICEiIyQlJicoKSorLC0uLw"
+        },
+        "expected": "reject_type_payload_mismatch"
+      },
+      {
+        "name": "register_type_accepts_registration_variant",
+        "envelopeType": "register",
+        "payloadVariant": "registration_heartbeat",
+        "payload": {
+          "version": 3,
+          "issuedAt": 1700000000,
+          "expiresAt": 1700000030,
+          "instanceId": "ICEiIyQlJicoKSorLC0uLw"
+        },
+        "expected": "accept"
+      },
+      {
+        "name": "heartbeat_type_accepts_registration_variant",
+        "envelopeType": "heartbeat",
+        "payloadVariant": "registration_heartbeat",
+        "payload": {
+          "version": 3,
+          "issuedAt": 1700000000,
+          "expiresAt": 1700000030,
+          "instanceId": "ICEiIyQlJicoKSorLC0uLw"
+        },
+        "expected": "accept"
+      },
+      {
+        "name": "snapshot_type_accepts_snapshot_fragment",
+        "envelopeType": "snapshot",
+        "payloadVariant": "snapshot_fragment",
+        "payload": {
+          "version": 3,
+          "issuedAt": 1700000000,
+          "expiresAt": 1700000090,
+          "fragment": {
+            "responseId": "EBESExQVFhcYGRobHB0eHw",
+            "index": 0,
+            "count": 1
+          },
+          "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "page": {
+            "index": 0,
+            "count": 1,
+            "nextCursor": null
+          },
+          "channels": [
+            {
+              "channelId": 111,
+              "name": "Operations"
+            }
+          ],
+          "speakers": [
+            {
+              "channelId": 111,
+              "senderId": 1001,
+              "name": "Unit A"
+            }
+          ]
+        },
+        "expected": "accept"
+      },
+      {
+        "name": "participants_type_rejects_schema_valid_snapshot_fragment",
+        "envelopeType": "participants",
+        "payloadVariant": "snapshot_fragment",
+        "payload": {
+          "version": 3,
+          "issuedAt": 1700000000,
+          "expiresAt": 1700000090,
+          "fragment": {
+            "responseId": "EBESExQVFhcYGRobHB0eHw",
+            "index": 0,
+            "count": 1
+          },
+          "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "page": {
+            "index": 0,
+            "count": 1,
+            "nextCursor": null
+          },
+          "channels": [
+            {
+              "channelId": 111,
+              "name": "Operations"
+            }
+          ],
+          "speakers": [
+            {
+              "channelId": 111,
+              "senderId": 1001,
+              "name": "Unit A"
+            }
+          ]
+        },
+        "expected": "reject_type_payload_mismatch"
+      },
+      {
+        "name": "participants_type_accepts_participant_fragment",
+        "envelopeType": "participants",
+        "payloadVariant": "participant_fragment",
+        "payload": {
+          "version": 3,
+          "issuedAt": 1700000000,
+          "expiresAt": 1700000090,
+          "requestId": "AAECAwQFBgcICQoLDA0ODw",
+          "fragment": {
+            "responseId": "EBESExQVFhcYGRobHB0eHw",
+            "index": 0,
+            "count": 3
+          },
+          "participants": [
+            {
+              "channelId": 111,
+              "senderId": 1001,
+              "lastSeenAt": 1700000000,
+              "talking": false
+            }
+          ]
+        },
+        "expected": "accept"
+      },
+      {
+        "name": "error_type_accepts_error_variant",
+        "envelopeType": "error",
+        "payloadVariant": "error",
+        "payload": {
+          "version": 3,
+          "issuedAt": 1700000000,
+          "expiresAt": 1700000090,
+          "requestId": "AAECAwQFBgcICQoLDA0ODw",
+          "code": "RESPONSE_TOO_LARGE"
+        },
+        "expected": "accept"
+      }
+    ]
   }
 }
