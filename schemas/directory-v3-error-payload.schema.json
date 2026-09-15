@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FriedOUDON/IncomUdon-Spec/schemas/directory-v3-error-payload.schema.json",
+  "title": "IncomUdon Directory UDP v3 decrypted error payload",
+  "type": "object",
+  "required": [
+    "version",
+    "issuedAt",
+    "expiresAt",
+    "requestId",
+    "code"
+  ],
+  "properties": {
+    "version": {
+      "const": 3
+    },
+    "issuedAt": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "expiresAt": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 22,
+      "maxLength": 22,
+      "pattern": "^[A-Za-z0-9_-]{22}$"
+    },
+    "code": {
+      "enum": [
+        "RESPONSE_TOO_LARGE",
+        "INVALID_CURSOR",
+        "PAGING_SESSION_EXPIRED"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

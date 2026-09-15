@@ -35,7 +35,7 @@ requirements for compatible implementations.
 - `docs/extensions/management/openapi-v1.yaml`: Management Plane HTTPS and SSE API contract.
 - `docs/protocol/fec.md`: external parity FEC and Opus in-band FEC.
 - `docs/protocol/fec-testing.md`: common FEC fault-injection cases.
-- `docs/protocol/directory-udp.md`: optional Directory protocol; channel-password-derived v2 is primary and shared-PSK v1 is compatibility-only.
+- `docs/protocol/directory-udp.md`: optional Directory UDP v3 protocol; channel-password scoped with bounded fragmentation and an optional media-port carrier.
 - `docs/protocol/ping.md`: liveness and RTT measurement.
 - `docs/protocol/diagnostics.md`: local debug metrics and redaction rules.
 - `docs/protocol/versioning.md`: compatibility and release procedure.

@@ -1,0 +1,378 @@
+{
+  "specVersion": "unreleased",
+  "scheme": "directory-udp-v3",
+  "limits": {
+    "maxUdpPayloadBytes": 1200,
+    "maxFragmentCount": 32,
+    "replayWindowSize": 64,
+    "maxConcurrentReassemblySets": 2,
+    "maxReassembledPlaintextBytes": 32768,
+    "reassemblyTimeoutSeconds": 5,
+    "maxPageCount": 256
+  },
+  "crypto": {
+    "dedicatedRequest": {
+      "epochRawHex": "6469726563746f72792d65706f636821",
+      "epochBase64Url": "ZGlyZWN0b3J5LWVwb2NoIQ",
+      "sequence": 1,
+      "expiresAt": 1700000010,
+      "type": "request",
+      "transportBinding": 0,
+      "plaintextUtf8": "{\"version\":3,\"issuedAt\":1700000000,\"expiresAt\":1700000010,\"requestId\":\"AAECAwQFBgcICQoLDA0ODw\",\"resource\":\"participants\"}",
+      "nonce12Hex": "494450330000000000000001",
+      "aadHex": "496e636f6d55646f6e204469726563746f727920456e76656c6f70652041414420763300030007726571756573740000006f6469726563746f72792d65706f6368210000000000000001000000006553f10a",
+      "ciphertextBase64Url": "b6RluZd8-5m8N7Rr5HzmyiOpYbvdbGuXHyEGROE_TRXK3NAgynTVfJC1VW1flLE9eTKGCFw7sAm078TCmGBLZh28eZhDUmig6nNaE7nCZoD0dO0vkhHdxG08X-JarQUXOWGWJV2wSaXv9fNHkIeLGXq8O-kM5T4EECpAPmvKv80Q3w5SDXXrEUs",
+      "envelope": {
+        "v": 3,
+        "type": "request",
+        "channelId": 111,
+        "epoch": "ZGlyZWN0b3J5LWVwb2NoIQ",
+        "sequence": 1,
+        "expiresAt": 1700000010,
+        "ciphertext": "b6RluZd8-5m8N7Rr5HzmyiOpYbvdbGuXHyEGROE_TRXK3NAgynTVfJC1VW1flLE9eTKGCFw7sAm078TCmGBLZh28eZhDUmig6nNaE7nCZoD0dO0vkhHdxG08X-JarQUXOWGWJV2wSaXv9fNHkIeLGXq8O-kM5T4EECpAPmvKv80Q3w5SDXXrEUs"
+      },
+      "datagramUtf8": "{\"v\":3,\"type\":\"request\",\"channelId\":111,\"epoch\":\"ZGlyZWN0b3J5LWVwb2NoIQ\",\"sequence\":1,\"expiresAt\":1700000010,\"ciphertext\":\"b6RluZd8-5m8N7Rr5HzmyiOpYbvdbGuXHyEGROE_TRXK3NAgynTVfJC1VW1flLE9eTKGCFw7sAm078TCmGBLZh28eZhDUmig6nNaE7nCZoD0dO0vkhHdxG08X-JarQUXOWGWJV2wSaXv9fNHkIeLGXq8O-kM5T4EECpAPmvKv80Q3w5SDXXrEUs\"}",
+      "datagramBytes": 308
+    },
+    "directoryChannelKeyHex": "174209da75aa25b4f917342071659c2e4d15a1b3b38fd82fad83d519c32cf17e",
+    "mediaPortParticipantsFragments": [
+      {
+        "epochRawHex": "72656c61792d6469726563746f727921",
+        "epochBase64Url": "cmVsYXktZGlyZWN0b3J5IQ",
+        "sequence": 10,
+        "expiresAt": 1700000090,
+        "type": "participants",
+        "transportBinding": 1,
+        "plaintextUtf8": "{\"version\":3,\"issuedAt\":1700000000,\"expiresAt\":1700000090,\"requestId\":\"AAECAwQFBgcICQoLDA0ODw\",\"fragment\":{\"responseId\":\"EBESExQVFhcYGRobHB0eHw\",\"index\":0,\"count\":3},\"participants\":[{\"channelId\":111,\"senderId\":1001,\"lastSeenAt\":1700000000,\"talking\":false}]}",
+        "nonce12Hex": "49445033000000000000000a",
+        "aadHex": "496e636f6d55646f6e204469726563746f727920456e76656c6f7065204141442076330003010c7061727469636970616e74730000006f72656c61792d6469726563746f727921000000000000000a000000006553f15a",
+        "ciphertextBase64Url": "OKzOYXDVfi8BdDo-9KaosHFo1woiqeMnM5P3DtdquoipDsvulKkgPtiZT5eh55NfmT2sjmrI2snusHanEvBnEN71naLUqeTkE2JkFnVDoSXsC4uLRXarmc1wEksX9uCL91-3JKtcs0FNnYZ9hCRWHx82XJbhDsa9-0MAHB_VX6miKspxHvDWnXydNjcweBkkGNVVLHNxft2UIUh5PcFpjfoPf4l0QJhis2S_8jTk4iW6qct-wJ73hQSF8On2u_EM7907AyJ2nZvjKQIG1F9IQsSpTDDStsbqO6R63hBnp-G6ra5sOKl1OZbo_t5MV4jT8fvOmEu9DUIV_G1jj4YANSE9PBE3VbpN_IE4NDL7WEyh",
+        "envelope": {
+          "v": 3,
+          "type": "participants",
+          "channelId": 111,
+          "epoch": "cmVsYXktZGlyZWN0b3J5IQ",
+          "sequence": 10,
+          "expiresAt": 1700000090,
+          "ciphertext": "OKzOYXDVfi8BdDo-9KaosHFo1woiqeMnM5P3DtdquoipDsvulKkgPtiZT5eh55NfmT2sjmrI2snusHanEvBnEN71naLUqeTkE2JkFnVDoSXsC4uLRXarmc1wEksX9uCL91-3JKtcs0FNnYZ9hCRWHx82XJbhDsa9-0MAHB_VX6miKspxHvDWnXydNjcweBkkGNVVLHNxft2UIUh5PcFpjfoPf4l0QJhis2S_8jTk4iW6qct-wJ73hQSF8On2u_EM7907AyJ2nZvjKQIG1F9IQsSpTDDStsbqO6R63hBnp-G6ra5sOKl1OZbo_t5MV4jT8fvOmEu9DUIV_G1jj4YANSE9PBE3VbpN_IE4NDL7WEyh"
+        },
+        "datagramUtf8": "{\"v\":3,\"type\":\"participants\",\"channelId\":111,\"epoch\":\"cmVsYXktZGlyZWN0b3J5IQ\",\"sequence\":10,\"expiresAt\":1700000090,\"ciphertext\":\"OKzOYXDVfi8BdDo-9KaosHFo1woiqeMnM5P3DtdquoipDsvulKkgPtiZT5eh55NfmT2sjmrI2snusHanEvBnEN71naLUqeTkE2JkFnVDoSXsC4uLRXarmc1wEksX9uCL91-3JKtcs0FNnYZ9hCRWHx82XJbhDsa9-0MAHB_VX6miKspxHvDWnXydNjcweBkkGNVVLHNxft2UIUh5PcFpjfoPf4l0QJhis2S_8jTk4iW6qct-wJ73hQSF8On2u_EM7907AyJ2nZvjKQIG1F9IQsSpTDDStsbqO6R63hBnp-G6ra5sOKl1OZbo_t5MV4jT8fvOmEu9DUIV_G1jj4YANSE9PBE3VbpN_IE4NDL7WEyh\"}",
+        "datagramBytes": 495,
+        "carrierHex": "49445033017b2276223a332c2274797065223a227061727469636970616e7473222c226368616e6e656c4964223a3131312c2265706f6368223a22636d567359586b745a476c795a574e3062334a354951222c2273657175656e6365223a31302c22657870697265734174223a313730303030303039302c2263697068657274657874223a224f4b7a4f595844566669384264446f2d394b616f7348466f31776f6971654d6e4d35503344746471756f6970447376756c4b6b675074695a5435656835354e666d5432736a6d724932736e757348616e4576426e454e37316e614c557165546b45324a6b466e56446f5358734334754c525861726d633177456b73583975434c39312d334a4b74637330464e6e595a396843525748783832584a6268447361392d304d4148425f5658366d694b737078487644576e5879644e6a637765426b6b474e56564c484e786674325549556835506346706a666f5066346c30514a68697332535f386a546b346957367163742d774a373368515346384f6e32755f454d3739303741794a326e5a766a4b514947314639495173537054444453747362714f3652363368426e702d4736726135734f4b6c314f5a626f5f74354d56346a543866764f6d457539445549565f47316a6a3459414e534539504245335662704e5f4945344e444c3757457968227d",
+        "carrierBytes": 500
+      },
+      {
+        "epochRawHex": "72656c61792d6469726563746f727921",
+        "epochBase64Url": "cmVsYXktZGlyZWN0b3J5IQ",
+        "sequence": 11,
+        "expiresAt": 1700000090,
+        "type": "participants",
+        "transportBinding": 1,
+        "plaintextUtf8": "{\"version\":3,\"issuedAt\":1700000000,\"expiresAt\":1700000090,\"requestId\":\"AAECAwQFBgcICQoLDA0ODw\",\"fragment\":{\"responseId\":\"EBESExQVFhcYGRobHB0eHw\",\"index\":1,\"count\":3},\"participants\":[{\"channelId\":111,\"senderId\":1002,\"lastSeenAt\":1700000000,\"talking\":false}]}",
+        "nonce12Hex": "49445033000000000000000b",
+        "aadHex": "496e636f6d55646f6e204469726563746f727920456e76656c6f7065204141442076330003010c7061727469636970616e74730000006f72656c61792d6469726563746f727921000000000000000b000000006553f15a",
+        "ciphertextBase64Url": "J6KDA1MGqMfv-x2LGO5jmxvS9huFaEJx60x553gMejjOxzk1tgTaC_d9XV5IwqVka4AeQptd8tiGGW-tjXjLYlyQekvH4OzJr9Vt37WgzdiXC3iqXMPS0WUV6jyHwZJ5pZZSYLJDGQFNxQ7SgOj2hhysxfWJBi-UcYQjQawPTynxgSpHNGF01he2OmSvvriZf5FTBH-ACeQwO1jbKd-T1PkbJavuQefm6QBPhefrENyDdv64jQTwyP2up71sYFw7xaW4aM0xhla10L5CifzAJDpGJDFzYS3JfaCKPv16tApeLyMg3LwhyBZMwWAAogbz5JrTof371oE1eHYD-4U3DklpTTp1jmCaNvFNnBHcUFVv",
+        "envelope": {
+          "v": 3,
+          "type": "participants",
+          "channelId": 111,
+          "epoch": "cmVsYXktZGlyZWN0b3J5IQ",
+          "sequence": 11,
+          "expiresAt": 1700000090,
+          "ciphertext": "J6KDA1MGqMfv-x2LGO5jmxvS9huFaEJx60x553gMejjOxzk1tgTaC_d9XV5IwqVka4AeQptd8tiGGW-tjXjLYlyQekvH4OzJr9Vt37WgzdiXC3iqXMPS0WUV6jyHwZJ5pZZSYLJDGQFNxQ7SgOj2hhysxfWJBi-UcYQjQawPTynxgSpHNGF01he2OmSvvriZf5FTBH-ACeQwO1jbKd-T1PkbJavuQefm6QBPhefrENyDdv64jQTwyP2up71sYFw7xaW4aM0xhla10L5CifzAJDpGJDFzYS3JfaCKPv16tApeLyMg3LwhyBZMwWAAogbz5JrTof371oE1eHYD-4U3DklpTTp1jmCaNvFNnBHcUFVv"
+        },
+        "datagramUtf8": "{\"v\":3,\"type\":\"participants\",\"channelId\":111,\"epoch\":\"cmVsYXktZGlyZWN0b3J5IQ\",\"sequence\":11,\"expiresAt\":1700000090,\"ciphertext\":\"J6KDA1MGqMfv-x2LGO5jmxvS9huFaEJx60x553gMejjOxzk1tgTaC_d9XV5IwqVka4AeQptd8tiGGW-tjXjLYlyQekvH4OzJr9Vt37WgzdiXC3iqXMPS0WUV6jyHwZJ5pZZSYLJDGQFNxQ7SgOj2hhysxfWJBi-UcYQjQawPTynxgSpHNGF01he2OmSvvriZf5FTBH-ACeQwO1jbKd-T1PkbJavuQefm6QBPhefrENyDdv64jQTwyP2up71sYFw7xaW4aM0xhla10L5CifzAJDpGJDFzYS3JfaCKPv16tApeLyMg3LwhyBZMwWAAogbz5JrTof371oE1eHYD-4U3DklpTTp1jmCaNvFNnBHcUFVv\"}",
+        "datagramBytes": 495,
+        "carrierHex": "49445033017b2276223a332c2274797065223a227061727469636970616e7473222c226368616e6e656c4964223a3131312c2265706f6368223a22636d567359586b745a476c795a574e3062334a354951222c2273657175656e6365223a31312c22657870697265734174223a313730303030303039302c2263697068657274657874223a224a364b4441314d47714d66762d78324c474f356a6d7876533968754661454a78363078353533674d656a6a4f787a6b3174675461435f6439585635497771566b61344165517074643874694747572d746a586a4c596c7951656b7648344f7a4a72395674333757677a64695843336971584d505330575556366a7948775a4a35705a5a53594c4a444751464e78513753674f6a32686879737866574a42692d556359516a5161775054796e78675370484e474630316865324f6d53767672695a6635465442482d41436551774f316a624b642d5431506b624a6176755165666d3651425068656672454e7944647636346a51547779503275703731735946773778615734614d3078686c6131304c354369667a414a4470474a44467a5953334a6661434b50763136744170654c794d67334c776879425a4d775741416f67627a354a72546f663337316f4531654859442d345533446b6c70545470316a6d43614e76464e6e42486355465676227d",
+        "carrierBytes": 500
+      },
+      {
+        "epochRawHex": "72656c61792d6469726563746f727921",
+        "epochBase64Url": "cmVsYXktZGlyZWN0b3J5IQ",
+        "sequence": 12,
+        "expiresAt": 1700000090,
+        "type": "participants",
+        "transportBinding": 1,
+        "plaintextUtf8": "{\"version\":3,\"issuedAt\":1700000000,\"expiresAt\":1700000090,\"requestId\":\"AAECAwQFBgcICQoLDA0ODw\",\"fragment\":{\"responseId\":\"EBESExQVFhcYGRobHB0eHw\",\"index\":2,\"count\":3},\"participants\":[{\"channelId\":111,\"senderId\":1003,\"lastSeenAt\":1700000000,\"talking\":false}]}",
+        "nonce12Hex": "49445033000000000000000c",
+        "aadHex": "496e636f6d55646f6e204469726563746f727920456e76656c6f7065204141442076330003010c7061727469636970616e74730000006f72656c61792d6469726563746f727921000000000000000c000000006553f15a",
+        "ciphertextBase64Url": "2EMF37F4XHEacRnZxqShIMJA7rmhcFRzY0Kjyy2lDPalNj2ndL4WBhQ8A8jKR_unSRnCV6jJahnEAyWHLEzHN0j4gkokjILQHUrsbg4xSCqtBIMqKoSrAJFHhERgWQL0xXNF_1BDTrlGKe1cgRQoc9VX8PUg5WmCeed9IAM01_evVvwr4jyYZiHKoPCMLIwug6uovd7ECZoobs_cSAr6qj1Ji1FkOzYXQMXHl-PgRUbV6jt1XXqKGW3Ln2STHunLFEKLeR9nLb6_bF5pZXVLSHAUpXE89CIRQ3SY92eoPkqfvBCOODkCrT13FIK-UeO2h6KxlB656A0uHy63dPdRYJmVYTjEiRSkuIk4bZ_GtD83",
+        "envelope": {
+          "v": 3,
+          "type": "participants",
+          "channelId": 111,
+          "epoch": "cmVsYXktZGlyZWN0b3J5IQ",
+          "sequence": 12,
+          "expiresAt": 1700000090,
+          "ciphertext": "2EMF37F4XHEacRnZxqShIMJA7rmhcFRzY0Kjyy2lDPalNj2ndL4WBhQ8A8jKR_unSRnCV6jJahnEAyWHLEzHN0j4gkokjILQHUrsbg4xSCqtBIMqKoSrAJFHhERgWQL0xXNF_1BDTrlGKe1cgRQoc9VX8PUg5WmCeed9IAM01_evVvwr4jyYZiHKoPCMLIwug6uovd7ECZoobs_cSAr6qj1Ji1FkOzYXQMXHl-PgRUbV6jt1XXqKGW3Ln2STHunLFEKLeR9nLb6_bF5pZXVLSHAUpXE89CIRQ3SY92eoPkqfvBCOODkCrT13FIK-UeO2h6KxlB656A0uHy63dPdRYJmVYTjEiRSkuIk4bZ_GtD83"
+        },
+        "datagramUtf8": "{\"v\":3,\"type\":\"participants\",\"channelId\":111,\"epoch\":\"cmVsYXktZGlyZWN0b3J5IQ\",\"sequence\":12,\"expiresAt\":1700000090,\"ciphertext\":\"2EMF37F4XHEacRnZxqShIMJA7rmhcFRzY0Kjyy2lDPalNj2ndL4WBhQ8A8jKR_unSRnCV6jJahnEAyWHLEzHN0j4gkokjILQHUrsbg4xSCqtBIMqKoSrAJFHhERgWQL0xXNF_1BDTrlGKe1cgRQoc9VX8PUg5WmCeed9IAM01_evVvwr4jyYZiHKoPCMLIwug6uovd7ECZoobs_cSAr6qj1Ji1FkOzYXQMXHl-PgRUbV6jt1XXqKGW3Ln2STHunLFEKLeR9nLb6_bF5pZXVLSHAUpXE89CIRQ3SY92eoPkqfvBCOODkCrT13FIK-UeO2h6KxlB656A0uHy63dPdRYJmVYTjEiRSkuIk4bZ_GtD83\"}",
+        "datagramBytes": 495,
+        "carrierHex": "49445033017b2276223a332c2274797065223a227061727469636970616e7473222c226368616e6e656c4964223a3131312c2265706f6368223a22636d567359586b745a476c795a574e3062334a354951222c2273657175656e6365223a31322c22657870697265734174223a313730303030303039302c2263697068657274657874223a2232454d46333746345848456163526e5a78715368494d4a4137726d686346527a59304b6a7979326c4450616c4e6a326e644c34574268513841386a4b525f756e53526e4356366a4a61686e45417957484c457a484e306a34676b6f6b6a494c5148557273626734785343717442494d714b6f5372414a46486845526757514c3078584e465f31424454726c474b6531636752516f633956583850556735576d436565643949414d30315f657656767772346a79595a69484b6f50434d4c4977756736756f76643745435a6f6f62735f6353417236716a314a6931466b4f7a5958514d58486c2d506752556256366a74315858714b4757334c6e32535448756e4c46454b4c6552396e4c62365f624635705a58564c534841557058453839434952513353593932656f506b71667642434f4f446b437254313346494b2d55654f3268364b786c423635364130754879363364506452594a6d5659546a456952536b75496b34625a5f4774443833227d",
+        "carrierBytes": 500
+      }
+    ],
+    "mediaPortRequest": {
+      "epochRawHex": "6469726563746f72792d65706f636821",
+      "epochBase64Url": "ZGlyZWN0b3J5LWVwb2NoIQ",
+      "sequence": 2,
+      "expiresAt": 1700000010,
+      "type": "request",
+      "transportBinding": 1,
+      "plaintextUtf8": "{\"version\":3,\"issuedAt\":1700000000,\"expiresAt\":1700000010,\"requestId\":\"AAECAwQFBgcICQoLDA0ODw\",\"resource\":\"participants\"}",
+      "nonce12Hex": "494450330000000000000002",
+      "aadHex": "496e636f6d55646f6e204469726563746f727920456e76656c6f70652041414420763300030107726571756573740000006f6469726563746f72792d65706f6368210000000000000002000000006553f10a",
+      "ciphertextBase64Url": "17HB1G4NmOLslr7BqLQS-0-EJeqvccOlzTpnZ_YsL-7ZQZDXS5R4aaURV6e3nvquiyWXvAs5njoUzXaxN4gpRRIFabfCyXtYcmGpKzVsnZ-JWee_HeL1X1AbxCJ1jX-qseIlGHwiOubKPXvIyeNc2-OX0zS1Y5vQ58WQHism8Hx8DLzMSgGThOg",
+      "envelope": {
+        "v": 3,
+        "type": "request",
+        "channelId": 111,
+        "epoch": "ZGlyZWN0b3J5LWVwb2NoIQ",
+        "sequence": 2,
+        "expiresAt": 1700000010,
+        "ciphertext": "17HB1G4NmOLslr7BqLQS-0-EJeqvccOlzTpnZ_YsL-7ZQZDXS5R4aaURV6e3nvquiyWXvAs5njoUzXaxN4gpRRIFabfCyXtYcmGpKzVsnZ-JWee_HeL1X1AbxCJ1jX-qseIlGHwiOubKPXvIyeNc2-OX0zS1Y5vQ58WQHism8Hx8DLzMSgGThOg"
+      },
+      "datagramUtf8": "{\"v\":3,\"type\":\"request\",\"channelId\":111,\"epoch\":\"ZGlyZWN0b3J5LWVwb2NoIQ\",\"sequence\":2,\"expiresAt\":1700000010,\"ciphertext\":\"17HB1G4NmOLslr7BqLQS-0-EJeqvccOlzTpnZ_YsL-7ZQZDXS5R4aaURV6e3nvquiyWXvAs5njoUzXaxN4gpRRIFabfCyXtYcmGpKzVsnZ-JWee_HeL1X1AbxCJ1jX-qseIlGHwiOubKPXvIyeNc2-OX0zS1Y5vQ58WQHism8Hx8DLzMSgGThOg\"}",
+      "datagramBytes": 308,
+      "carrierHex": "49445033017b2276223a332c2274797065223a2272657175657374222c226368616e6e656c4964223a3131312c2265706f6368223a225a476c795a574e3062334a354c57567762324e6f4951222c2273657175656e6365223a322c22657870697265734174223a313730303030303031302c2263697068657274657874223a22313748423147344e6d4f4c736c723742714c51532d302d454a65717663634f6c7a54706e5a5f59734c2d375a515a44585335523461615552563665336e76717569795758764173356e6a6f557a5861784e346770525249466162664379587459636d47704b7a56736e5a2d4a5765655f48654c315831416278434a316a582d717365496c474877694f75624b5058764979654e63322d4f58307a533159357651353857514869736d38487838444c7a4d53674754684f67227d",
+      "carrierBytes": 313
+    },
+    "passwordKeyHex": "6c63ca4d97d0866372c0a8e13b4a79db4970b48687964d0445c6354e39c41005",
+    "requestId": "AAECAwQFBgcICQoLDA0ODw",
+    "responseId": "EBESExQVFhcYGRobHB0eHw"
+  },
+  "fragmentReassemblyCases": [
+    {
+      "name": "single_fragment_response",
+      "fragment": {
+        "responseId": "EBESExQVFhcYGRobHB0eHw",
+        "index": 0,
+        "count": 1
+      },
+      "receivedIndexes": [
+        0
+      ],
+      "expected": "apply_atomically"
+    },
+    {
+      "name": "three_fragment_out_of_order",
+      "responseId": "EBESExQVFhcYGRobHB0eHw",
+      "fragmentCount": 3,
+      "receivedSequenceOrder": [
+        12,
+        10,
+        11
+      ],
+      "expectedParticipantSenderIds": [
+        1001,
+        1002,
+        1003
+      ],
+      "expected": "reassemble_and_apply_atomically"
+    },
+    {
+      "name": "missing_fragment_does_not_apply_snapshot",
+      "responseId": "EBESExQVFhcYGRobHB0eHw",
+      "fragmentCount": 3,
+      "receivedIndexes": [
+        0,
+        2
+      ],
+      "discardAtSeconds": 1700000005,
+      "expected": "discard_incomplete_keep_previous_state"
+    },
+    {
+      "name": "duplicate_fragment_first_authenticated_copy_wins",
+      "responseId": "EBESExQVFhcYGRobHB0eHw",
+      "fragmentCount": 3,
+      "receivedIndexes": [
+        0,
+        1,
+        1,
+        2
+      ],
+      "expected": "ignore_duplicate_reassemble_and_apply_atomically"
+    },
+    {
+      "name": "conflicting_duplicate_discards_set",
+      "responseId": "EBESExQVFhcYGRobHB0eHw",
+      "fragmentCount": 3,
+      "conflictingIndex": 1,
+      "expected": "discard_set_increment_reassembly_conflicts"
+    },
+    {
+      "name": "different_response_ids_do_not_mix",
+      "fragmentSets": [
+        {
+          "responseId": "EBESExQVFhcYGRobHB0eHw",
+          "receivedIndexes": [
+            0,
+            2
+          ]
+        },
+        {
+          "responseId": "ICEiIyQlJicoKSorLC0uLw",
+          "receivedIndexes": [
+            1
+          ]
+        }
+      ],
+      "expected": "no_complete_response_applied"
+    }
+  ],
+  "replayWindowCases": [
+    {
+      "name": "accepts_reordered_sequence_inside_window",
+      "acceptedHighWatermark": 100,
+      "candidateSequence": 38,
+      "expected": "accept_unseen_sequence"
+    },
+    {
+      "name": "rejects_sequence_outside_window",
+      "acceptedHighWatermark": 100,
+      "candidateSequence": 37,
+      "expected": "reject_stale_sequence"
+    },
+    {
+      "name": "rejects_duplicate_sequence",
+      "acceptedSequences": [
+        10,
+        11,
+        12
+      ],
+      "candidateSequence": 11,
+      "expected": "reject_duplicate_sequence"
+    }
+  ],
+  "snapshotPaginationCases": [
+    {
+      "name": "apply_revision_only_after_all_pages_complete",
+      "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "pages": [
+        {
+          "index": 0,
+          "count": 2,
+          "nextCursor": "opaque-page-1",
+          "complete": true
+        },
+        {
+          "index": 1,
+          "count": 2,
+          "nextCursor": null,
+          "complete": true
+        }
+      ],
+      "expected": "replace_static_snapshot_atomically"
+    },
+    {
+      "name": "missing_page_retains_previous_revision",
+      "previousRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "stagedRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "receivedPages": [
+        0
+      ],
+      "expected": "retain_previous_snapshot"
+    },
+    {
+      "name": "mixed_revision_pages_do_not_apply",
+      "receivedRevisions": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "expected": "discard_staged_snapshot_restart_pagination"
+    }
+  ],
+  "mtuCases": [
+    {
+      "name": "dedicated_json_at_limit",
+      "transport": "dedicated-udp",
+      "jsonBytes": 1200,
+      "udpPayloadBytes": 1200,
+      "expected": "accept"
+    },
+    {
+      "name": "dedicated_json_over_limit",
+      "transport": "dedicated-udp",
+      "jsonBytes": 1201,
+      "udpPayloadBytes": 1201,
+      "expected": "reject"
+    },
+    {
+      "name": "media_carrier_at_limit",
+      "transport": "media-port",
+      "jsonBytes": 1195,
+      "carrierBytes": 5,
+      "udpPayloadBytes": 1200,
+      "expected": "accept"
+    },
+    {
+      "name": "media_carrier_over_limit",
+      "transport": "media-port",
+      "jsonBytes": 1196,
+      "carrierBytes": 5,
+      "udpPayloadBytes": 1201,
+      "expected": "reject"
+    }
+  ],
+  "legacyVersionCases": [
+    {
+      "v": 1,
+      "expected": "reject_unsupported_directory_version"
+    },
+    {
+      "v": 2,
+      "expected": "reject_unsupported_directory_version"
+    }
+  ],
+  "payloadValidationCases": {
+    "clientRequest": {
+      "version": 3,
+      "issuedAt": 1700000000,
+      "expiresAt": 1700000010,
+      "requestId": "AAECAwQFBgcICQoLDA0ODw",
+      "resource": "participants"
+    },
+    "relayError": {
+      "version": 3,
+      "issuedAt": 1700000000,
+      "expiresAt": 1700000090,
+      "requestId": "AAECAwQFBgcICQoLDA0ODw",
+      "code": "RESPONSE_TOO_LARGE"
+    },
+    "clientHeartbeat": {
+      "version": 3,
+      "issuedAt": 1700000000,
+      "expiresAt": 1700000030,
+      "instanceId": "ICEiIyQlJicoKSorLC0uLw"
+    },
+    "relaySnapshotPageFragment": {
+      "version": 3,
+      "issuedAt": 1700000000,
+      "expiresAt": 1700000090,
+      "fragment": {
+        "responseId": "EBESExQVFhcYGRobHB0eHw",
+        "index": 0,
+        "count": 1
+      },
+      "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "page": {
+        "index": 0,
+        "count": 1,
+        "nextCursor": null
+      },
+      "channels": [
+        {
+          "channelId": 111,
+          "name": "Operations"
+        }
+      ],
+      "speakers": [
+        {
+          "channelId": 111,
+          "senderId": 1001,
+          "name": "Unit A"
+        }
+      ]
+    }
+  }
+}

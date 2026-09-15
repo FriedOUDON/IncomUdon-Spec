@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Replaces the draft Directory UDP v1/v2 formats with channel-password-derived
+  Directory UDP v3. Adds bounded application-level fragmentation, atomic
+  reassembly, revision-pinned snapshot pagination, and an optional
+  media-port carrier with AES-GCM transport binding; the media-port transport
+  is the enabled-Directory default and dedicated UDP remains explicit.
+
 - Defines Membership Lease control-packet refresh by current channel policy:
   accepted `KEEPALIVE`, `CODEC_CONFIG`, and PTT control refresh in
   `optional` unconfigured legacy and `off` channels as well as authenticated

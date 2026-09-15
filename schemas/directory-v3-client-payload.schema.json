@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FriedOUDON/IncomUdon-Spec/schemas/directory-v3-client-payload.schema.json",
+  "title": "IncomUdon Directory UDP v3 decrypted client payload",
+  "oneOf": [
+    {
+      "title": "request",
+      "type": "object",
+      "required": [
+        "version",
+        "issuedAt",
+        "expiresAt",
+        "requestId",
+        "resource"
+      ],
+      "properties": {
+        "version": {
+          "const": 3
+        },
+        "issuedAt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "expiresAt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 22,
+          "maxLength": 22,
+          "pattern": "^[A-Za-z0-9_-]{22}$"
+        },
+        "resource": {
+          "enum": [
+            "participants",
+            "snapshot"
+          ]
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "cursor"
+            ]
+          },
+          "then": {
+            "properties": {
+              "resource": {
+                "const": "snapshot"
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    {
+      "title": "registration or heartbeat",
+      "type": "object",
+      "required": [
+        "version",
+        "issuedAt",
+        "expiresAt",
+        "instanceId"
+      ],
+      "properties": {
+        "version": {
+          "const": 3
+        },
+        "issuedAt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "expiresAt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 22,
+          "maxLength": 22,
+          "pattern": "^[A-Za-z0-9_-]{22}$"
+        }
+      },
+      "additionalProperties": false
+    }
+  ]
+}

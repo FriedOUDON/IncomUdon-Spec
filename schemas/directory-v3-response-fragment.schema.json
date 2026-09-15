@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FriedOUDON/IncomUdon-Spec/schemas/directory-v3-response-fragment.schema.json",
+  "title": "IncomUdon Directory UDP v3 decrypted data response fragment",
+  "type": "object",
+  "required": [
+    "version",
+    "issuedAt",
+    "expiresAt",
+    "fragment"
+  ],
+  "properties": {
+    "version": {
+      "const": 3
+    },
+    "issuedAt": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "expiresAt": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 22,
+      "maxLength": 22,
+      "pattern": "^[A-Za-z0-9_-]{22}$"
+    },
+    "fragment": {
+      "type": "object",
+      "required": [
+        "responseId",
+        "index",
+        "count"
+      ],
+      "properties": {
+        "responseId": {
+          "type": "string",
+          "minLength": 22,
+          "maxLength": 22,
+          "pattern": "^[A-Za-z0-9_-]{22}$"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        }
+      },
+      "additionalProperties": false
+    },
+    "participants": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/participant"
+      }
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "page": {
+      "type": "object",
+      "required": [
+        "index",
+        "count",
+        "nextCursor"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 256
+        },
+        "nextCursor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        }
+      },
+      "additionalProperties": false
+    },
+    "channels": {
+      "type": "array",
+      "maxItems": 1,
+      "items": {
+        "$ref": "#/$defs/channel"
+      }
+    },
+    "speakers": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/speaker"
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "participants"
+      ]
+    },
+    {
+      "required": [
+        "revision",
+        "page",
+        "channels",
+        "speakers"
+      ]
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "channel": {
+      "type": "object",
+      "required": [
+        "channelId",
+        "name"
+      ],
+      "properties": {
+        "channelId": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "additionalProperties": false
+    },
+    "speaker": {
+      "type": "object",
+      "required": [
+        "channelId",
+        "senderId",
+        "name"
+      ],
+      "properties": {
+        "channelId": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "senderId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "additionalProperties": false
+    },
+    "participant": {
+      "type": "object",
+      "required": [
+        "channelId",
+        "senderId",
+        "lastSeenAt",
+        "talking"
+      ],
+      "properties": {
+        "channelId": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "senderId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "lastSeenAt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "talking": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

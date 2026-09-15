@@ -62,6 +62,6 @@ that talker when the deadline or membership lease expires. See
 | Authentication | `AUTH_HELLO`, `AUTH_CHALLENGE` | Relay cookie challenge for authenticated membership |
 | Identity admission | `IDENTITY_*` | Optional OIDC-derived per-user Relay authorization |
 | Service admission | `SERVICE_ADMISSION_*` | Optional mTLS-Management-Plane-derived Relay authorization for services |
-| Directory | Separate JSON envelope | Optional metadata and participant discovery; v2 is channel-password scoped |
+| Directory | Separate JSON envelope | Optional channel-password-scoped metadata and participant discovery; v3 supports bounded fragmentation |
 
 The Relay recognizes protocol version `1` only.

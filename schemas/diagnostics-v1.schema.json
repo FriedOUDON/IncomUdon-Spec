@@ -38,6 +38,9 @@
     },
     "network": {
       "$ref": "#/$defs/network"
+    },
+    "directory": {
+      "$ref": "#/$defs/directory"
     }
   },
   "additionalProperties": false,
@@ -664,6 +667,62 @@
           ]
         },
         "rx_datagrams_rejected_oversize": {
+          "$ref": "#/$defs/counter"
+        }
+      },
+      "additionalProperties": false
+    },
+    "directory": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "transport",
+        "fragments_sent",
+        "fragments_received",
+        "reassembly_sets_completed",
+        "reassembly_timeouts",
+        "reassembly_conflicts",
+        "reassembly_limit_drops",
+        "replay_rejections",
+        "media_port_pre_auth_drops",
+        "media_port_budget_drops"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "transport": {
+          "enum": [
+            "disabled",
+            "media-port",
+            "dedicated-udp"
+          ]
+        },
+        "fragments_sent": {
+          "$ref": "#/$defs/counter"
+        },
+        "fragments_received": {
+          "$ref": "#/$defs/counter"
+        },
+        "reassembly_sets_completed": {
+          "$ref": "#/$defs/counter"
+        },
+        "reassembly_timeouts": {
+          "$ref": "#/$defs/counter"
+        },
+        "reassembly_conflicts": {
+          "$ref": "#/$defs/counter"
+        },
+        "reassembly_limit_drops": {
+          "$ref": "#/$defs/counter"
+        },
+        "replay_rejections": {
+          "$ref": "#/$defs/counter"
+        },
+        "media_port_pre_auth_drops": {
+          "$ref": "#/$defs/counter"
+        },
+        "media_port_budget_drops": {
           "$ref": "#/$defs/counter"
         }
       },

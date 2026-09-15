@@ -28,6 +28,11 @@ A sender MUST NOT create a datagram larger than
 incoming datagram larger than this limit. Implementations MAY count and
 locally report such drops, but MUST NOT log media content or secret material.
 
+Directory UDP v3 uses this same 1200-byte ceiling. Its dedicated transport is
+raw JSON; its media-port transport includes a five-byte carrier, so the inner
+JSON is limited to 1195 bytes. Directory fragmentation is an application-level
+mechanism and MUST NOT rely on IP fragmentation.
+
 ## Media and FEC budget
 
 For AES-GCM v2 AUDIO, the largest relevant envelope is:

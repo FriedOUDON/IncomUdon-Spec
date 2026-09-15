@@ -26,7 +26,8 @@ A snapshot, debug export, or normal log MUST NOT contain:
 - channel passwords or password hashes;
 - media keys, control keys, HMAC tags, AES-GCM tags, nonces, or cookies;
 - raw audio/FEC payloads;
-- Relay IP addresses, endpoint addresses, or local public addresses.
+- Relay IP addresses, endpoint addresses, or local public addresses;
+- Directory epochs, request IDs, response IDs, page cursors, or metadata names.
 
 Sender IDs, codec IDs, codec modes, local durations, aggregate byte counts,
 and Relay RTT are permitted.
@@ -164,6 +165,30 @@ the client can observe.
 The exact Relay rejection reason may be unavailable to a client. In that case,
 clients MUST increment only the locally observable aggregate failure counter.
 
+## Directory metrics
+
+The optional `directory` object is present only when an implementation exposes
+Directory UDP v3 diagnostics. It contains aggregate local state and counters;
+it MUST NOT contain Directory endpoints, channel identifiers, credentials, keys,
+epochs, request IDs, response IDs, page cursors, or metadata names.
+
+| Field | Meaning |
+|---|---|
+| `enabled` | Whether Directory processing is locally enabled. |
+| `transport` | `disabled`, `media-port`, or `dedicated-udp`. |
+| `fragments_sent` / `fragments_received` | Authenticated Directory fragment totals. |
+| `reassembly_sets_completed` | Complete data response or snapshot-page sets applied after validation. |
+| `reassembly_timeouts` | Incomplete sets discarded at the five-second or `expiresAt` deadline. |
+| `reassembly_conflicts` | Sets discarded because duplicate indexes conflict. |
+| `reassembly_limit_drops` | Sets or fragments rejected by count, concurrent-set, or plaintext limits. |
+| `replay_rejections` | Authenticated sequences rejected as duplicate or stale. |
+| `media_port_pre_auth_drops` | Carrier candidates dropped before JSON/AEAD processing by length, magic, or source budget checks. |
+| `media_port_budget_drops` | Directory fragments dropped by the media-port response budget or pacing queue. |
+
+A disabled Directory implementation MAY omit this object. If it reports the
+object while disabled, `transport` MUST be `disabled` and every counter MUST be
+zero.
+
 ## Identity admission metrics
 
 `identity_admission` records only local admission state and aggregate outcomes.
@@ -202,7 +227,8 @@ Debug UIs SHOULD show the following groups in this order:
 2. transmit;
 3. receive/playout per talker;
 4. FEC recovery;
-5. network and QoS.
+5. Directory, when enabled;
+6. network and QoS.
 
 Normal values use the default text color. Warnings such as stale-frame drops,
 PLC, decode failures, failed authentication, and output underruns SHOULD be
@@ -213,5 +239,5 @@ an error state.
 
 Implementations MUST validate the sample
 `../../test-vectors/diagnostics-v1.json`. Tests MUST cover counter increments,
-per-talker separation, released-talker expiry, 16-talker retention cap,
-missing-platform fields, and redaction of prohibited values.
+per-talker separation, released-talker expiry, 16-talker retention cap, Directory fragment/reassembly
+counters, missing-platform fields, and redaction of prohibited values.

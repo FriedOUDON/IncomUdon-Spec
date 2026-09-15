@@ -132,5 +132,18 @@
     "qos_requested": true,
     "qos_applied": null,
     "rx_datagrams_rejected_oversize": 0
+  },
+  "directory": {
+    "enabled": true,
+    "transport": "media-port",
+    "fragments_sent": 6,
+    "fragments_received": 8,
+    "reassembly_sets_completed": 2,
+    "reassembly_timeouts": 1,
+    "reassembly_conflicts": 0,
+    "reassembly_limit_drops": 0,
+    "replay_rejections": 1,
+    "media_port_pre_auth_drops": 3,
+    "media_port_budget_drops": 1
   }
 }
