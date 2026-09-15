@@ -1,0 +1,54 @@
+{
+  "specVersion": "unreleased",
+  "scheme": "management-sse-resume-v1",
+  "cursor_semantics": "exclusive",
+  "cases": [
+    {
+      "name": "initial_replay_uses_since",
+      "request": {
+        "since": "100"
+      },
+      "selected_cursor": "100",
+      "selected_cursor_source": "since",
+      "expected_first_event_id": "101"
+    },
+    {
+      "name": "reconnect_uses_last_event_id",
+      "request": {
+        "last_event_id": "150"
+      },
+      "selected_cursor": "150",
+      "selected_cursor_source": "Last-Event-ID",
+      "expected_first_event_id": "151"
+    },
+    {
+      "name": "last_event_id_takes_precedence_over_since",
+      "request": {
+        "since": "100",
+        "last_event_id": "150"
+      },
+      "selected_cursor": "150",
+      "selected_cursor_source": "Last-Event-ID",
+      "ignored_query_parameters": [
+        "since"
+      ],
+      "expected_first_event_id": "151"
+    },
+    {
+      "name": "malformed_selected_cursor_is_bad_request",
+      "request": {
+        "last_event_id": "not-a-cursor"
+      },
+      "expected_status": 400
+    },
+    {
+      "name": "unavailable_selected_cursor_requires_resynchronization",
+      "request": {
+        "last_event_id": "150"
+      },
+      "cursor_state": "different_management_service_instance",
+      "expected_status": 410,
+      "required_client_action": "fetch_fresh_participant_snapshot"
+    }
+  ]
+}

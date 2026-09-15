@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Defines Management Plane SSE replay and reconnection cursor precedence,
+  including `Last-Event-ID` handling and deterministic malformed or unavailable
+  cursor errors.
 - Defines Management Plane effective authorization scopes for channel,
   resource-owned, multi-channel, and global API operations.
 

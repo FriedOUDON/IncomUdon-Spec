@@ -58,10 +58,23 @@ Management APIs MUST use explicit `/v1/` versioning and MUST NOT return channel
 passwords, derived keys, media plaintext, OIDC credentials, or client certificate private keys. The grant-issuance endpoint is the only API response permitted to return a Service Admission Grant; it MUST use `Cache-Control: no-store`, and grants MUST NOT appear in logs, audit records, or event streams.
 
 Management API methods MUST use TLS. HTTP/2 MAY be used, but HTTP/1.1
-compatibility is REQUIRED. SSE reconnection uses the `Last-Event-ID` header
-and the monotonic `event_id` field. A server MAY return a resynchronization
-error when a requested event ID is no longer retained; callers then fetch a
-fresh participant snapshot.
+compatibility is REQUIRED. Every SSE event MUST carry its monotonic
+`event_id` as the SSE `id` field. Event IDs are opaque decimal cursors scoped
+to one Management Service instance.
+
+`since` is an optional query parameter for an initial connection or an
+explicit historical replay. `Last-Event-ID` is the authoritative resume cursor
+for SSE reconnection. Both cursors are exclusive: when either is selected, the
+first replay candidate is the first retained event ordered after that cursor. Clients
+SHOULD omit `since` when reconnecting an established stream.
+
+If both `Last-Event-ID` and `since` are present, the Management Service MUST
+use `Last-Event-ID` and MUST ignore `since`. A malformed cursor MUST return
+`400 Bad Request`. A syntactically valid cursor that is unknown, belongs to a
+different Management Service instance, or is no longer retained MUST return
+`410 Gone`; the service MUST NOT silently start from the newest event. Callers
+that receive `410 Gone` fetch a fresh participant snapshot before opening a
+new stream.
 
 ## mTLS and service identity
 

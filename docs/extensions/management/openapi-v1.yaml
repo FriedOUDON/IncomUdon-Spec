@@ -131,17 +131,25 @@ paths:
         - name: since
           in: query
           required: false
-          schema: { type: string, pattern: '^[0-9]+$' }
+          description: Optional exclusive initial-replay cursor; ignored when Last-Event-ID is present.
+          schema: { type: string, minLength: 1, maxLength: 64, pattern: '^[0-9]+$' }
+        - name: Last-Event-ID
+          in: header
+          required: false
+          description: Authoritative exclusive SSE reconnection cursor; takes precedence over since.
+          schema: { type: string, minLength: 1, maxLength: 64, pattern: '^[0-9]+$' }
       responses:
         '200':
-          description: Event stream. Reconnection uses Last-Event-ID.
+          description: Event stream. Each event's SSE id equals its event_id; selected cursors resume after that event.
           content:
             text/event-stream:
               schema:
                 type: string
+        '400':
+          description: Selected since or Last-Event-ID cursor is malformed.
         '403': { $ref: '#/components/responses/Forbidden' }
         '410':
-          description: Requested event cursor is no longer retained; fetch a fresh snapshot.
+          description: Selected event cursor is unknown, belongs to another Management Service instance, or is no longer retained; fetch a fresh snapshot.
   /service-admission-grants:
     post:
       operationId: issueServiceAdmissionGrant
