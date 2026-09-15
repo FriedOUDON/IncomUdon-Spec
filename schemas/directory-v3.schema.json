@@ -35,7 +35,7 @@
       "type": "string",
       "minLength": 22,
       "maxLength": 22,
-      "pattern": "^[A-Za-z0-9_-]{22}$",
+      "pattern": "^[A-Za-z0-9_-]{21}[AQgw]$",
       "description": "Canonical unpadded base64url encoding of exactly 16 raw epoch bytes."
     },
     "sequence": {

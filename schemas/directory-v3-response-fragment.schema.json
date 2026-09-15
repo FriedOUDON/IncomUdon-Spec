@@ -27,7 +27,7 @@
       "type": "string",
       "minLength": 22,
       "maxLength": 22,
-      "pattern": "^[A-Za-z0-9_-]{22}$"
+      "pattern": "^[A-Za-z0-9_-]{21}[AQgw]$"
     },
     "fragment": {
       "type": "object",
@@ -41,7 +41,7 @@
           "type": "string",
           "minLength": 22,
           "maxLength": 22,
-          "pattern": "^[A-Za-z0-9_-]{22}$"
+          "pattern": "^[A-Za-z0-9_-]{21}[AQgw]$"
         },
         "index": {
           "type": "integer",

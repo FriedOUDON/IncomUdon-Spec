@@ -124,18 +124,34 @@ It is included in AAD and is authenticated. A Relay MUST NOT return data for a
 different channel. A receiver MUST reject a decrypted record whose `channelId`,
 when present, differs from envelope `channelId`.
 
-The JSON `epoch` is canonical unpadded base64url encoding of exactly 16 random
-bytes. Let `epoch_raw = BASE64URL-DECODE(envelope.epoch)`. A receiver MUST
-reject decode failure, a value other than 16 bytes, or an encoding for which
-`BASE64URL-ENCODE(epoch_raw)` differs from `envelope.epoch`. All cryptographic
-uses of `epoch` use `epoch_raw`, never the textual JSON representation.
+The `epoch`, `requestId`, `instanceId`, and `responseId` fields are canonical
+unpadded base64url encodings of exactly 16 raw bytes. The JSON Schemas constrain
+these identifiers to 22 characters and the canonical final base64url character,
+but the following receiver validation is mandatory and authoritative for every
+such field:
 
-`sequence` and `expiresAt` MUST be positive JavaScript-safe integers in the
-inclusive range 1 through 9007199254740991. Implementations MUST preserve
-these values exactly through JSON parsing and encode them as zero-extended
-`U64BE` inputs. `expiresAt`, `issuedAt`, and `lastSeenAt` are Unix time seconds.
-Senders choose a fresh CSPRNG-generated `epoch_raw` before first use and
-whenever local sequence state resets.
+1. Strictly Base64URL-decode the received value without accepting padding.
+2. Require exactly 16 decoded bytes.
+3. Canonically re-encode those bytes with unpadded Base64URL.
+4. Require the re-encoded value to exactly equal the received value.
+
+Otherwise, the receiver MUST reject the datagram. This prevents multiple textual
+representations of the same identifier. After validation, an implementation may
+use either the decoded 16-byte value or its validated canonical text as an
+identity key; the two forms are equivalent. An invalid `epoch` is rejected
+before key derivation. An invalid plaintext identifier is rejected after AEAD
+but before request correlation, registration lookup, reassembly, replay commit,
+or any semantic state update.
+
+The `epoch` itself is 16 random bytes. Let
+`epoch_raw = BASE64URL-DECODE(envelope.epoch)`. All cryptographic uses of
+`epoch` use `epoch_raw`, never the textual JSON representation. `sequence` and
+`expiresAt` MUST be positive JavaScript-safe integers in the inclusive range 1
+through 9007199254740991. Implementations MUST preserve these values exactly
+through JSON parsing and encode them as zero-extended `U64BE` inputs.
+`expiresAt`, `issuedAt`, and `lastSeenAt` are Unix time seconds. Senders choose
+a fresh CSPRNG-generated `epoch_raw` before first use and whenever local
+sequence state resets.
 
 ## Key derivation and AEAD
 
@@ -239,9 +255,9 @@ advance replay state.
 
 Receiver processing is: validate outer size/carrier/envelope and direction;
 validate expiration and canonical epoch; derive the direction key and authenticate
-AEAD; parse and validate plaintext JSON; validate the type/payload mapping and
-cross-document values such as `expiresAt`; then update replay and semantic
-state. Implementations MAY use a preliminary replay lookup to reject an already
+AEAD; parse and validate plaintext JSON; validate plaintext canonical 16-byte
+identifiers, the type/payload mapping, and cross-document values such as
+`expiresAt`; then update replay and semantic state. Implementations MAY use a preliminary replay lookup to reject an already
 accepted sequence, but MUST NOT commit a new sequence before all of these
 checks succeed.
 
@@ -438,4 +454,7 @@ Implementations MUST validate `../../test-vectors/directory-v3.json` and test:
    unknown/mismatched heartbeat drops, capacity handling, expiry cleanup, and
    periodic re-registration recovery after lost Relay state;
 10. authenticated envelope type to plaintext-payload variant matching, including
-    schema-valid negative mismatch cases.
+    schema-valid negative mismatch cases;
+11. canonical 16-byte identifier acceptance and rejection of noncanonical trailing
+    bits, padding, and decoded lengths other than 16 before correlation or state
+    changes.

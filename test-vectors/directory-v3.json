@@ -692,5 +692,79 @@
         "expected": "accept"
       }
     ]
+  },
+  "identifierCanonicalizationCases": {
+    "rule": "Every Directory v3 16-byte identifier is strict unpadded Base64URL. Decode exactly 16 bytes, canonically re-encode, and compare byte-for-byte with the received text.",
+    "cases": [
+      {
+        "name": "canonical_envelope_epoch",
+        "field": "envelope.epoch",
+        "received": "ZGlyZWN0b3J5LWVwb2NoIQ",
+        "decodedHex": "6469726563746f72792d65706f636821",
+        "expected": "accept"
+      },
+      {
+        "name": "noncanonical_envelope_epoch_unused_trailing_bits",
+        "field": "envelope.epoch",
+        "received": "ZGlyZWN0b3J5LWVwb2NoIR",
+        "decodedHex": "6469726563746f72792d65706f636821",
+        "expected": "reject_noncanonical_base64url"
+      },
+      {
+        "name": "canonical_request_id",
+        "field": "requestId",
+        "received": "AAECAwQFBgcICQoLDA0ODw",
+        "decodedHex": "000102030405060708090a0b0c0d0e0f",
+        "expected": "accept"
+      },
+      {
+        "name": "noncanonical_request_id_unused_trailing_bits",
+        "field": "requestId",
+        "received": "AAECAwQFBgcICQoLDA0ODx",
+        "decodedHex": "000102030405060708090a0b0c0d0e0f",
+        "expected": "reject_noncanonical_base64url"
+      },
+      {
+        "name": "canonical_instance_id",
+        "field": "instanceId",
+        "received": "ICEiIyQlJicoKSorLC0uLw",
+        "decodedHex": "202122232425262728292a2b2c2d2e2f",
+        "expected": "accept"
+      },
+      {
+        "name": "noncanonical_instance_id_unused_trailing_bits",
+        "field": "instanceId",
+        "received": "ICEiIyQlJicoKSorLC0uLx",
+        "decodedHex": "202122232425262728292a2b2c2d2e2f",
+        "expected": "reject_noncanonical_base64url"
+      },
+      {
+        "name": "canonical_response_id",
+        "field": "fragment.responseId",
+        "received": "EBESExQVFhcYGRobHB0eHw",
+        "decodedHex": "101112131415161718191a1b1c1d1e1f",
+        "expected": "accept"
+      },
+      {
+        "name": "noncanonical_response_id_unused_trailing_bits",
+        "field": "fragment.responseId",
+        "received": "EBESExQVFhcYGRobHB0eHx",
+        "decodedHex": "101112131415161718191a1b1c1d1e1f",
+        "expected": "reject_noncanonical_base64url"
+      },
+      {
+        "name": "request_id_with_padding",
+        "field": "requestId",
+        "received": "AAECAwQFBgcICQoLDA0ODw=",
+        "expected": "reject_noncanonical_base64url"
+      },
+      {
+        "name": "request_id_decodes_to_fifteen_bytes",
+        "field": "requestId",
+        "received": "AAECAwQFBgcICQoLDA0O",
+        "decodedHex": "000102030405060708090a0b0c0d0e",
+        "expected": "reject_identifier_length"
+      }
+    ]
   }
 }

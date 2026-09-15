@@ -21,6 +21,12 @@
   before replay or semantic state changes; vectors cover schema-valid negative
   mismatch cases.
 
+- Requires canonical unpadded Base64URL validation for every Directory UDP v3
+  16-byte identifier (`epoch`, `requestId`, `instanceId`, and `responseId`).
+  Schemas reject invalid trailing sextets, and receivers must strictly decode,
+  verify the length, and canonical re-encode before correlation or state changes.
+  Adds positive and noncanonical identifier vectors.
+
 - Defines Membership Lease control-packet refresh by current channel policy:
   accepted `KEEPALIVE`, `CODEC_CONFIG`, and PTT control refresh in
   `optional` unconfigured legacy and `off` channels as well as authenticated
