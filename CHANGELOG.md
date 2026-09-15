@@ -8,6 +8,14 @@
   media-port carrier with AES-GCM transport binding; the media-port transport
   is the enabled-Directory default and dedicated UDP remains explicit.
 
+
+- Defines Directory UDP v3 dynamic registration lifecycle: Relay-local
+  90-second monotonic registration TTL, register-only endpoint replacement,
+  matching-source heartbeat refresh, 30-second heartbeat and 60-second
+  re-registration recovery, Relay-wide 64-registration capacity without
+  eviction, silent uncorrelated drops, expiry cleanup, diagnostics, and state
+  transition vectors.
+
 - Defines Membership Lease control-packet refresh by current channel policy:
   accepted `KEEPALIVE`, `CODEC_CONFIG`, and PTT control refresh in
   `optional` unconfigured legacy and `off` channels as well as authenticated

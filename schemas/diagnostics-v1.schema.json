@@ -684,6 +684,14 @@
         "reassembly_conflicts",
         "reassembly_limit_drops",
         "replay_rejections",
+        "active_registrations",
+        "registrations_created",
+        "registrations_replaced",
+        "registrations_refreshed",
+        "registration_expirations",
+        "registration_capacity_drops",
+        "heartbeat_unknown_drops",
+        "heartbeat_source_mismatch_drops",
         "media_port_pre_auth_drops",
         "media_port_budget_drops"
       ],
@@ -717,6 +725,32 @@
           "$ref": "#/$defs/counter"
         },
         "replay_rejections": {
+          "$ref": "#/$defs/counter"
+        },
+        "active_registrations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "registrations_created": {
+          "$ref": "#/$defs/counter"
+        },
+        "registrations_replaced": {
+          "$ref": "#/$defs/counter"
+        },
+        "registrations_refreshed": {
+          "$ref": "#/$defs/counter"
+        },
+        "registration_expirations": {
+          "$ref": "#/$defs/counter"
+        },
+        "registration_capacity_drops": {
+          "$ref": "#/$defs/counter"
+        },
+        "heartbeat_unknown_drops": {
+          "$ref": "#/$defs/counter"
+        },
+        "heartbeat_source_mismatch_drops": {
           "$ref": "#/$defs/counter"
         },
         "media_port_pre_auth_drops": {

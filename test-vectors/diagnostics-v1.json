@@ -143,6 +143,14 @@
     "reassembly_conflicts": 0,
     "reassembly_limit_drops": 0,
     "replay_rejections": 1,
+    "active_registrations": 2,
+    "registrations_created": 3,
+    "registrations_replaced": 1,
+    "registrations_refreshed": 8,
+    "registration_expirations": 1,
+    "registration_capacity_drops": 0,
+    "heartbeat_unknown_drops": 1,
+    "heartbeat_source_mismatch_drops": 1,
     "media_port_pre_auth_drops": 3,
     "media_port_budget_drops": 1
   }

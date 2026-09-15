@@ -22,7 +22,8 @@ it MUST NOT fall back to or negotiate v1 or v2.
 | Constant | Value | Requirement |
 |---|---:|---|
 | `MAX_DIRECTORY_UDP_PAYLOAD_BYTES` | 1200 bytes | Complete UDP payload, including an optional media-port carrier. |
-| Maximum channels/speakers/participants/clients | 256/4096/128/64 | Directory logical-object limits. |
+| Maximum channels/speakers/participants | 256/4096/128 | Directory logical-object limits. |
+| `MAX_DIRECTORY_ACTIVE_REGISTRATIONS` | 64 | Relay-wide live `(channelId, instanceId)` registration records. |
 | `MAX_DIRECTORY_FRAGMENT_COUNT` | 32 | Maximum fragments in one data response or snapshot page. |
 | `DIRECTORY_REPLAY_WINDOW_SIZE` | 64 | Per-domain authenticated sequence window. |
 | `MAX_DIRECTORY_REASSEMBLY_SETS` | 2 | Incomplete sets retained per replay domain. |
@@ -30,8 +31,11 @@ it MUST NOT fall back to or negotiate v1 or v2.
 | `DIRECTORY_REASSEMBLY_TIMEOUT_SECONDS` | 5 seconds | Maximum time to wait for a complete fragment set. |
 | `MAX_DIRECTORY_PAGE_COUNT` | 256 | Maximum pages in one revision-pinned snapshot retrieval. |
 | Default publish interval | 30 seconds | Relay dynamic participant publication interval. |
-| Default snapshot/client TTL | 90 seconds | Maximum freshness lifetime for published metadata. |
-| Request and registration lifetime | 30 seconds | Maximum accepted `expiresAt - issuedAt`. |
+| Default snapshot freshness TTL | 90 seconds | Maximum freshness lifetime for published metadata. |
+| `DIRECTORY_REGISTRATION_TTL_SECONDS` | 90 seconds | Relay-local lifetime for one accepted dynamic registration. |
+| `DIRECTORY_HEARTBEAT_INTERVAL_SECONDS` | 30 seconds | Maximum idle interval between client registration refreshes. |
+| `DIRECTORY_REREGISTRATION_INTERVAL_SECONDS` | 60 seconds | Maximum interval between client `register` packets while unsolicited publication is wanted. |
+| Client-originated envelope lifetime | 30 seconds | Maximum accepted `expiresAt - issuedAt` for `request`, `register`, and `heartbeat`. |
 
 The 1200-byte limit applies after UTF-8 JSON serialization, AES-GCM encryption,
 base64url encoding, envelope serialization, and, for media-port transport, the
@@ -219,12 +223,69 @@ Relay publication without a request MAY omit `requestId`.
 
 `register` and `heartbeat` additionally carry a canonical base64url 16-byte
 `instanceId`. The Relay MUST bind dynamic registrations to the observed UDP
-source endpoint, never to an address in a payload.
+source endpoint, never to an address in a payload. Their lifecycle is defined
+in [Dynamic registration lifecycle](#dynamic-registration-lifecycle).
 
 An `error` payload is always a single Relay-originated datagram conforming to
 `../../schemas/directory-v3-error-payload.schema.json`. It has `version`,
 `issuedAt`, `expiresAt`, `requestId`, and `code`; it MUST NOT contain
 `fragment`.
+
+
+## Dynamic registration lifecycle
+
+A dynamic registration is a Relay-local publication destination, not an
+IncomUdon membership or Directory participant record. Its unique key is
+`(channelId, instanceId)`, and it contains the observed source transport,
+source IP address, source port, and Relay-local expiry. `request` responses do
+not require a registration and continue to use the request's observed source.
+Unsolicited periodic publications are sent only to current registrations.
+
+After fully validating a `register`, the Relay MUST create a record when the
+key is new and capacity is available. If that key already exists, it MUST
+atomically replace the observed source endpoint and refresh the record. A
+repeated `register` therefore is the only supported endpoint-change and NAT
+rebinding operation. Replacing an existing record does not consume another
+registration slot.
+
+The registration expiry is the Relay's monotonic acceptance time plus
+`DIRECTORY_REGISTRATION_TTL_SECONDS` (90 seconds). It is not derived from the
+client `issuedAt` or `expiresAt`; those fields instead limit acceptance of the
+individual client datagram to 30 seconds. The Relay MUST use a monotonic clock
+for this local deadline.
+
+A client that wants unsolicited periodic publication MUST send `register` on
+startup and after a local source-endpoint change. While it remains interested,
+it MUST send a valid registration-refreshing packet at least every
+`DIRECTORY_HEARTBEAT_INTERVAL_SECONDS` (30 seconds), and it MUST send a fresh
+`register` at least every `DIRECTORY_REREGISTRATION_INTERVAL_SECONDS` (60
+seconds). The periodic re-registration recovers from Relay restart or other
+lost registration state because `heartbeat` failures are intentionally silent.
+
+A `heartbeat` MUST refresh only an existing, unexpired registration with the
+same `(channelId, instanceId)` and exact observed source transport, IP address,
+and port. It refreshes the expiry to the Relay's monotonic acceptance time plus
+90 seconds. A heartbeat MUST NOT create a registration or rebind an endpoint.
+The Relay MUST silently discard an unknown or expired `instanceId`, or one sent
+from a different source endpoint, without changing registration state.
+
+`MAX_DIRECTORY_ACTIVE_REGISTRATIONS` is a Relay-wide limit across all channels
+and configured Directory transports. When 64 active registrations already
+exist, the Relay MUST silently discard a `register` for a new key. It MUST NOT
+evict, replace, or shorten an existing valid registration to create capacity.
+A repeated `register` for an existing key remains valid at capacity.
+
+When the monotonic registration deadline is reached, the Relay MUST remove the
+record and discard unsent unsolicited Directory publications queued for it. It
+MUST stop periodic publication to that record. A later heartbeat for the
+expired key is handled as unknown; a valid `register` is required to create a
+new record.
+
+`error` packets are correlated only with a `requestId`. Because `register` and
+`heartbeat` have `instanceId` but no transaction identifier, their validation,
+capacity, and endpoint-mismatch failures MUST NOT produce an `error` response.
+Implementations MUST expose aggregate lifecycle drops through local diagnostics
+without logging endpoints or instance IDs.
 
 Data responses (`participants` and `snapshot`) MUST conform after decryption to
 `../../schemas/directory-v3-response-fragment.schema.json`. Every data response
@@ -342,4 +403,7 @@ Implementations MUST validate `../../test-vectors/directory-v3.json` and test:
 6. 1200-byte boundary enforcement including the carrier;
 7. revision-pinned snapshot pagination and atomic replacement;
 8. media-port rate-limit, pacing, and Directory drop behavior without media
-   scheduling regression.
+   scheduling regression;
+9. registration creation, replacement, matching-source heartbeat refresh,
+   unknown/mismatched heartbeat drops, capacity handling, expiry cleanup, and
+   periodic re-registration recovery after lost Relay state.

@@ -8,7 +8,11 @@
     "maxConcurrentReassemblySets": 2,
     "maxReassembledPlaintextBytes": 32768,
     "reassemblyTimeoutSeconds": 5,
-    "maxPageCount": 256
+    "maxPageCount": 256,
+    "maxActiveRegistrations": 64,
+    "registrationTtlSeconds": 90,
+    "heartbeatIntervalSeconds": 30,
+    "reregistrationIntervalSeconds": 60
   },
   "crypto": {
     "dedicatedRequest": {
@@ -373,6 +377,158 @@
           "name": "Unit A"
         }
       ]
+    }
+  },
+  "registrationLifecycleCases": {
+    "registrationKey": [
+      "channelId",
+      "instanceId"
+    ],
+    "capacityScope": "relay-wide",
+    "registerHeartbeatFailureResponse": "silent_drop_no_error",
+    "cases": [
+      {
+        "name": "register_creates_record_with_relay_local_ttl",
+        "input": {
+          "channelId": 111,
+          "instanceId": "ICEiIyQlJicoKSorLC0uLw",
+          "sourceEndpoint": "192.0.2.10:40000",
+          "acceptedAtRelayMonotonicMs": 100000
+        },
+        "expected": {
+          "state": "registered",
+          "registrationExpiresAtRelayMonotonicMs": 190000,
+          "activeRegistrations": 1
+        }
+      },
+      {
+        "name": "matching_heartbeat_refreshes_existing_record_only",
+        "initial": {
+          "channelId": 111,
+          "instanceId": "ICEiIyQlJicoKSorLC0uLw",
+          "sourceEndpoint": "192.0.2.10:40000",
+          "registrationExpiresAtRelayMonotonicMs": 190000
+        },
+        "input": {
+          "type": "heartbeat",
+          "sourceEndpoint": "192.0.2.10:40000",
+          "acceptedAtRelayMonotonicMs": 200000
+        },
+        "expected": {
+          "state": "registered",
+          "registrationExpiresAtRelayMonotonicMs": 290000
+        }
+      },
+      {
+        "name": "unknown_heartbeat_is_silently_dropped",
+        "input": {
+          "type": "heartbeat",
+          "channelId": 111,
+          "instanceId": "ICEiIyQlJicoKSorLC0uLw",
+          "sourceEndpoint": "192.0.2.10:40000"
+        },
+        "expected": "silent_drop_no_registration_created_no_error"
+      },
+      {
+        "name": "heartbeat_from_different_endpoint_is_silently_dropped",
+        "initial": {
+          "channelId": 111,
+          "instanceId": "ICEiIyQlJicoKSorLC0uLw",
+          "sourceEndpoint": "192.0.2.10:40000",
+          "registrationExpiresAtRelayMonotonicMs": 190000
+        },
+        "input": {
+          "type": "heartbeat",
+          "sourceEndpoint": "192.0.2.10:50000",
+          "acceptedAtRelayMonotonicMs": 120000
+        },
+        "expected": {
+          "state": "unchanged",
+          "sourceEndpoint": "192.0.2.10:40000",
+          "registrationExpiresAtRelayMonotonicMs": 190000,
+          "response": "none"
+        }
+      },
+      {
+        "name": "repeated_register_replaces_endpoint_without_new_slot",
+        "initial": {
+          "channelId": 111,
+          "instanceId": "ICEiIyQlJicoKSorLC0uLw",
+          "sourceEndpoint": "192.0.2.10:40000",
+          "activeRegistrations": 64
+        },
+        "input": {
+          "type": "register",
+          "sourceEndpoint": "192.0.2.10:50000",
+          "acceptedAtRelayMonotonicMs": 200000
+        },
+        "expected": {
+          "state": "replaced",
+          "sourceEndpoint": "192.0.2.10:50000",
+          "activeRegistrations": 64,
+          "registrationExpiresAtRelayMonotonicMs": 290000
+        }
+      },
+      {
+        "name": "new_register_at_capacity_is_silently_dropped_without_eviction",
+        "initialActiveRegistrations": 64,
+        "input": {
+          "type": "register",
+          "channelId": 111,
+          "instanceId": "MDEyMzQ1Njc4OWFiY2RlZg",
+          "sourceEndpoint": "192.0.2.11:40000"
+        },
+        "expected": {
+          "state": "unregistered",
+          "activeRegistrations": 64,
+          "evictedRegistrations": 0,
+          "response": "none"
+        }
+      },
+      {
+        "name": "expiry_removes_record_and_stops_periodic_publication",
+        "initial": {
+          "channelId": 111,
+          "instanceId": "ICEiIyQlJicoKSorLC0uLw",
+          "registrationExpiresAtRelayMonotonicMs": 190000,
+          "pendingUnsolicitedPublications": 2
+        },
+        "input": {
+          "relayMonotonicMs": 190000
+        },
+        "expected": {
+          "state": "unregistered",
+          "pendingUnsolicitedPublications": 0
+        }
+      },
+      {
+        "name": "periodic_reregister_recovers_lost_relay_state",
+        "initial": {
+          "relayRegistrationState": "lost_after_restart",
+          "clientSourceEndpoint": "192.0.2.10:40000"
+        },
+        "inputs": [
+          {
+            "type": "heartbeat",
+            "atSeconds": 30,
+            "expected": "silent_drop_unknown_instance"
+          },
+          {
+            "type": "register",
+            "atSeconds": 60,
+            "expected": "create_registration"
+          }
+        ],
+        "expected": {
+          "state": "registered",
+          "registrationExpiresAtSecondsAfterInitialStateLoss": 150
+        }
+      }
+    ],
+    "clientRenewalSchedule": {
+      "registerOnStartupAndEndpointChange": true,
+      "maximumHeartbeatIntervalSeconds": 30,
+      "maximumReregistrationIntervalSeconds": 60
     }
   }
 }

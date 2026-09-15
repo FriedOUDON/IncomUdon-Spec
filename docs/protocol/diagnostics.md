@@ -182,12 +182,17 @@ epochs, request IDs, response IDs, page cursors, or metadata names.
 | `reassembly_conflicts` | Sets discarded because duplicate indexes conflict. |
 | `reassembly_limit_drops` | Sets or fragments rejected by count, concurrent-set, or plaintext limits. |
 | `replay_rejections` | Authenticated sequences rejected as duplicate or stale. |
+| `active_registrations` | Current Relay-wide dynamic registration count, from 0 through 64. |
+| `registrations_created` / `registrations_replaced` / `registrations_refreshed` | Accepted lifecycle transitions. |
+| `registration_expirations` | Registrations removed at their monotonic 90-second deadline. |
+| `registration_capacity_drops` | New registrations silently discarded because all 64 slots were active. |
+| `heartbeat_unknown_drops` / `heartbeat_source_mismatch_drops` | Heartbeats silently discarded for an unknown/expired ID or a different observed endpoint. |
 | `media_port_pre_auth_drops` | Carrier candidates dropped before JSON/AEAD processing by length, magic, or source budget checks. |
 | `media_port_budget_drops` | Directory fragments dropped by the media-port response budget or pacing queue. |
 
 A disabled Directory implementation MAY omit this object. If it reports the
-object while disabled, `transport` MUST be `disabled` and every counter MUST be
-zero.
+object while disabled, `transport` MUST be `disabled`, `active_registrations`
+MUST be zero, and every counter MUST be zero.
 
 ## Identity admission metrics
 
