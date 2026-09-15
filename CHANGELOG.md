@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Adds the required Relay-reauthenticated `CODEC_CONFIG` vector to the vector
+  index and fixes the wire-format packet-envelope relative reference.
+
 - Requires non-zero CSPRNG-generated Control Authentication client session and
   Relay instance IDs, preventing `AUTH_HELLO` counter zero from producing the
   prohibited all-zero control nonce.

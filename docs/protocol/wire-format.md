@@ -114,6 +114,6 @@ Unknown flag bits MUST be zero when sending and ignored when receiving.
 | `0x19` | `SERVICE_ADMISSION_DENY` |
 | `0x1A` | `PTT_REQUEST` |
 
-See `../test-vectors/packet-envelope-v1.json` for canonical byte examples.
+See `../../test-vectors/packet-envelope-v1.json` for canonical byte examples.
 
 Control Authentication v1 packet construction is defined in `control-auth.md`.
