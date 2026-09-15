@@ -186,10 +186,21 @@ present and Floor Interrupt v1 is enabled. A Relay MUST reject a PTT request
 whose required permission is absent and MUST NOT forward that peer's media or
 FEC.
 
-Relay membership expiration is the earlier of the normal membership deadline
-and the ticket `exp`. On ticket expiry, the Relay MUST remove membership. If
-that peer is actively talking, it MUST stop forwarding media/FEC and broadcast
-`TALK_RELEASE` with reason `IDENTITY_EXPIRED`.
+The Identity Admission deadline is ticket `exp`. The effective membership
+expiry is the earlier of the normal membership deadline and ticket `exp`. The
+Relay MUST retain which deadline caused that expiry; `effective membership
+expiry` alone does not determine the `TALK_RELEASE` reason.
+
+When the normal membership deadline is earlier than or equal to ticket `exp`,
+the Relay MUST remove membership through the ordinary membership-expiry path.
+If the endpoint is actively talking, it MUST stop forwarding media/FEC and
+broadcast `TALK_RELEASE` with reason `MEMBERSHIP_TIMEOUT` (`0x02`). Normal
+membership expiry wins this equality case deterministically.
+
+Only when ticket `exp` is strictly earlier than the normal membership deadline
+does natural Identity Admission expiry apply. The Relay MUST remove membership.
+If the endpoint is actively talking, it MUST stop forwarding media/FEC and
+broadcast `TALK_RELEASE` with reason `IDENTITY_EXPIRED` (`0x05`).
 
 A Relay MUST NOT automatically renew a ticket. If an Access Service revokes an
 account, the normal bounded response is ticket expiry. Immediate revocation
@@ -242,8 +253,9 @@ URIs, and rotate signing keys through overlapping `kid` entries.
    wrong public key, replayed challenge, and invalid signature are rejected.
 7. Ticket renewal preserves membership without resetting an active PTT lease
    or the Control Authentication counter.
-8. Ticket expiry removes membership and releases an active talker with
-   `IDENTITY_EXPIRED`.
+8. A ticket expiry strictly earlier than the normal membership deadline removes
+   membership and releases an active talker with `IDENTITY_EXPIRED`; an equal
+   or earlier normal membership deadline uses `MEMBERSHIP_TIMEOUT`.
 9. No normal log, diagnostics snapshot, or UI export contains a JWS, OIDC
    credential, challenge, public key, or full pseudonymous subject value.
 

@@ -57,7 +57,7 @@ with reason `SERVER_POLICY`.
 | `0x02` | `MEMBERSHIP_TIMEOUT` | The talker's membership lease expired. |
 | `0x03` | `CLIENT_LEAVE` | Relay accepted the talker's `LEAVE`. |
 | `0x04` | `SERVER_POLICY` | Relay or administrator ended the active talk for policy reasons. |
-| `0x05` | `IDENTITY_EXPIRED` | The optional Identity Admission Ticket expired or was no longer valid. |
+| `0x05` | `IDENTITY_EXPIRED` | Identity ticket `exp` was strictly earlier than the normal membership deadline. |
 | `0x06` | `SERVICE_ADMISSION_REVOKED` | Managed Service Admission was revoked. |
 | `0x07` | `PREEMPTED` | A higher-priority authorized Floor Interrupt replaced this talker. |
 | `0x08` | `SERVICE_ADMISSION_EXPIRED` | Managed Service Admission deadline was strictly earlier than the normal membership deadline. |
@@ -69,9 +69,11 @@ the common header `sender_id` and payload `talker_id`.
 A Relay MUST emit only one release for a grant. If `PTT_OFF`, `LEAVE`, a
 membership timeout, Identity Admission expiry, Managed Service Admission expiry,
 service revocation, preemption, or a server timeout race, the Relay uses the
-first event processed for that grant and ignores later termination events. A
-duplicate `PTT_OFF` or `LEAVE` after release MUST be harmless and MUST NOT
-generate a second release broadcast.
+first event processed for that grant and ignores later termination events. The
+deterministic normal-membership versus Identity/Managed-Service admission
+deadline attribution rules apply before this first-event rule and MUST NOT be
+changed by timer processing order. A duplicate `PTT_OFF` or `LEAVE` after
+release MUST be harmless and MUST NOT generate a second release broadcast.
 
 For a client-initiated release with external FEC v2 enabled, the client MUST
 submit its final AUDIO and final P/Q parity before `PTT_OFF` as defined in

@@ -19,7 +19,7 @@ MUST NOT be used in production.
 | `diagnostics-v1.json` | Redacted local debug-metrics snapshot |
 | `ptt-timeout-v1.json` | `TALK_RELEASE` reason payloads and timeout timelines |
 | `floor-interrupt-v1.json` | Admission-required interrupt request, preemption release, and priority-selection cases |
-| `identity-admission-v1.json` | Ed25519 JWS ticket, proof-of-possession, and denial payloads |
+| `identity-admission-v1.json` | Ed25519 JWS ticket, proof-of-possession, denial payloads, and membership-expiry tie-break cases |
 | `management/service-admission-v1.json` | Managed Service Admission Ed25519 JWS grant, proof-of-possession, and denial payloads |
 | `management/service-admission-control-auth-v1.json` | Managed Service Admission pre-JOIN Control Authentication counter sequence |
 | `management/event-stream-resume-v1.json` | SSE cursor precedence and role-aware `410 Gone` recovery |

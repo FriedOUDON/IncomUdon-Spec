@@ -75,5 +75,40 @@
         "nonce_hex": "1234567800000003"
       }
     ]
-  }
+  },
+  "membership_expiry_cases": [
+    {
+      "name": "identity_ticket_expiry_first",
+      "normal_membership_deadline": 1700000400,
+      "ticket_exp": 1700000300,
+      "effective_membership_expiry": 1700000300,
+      "active_talk": true,
+      "talker_id": 1001,
+      "release_reason": "IDENTITY_EXPIRED",
+      "release_reason_byte": 5,
+      "talk_release_payload_hex": "000003e905"
+    },
+    {
+      "name": "normal_membership_expiry_first",
+      "normal_membership_deadline": 1700000200,
+      "ticket_exp": 1700000300,
+      "effective_membership_expiry": 1700000200,
+      "active_talk": true,
+      "talker_id": 1001,
+      "release_reason": "MEMBERSHIP_TIMEOUT",
+      "release_reason_byte": 2,
+      "talk_release_payload_hex": "000003e902"
+    },
+    {
+      "name": "equal_deadlines_normal_membership_wins",
+      "normal_membership_deadline": 1700000300,
+      "ticket_exp": 1700000300,
+      "effective_membership_expiry": 1700000300,
+      "active_talk": true,
+      "talker_id": 1001,
+      "release_reason": "MEMBERSHIP_TIMEOUT",
+      "release_reason_byte": 2,
+      "talk_release_payload_hex": "000003e902"
+    }
+  ]
 }

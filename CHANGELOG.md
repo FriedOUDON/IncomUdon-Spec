@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Defines Identity Admission expiry attribution: normal membership expiry wins
+  equal deadlines and releases with `MEMBERSHIP_TIMEOUT`; only a strictly
+  earlier Identity ticket deadline releases with `IDENTITY_EXPIRED`. Adds
+  deterministic expiry-order vectors.
+
 - Adds Relay-reauthenticated `CODEC_CONFIG` to the normative Relay-generated
   Control Authentication packet-class list, aligning it with its forwarding
   requirements and canonical vector.

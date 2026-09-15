@@ -15,7 +15,10 @@ Managed Service Admission endpoint, this rule applies when the normal
 membership deadline is earlier than or equal to the service admission deadline;
 the strictly earlier service-admission deadline uses
 `SERVICE_ADMISSION_EXPIRED` (`0x08`) as defined in
-`../extensions/management/service-admission.md`.
+`../extensions/management/service-admission.md`. For an Identity Admission
+endpoint, this rule likewise applies when the normal membership deadline is
+earlier than or equal to ticket `exp`; only a strictly earlier ticket expiry
+uses `IDENTITY_EXPIRED` (`0x05`) as defined in `identity-admission.md`.
 
 ## Advertised timing
 
