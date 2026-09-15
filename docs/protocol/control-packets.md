@@ -80,13 +80,14 @@ For `aes-gcm-v2`, `media_nonce_base_96` MUST be a newly CSPRNG-generated,
 non-zero media session base and MUST match every subsequent encrypted `AUDIO`
 and `FEC` header for this sender until the next configuration. A sender MUST
 create a fresh base whenever it changes the codec transport, mode, or FEC
-options and emits a replacement configuration. The packet MUST use Control
-Authentication v1. A receiver MUST authenticate this configuration before
-creating or replacing the sender's media replay domain. When the Relay forwards
-or replays a verified configuration, it reauthenticates the original talker's
-19-byte payload as Relay-originated control under `control-auth.md`; the
-receiver uses the Relay nonce domain for control replay protection while still
-using the original talker `sender_id` and payload for media state.
+options and emits a replacement configuration. An `aes-gcm-v2` `CODEC_CONFIG`
+MUST use Control Authentication v1 regardless of the configured compatibility
+policy. A receiver MUST authenticate this configuration before creating or
+replacing the sender's media replay domain. When the Relay forwards or replays
+a verified configuration, it reauthenticates the original talker's 19-byte
+payload as Relay-originated control under `control-auth.md`; the receiver uses
+the Relay nonce domain for control replay protection while still using the
+original talker `sender_id` and payload for media state.
 `CODEC_CONFIG` does not carry a `media_key_id`: an AES-GCM v2 receiver MUST use
 the `media_key_id` selected by its media security mode (`2` for AES-GCM v2).
 The `control_key_id` in the Control Authentication header authenticates this
@@ -95,7 +96,11 @@ configuration but MUST NOT be used as its media replay-domain key ID.
 For `no-crypto`, `legacy-xor`, and legacy `aes-gcm`, the 12-byte
 `media_nonce_base_96` field (bytes 7 through 18) MUST be all zero and
 receivers MUST ignore it. It remains present so the payload length is
-unambiguous across the coordinated release.
+unambiguous across the coordinated release. These modes MUST use Control
+Authentication v1 when the current channel policy requires it. An
+unauthenticated `CODEC_CONFIG` is valid only when that policy permits legacy
+unauthenticated control: an `optional` channel without a configured Control Key
+or an `off` channel. It MUST NOT configure `aes-gcm-v2`.
 
 FEC option bits are:
 

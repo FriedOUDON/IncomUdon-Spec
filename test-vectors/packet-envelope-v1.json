@@ -3,8 +3,13 @@
   "endianness": "big-endian for envelope and control integers",
   "senderIdNamespaces": {
     "relaySystemReserved": 0,
-    "validEndpointSenderIds": [1, 4294967295],
-    "invalidEndpointSenderIds": [0],
+    "validEndpointSenderIds": [
+      1,
+      4294967295
+    ],
+    "invalidEndpointSenderIds": [
+      0
+    ],
     "requirements": [
       "Endpoint-originated datagrams use senderId from 1 through 4294967295.",
       "Relay/System datagrams without a concrete endpoint identity may use senderId 0."
@@ -13,61 +18,139 @@
   "vectors": [
     {
       "name": "no_crypto_codec_config_opus_12000",
-      "fields": {"version": 1, "type": "CODEC_CONFIG", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 42, "flags": 0},
+      "fields": {
+        "version": 1,
+        "type": "CODEC_CONFIG",
+        "headerLen": 16,
+        "channelId": 111,
+        "senderId": 1002,
+        "seq": 42,
+        "flags": 0
+      },
       "payloadHex": "000200002ee000000000000000000000000000",
       "datagramHex": "010b00100000006f000003ea002a0000000200002ee000000000000000000000000000",
       "notes": "19-byte CODEC_CONFIG; no-crypto reserves the media_nonce_base_96 bytes as zero."
     },
     {
       "name": "no_crypto_codec_config_opus_128000",
-      "fields": {"version": 1, "type": "CODEC_CONFIG", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 44, "flags": 0},
+      "fields": {
+        "version": 1,
+        "type": "CODEC_CONFIG",
+        "headerLen": 16,
+        "channelId": 111,
+        "senderId": 1002,
+        "seq": 44,
+        "flags": 0
+      },
       "payloadHex": "00020001f40000000000000000000000000000",
       "datagramHex": "010b00100000006f000003ea002c000000020001f40000000000000000000000000000",
       "notes": "19-byte CODEC_CONFIG proves the u32 bitrate field carries an Opus value above u16 range."
     },
     {
       "name": "no_crypto_codec_config_opus_24000",
-      "fields": {"version": 1, "type": "CODEC_CONFIG", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 45, "flags": 0},
+      "fields": {
+        "version": 1,
+        "type": "CODEC_CONFIG",
+        "headerLen": 16,
+        "channelId": 111,
+        "senderId": 1002,
+        "seq": 45,
+        "flags": 0
+      },
       "payloadHex": "000200005dc000000000000000000000000000",
       "datagramHex": "010b00100000006f000003ea002d0000000200005dc000000000000000000000000000",
       "notes": "19-byte CODEC_CONFIG for the registered Opus 24 kbps mode."
     },
     {
       "name": "no_crypto_ptt_on",
-      "fields": {"version": 1, "type": "PTT_ON", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 43, "flags": 0},
+      "fields": {
+        "version": 1,
+        "type": "PTT_ON",
+        "headerLen": 16,
+        "channelId": 111,
+        "senderId": 1002,
+        "seq": 43,
+        "flags": 0
+      },
       "payloadHex": "",
       "datagramHex": "010200100000006f000003ea002b0000"
     },
     {
       "name": "no_crypto_talk_grant",
-      "fields": {"version": 1, "type": "TALK_GRANT", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 0, "flags": 0},
+      "fields": {
+        "version": 1,
+        "type": "TALK_GRANT",
+        "headerLen": 16,
+        "channelId": 111,
+        "senderId": 1002,
+        "seq": 0,
+        "flags": 0
+      },
       "payloadHex": "000003ea",
       "datagramHex": "010700100000006f000003ea00000000000003ea"
     },
     {
       "name": "no_crypto_talk_deny_no_selectable_talker",
-      "fields": {"version": 1, "type": "TALK_DENY", "headerLen": 16, "channelId": 111, "senderId": 0, "seq": 3, "flags": 0},
+      "fields": {
+        "version": 1,
+        "type": "TALK_DENY",
+        "headerLen": 16,
+        "channelId": 111,
+        "senderId": 0,
+        "seq": 3,
+        "flags": 0
+      },
       "payloadHex": "00000000",
       "datagramHex": "010900100000006f000000000003000000000000",
       "notes": "Both header senderId and payload talker_id are the zero Relay/System sentinel when no active talker can be selected."
     },
     {
       "name": "no_crypto_talk_release_server_timeout",
-      "fields": {"version": 1, "type": "TALK_RELEASE", "headerLen": 16, "channelId": 111, "senderId": 1001, "seq": 1, "flags": 0},
+      "fields": {
+        "version": 1,
+        "type": "TALK_RELEASE",
+        "headerLen": 16,
+        "channelId": 111,
+        "senderId": 1001,
+        "seq": 1,
+        "flags": 0
+      },
       "payloadHex": "000003e901",
       "datagramHex": "010800100000006f000003e900010000000003e901"
     },
     {
       "name": "no_crypto_server_config_standard_membership",
-      "fields": {"version": 1, "type": "SERVER_CONFIG", "headerLen": 16, "channelId": 111, "senderId": 0, "seq": 2, "flags": 0},
-      "serverConfig": {"maximumTalkSeconds": 0, "multiTalkEnabled": false, "maximumActiveTalkers": 1, "membershipLeaseSeconds": 30, "keepaliveIntervalSeconds": 10},
+      "fields": {
+        "version": 1,
+        "type": "SERVER_CONFIG",
+        "headerLen": 16,
+        "channelId": 111,
+        "senderId": 0,
+        "seq": 2,
+        "flags": 0
+      },
+      "serverConfig": {
+        "maximumTalkSeconds": 0,
+        "multiTalkEnabled": false,
+        "maximumActiveTalkers": 1,
+        "membershipLeaseSeconds": 30,
+        "keepaliveIntervalSeconds": 10
+      },
       "payloadHex": "00000001001e000a",
       "datagramHex": "010d00100000006f000000000002000000000001001e000a",
       "notes": "Canonical Relay/System senderId 0 eight-byte SERVER_CONFIG with the standard 30-second membership lease and 10-second idle keepalive; maximum_talk_seconds is disabled for this example."
     },
     {
       "name": "no_crypto_ping",
-      "fields": {"version": 1, "type": "PING", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 44, "flags": 0},
+      "fields": {
+        "version": 1,
+        "type": "PING",
+        "headerLen": 16,
+        "channelId": 111,
+        "senderId": 1002,
+        "seq": 44,
+        "flags": 0
+      },
       "payloadHex": "1020304050607080",
       "datagramHex": "010e00100000006f000003ea002c00001020304050607080"
     },
@@ -82,6 +165,57 @@
       "name": "legacy_pcm_payload",
       "payloadLength": 320,
       "notes": "Exactly 320 bytes is interpreted as unsequenced 8 kHz signed little-endian PCM."
+    }
+  ],
+  "codecConfigPolicyCases": [
+    {
+      "name": "required_accepts_authenticated_aes_gcm_v2_codec_config",
+      "policy": "required",
+      "controlKeyConfigured": true,
+      "mediaSecurityMode": "aes-gcm-v2",
+      "fixture": "relay-reauthenticated-codec-config-v1.json.clientOriginated",
+      "expected": "accept"
+    },
+    {
+      "name": "required_rejects_unauthenticated_codec_config",
+      "policy": "required",
+      "controlKeyConfigured": true,
+      "mediaSecurityMode": "no-crypto",
+      "fixture": "no_crypto_codec_config_opus_12000",
+      "expected": "reject_control_auth_required"
+    },
+    {
+      "name": "optional_configured_rejects_unauthenticated_codec_config",
+      "policy": "optional",
+      "controlKeyConfigured": true,
+      "mediaSecurityMode": "no-crypto",
+      "fixture": "no_crypto_codec_config_opus_12000",
+      "expected": "reject_control_auth_required"
+    },
+    {
+      "name": "optional_unconfigured_accepts_unauthenticated_legacy_codec_config",
+      "policy": "optional",
+      "controlKeyConfigured": false,
+      "mediaSecurityMode": "no-crypto",
+      "fixture": "no_crypto_codec_config_opus_12000",
+      "expected": "accept"
+    },
+    {
+      "name": "off_accepts_unauthenticated_legacy_codec_config",
+      "policy": "off",
+      "controlKeyConfigured": false,
+      "mediaSecurityMode": "no-crypto",
+      "fixture": "no_crypto_codec_config_opus_12000",
+      "expected": "accept"
+    },
+    {
+      "name": "off_rejects_unauthenticated_aes_gcm_v2_codec_config",
+      "policy": "off",
+      "controlKeyConfigured": false,
+      "mediaSecurityMode": "aes-gcm-v2",
+      "headerLen": 16,
+      "flags": 0,
+      "expected": "reject_aes_gcm_v2_requires_control_auth"
     }
   ]
 }

@@ -264,7 +264,10 @@ of those actions. A packet rejected by the current policy MUST NOT refresh
 membership. Membership refresh eligibility for accepted `KEEPALIVE`,
 `CODEC_CONFIG`, and PTT control is defined in `membership-lease.md`; this also
 includes valid unauthenticated control accepted for an `optional` unconfigured
-legacy channel or an `off` channel.
+legacy channel or an `off` channel. Such an unauthenticated `CODEC_CONFIG`
+MUST select only `no-crypto`, `legacy-xor`, or legacy `aes-gcm`; it MUST NOT
+configure AES-GCM v2. A Relay MUST reject an unauthenticated AES-GCM v2
+`CODEC_CONFIG` even when its Control Authentication policy is `off`.
 
 For AES-GCM v2, the Relay
 MUST cache the verified CodecConfig and reauthenticate it before forwarding the
@@ -346,6 +349,7 @@ Implementations MUST verify the deterministic `control-auth-v1.json` and
 tags, tampering, wrong key IDs, incorrect channel or
 sender IDs, expired/reused cookies, source-address cookie mismatch, replayed
 nonces, provisional-window expiry, window promotion at JOIN, direct,
-Identity Admission, and Managed Service Admission counter sequences, and
+Identity Admission, and Managed Service Admission counter sequences,
 Relay-reauthenticated `CODEC_CONFIG` delivery with a fresh Relay nonce and tag,
-and Relay counter exhaustion rollover without nonce reuse or counter wrap.
+required/optional/off `CODEC_CONFIG` policy handling, and Relay counter
+exhaustion rollover without nonce reuse or counter wrap.
