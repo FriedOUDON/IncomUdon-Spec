@@ -1,0 +1,94 @@
+{
+  "specVersion": "unreleased",
+  "scheme": "management-authorization-v1",
+  "cases": [
+    {
+      "name": "channel_scoped_participant_lookup",
+      "operation": "GET /channels/{channel_id}/participants",
+      "service_id": "recorder-01",
+      "target_channel_id": 100,
+      "channel_roles": {
+        "100": [
+          "viewer"
+        ],
+        "200": [
+          "viewer"
+        ]
+      },
+      "expected": "allow"
+    },
+    {
+      "name": "list_channels_filters_by_viewer_scope",
+      "operation": "GET /channels",
+      "service_id": "recorder-01",
+      "channel_roles": {
+        "100": [
+          "viewer"
+        ],
+        "200": [
+          "viewer"
+        ]
+      },
+      "available_channel_ids": [
+        100,
+        200,
+        300
+      ],
+      "expected_visible_channel_ids": [
+        100,
+        200
+      ]
+    },
+    {
+      "name": "event_stream_filters_each_event",
+      "operation": "GET /events",
+      "service_id": "auditor-01",
+      "channel_roles": {
+        "100": [
+          "auditor"
+        ],
+        "200": [
+          "auditor"
+        ]
+      },
+      "candidate_event_channel_ids": [
+        100,
+        200,
+        300
+      ],
+      "expected_visible_event_channel_ids": [
+        100,
+        200
+      ]
+    },
+    {
+      "name": "health_requires_explicit_global_permission",
+      "operation": "GET /health",
+      "service_id": "recorder-01",
+      "channel_roles": {
+        "100": [
+          "viewer"
+        ]
+      },
+      "global_permissions": [],
+      "expected": "deny"
+    },
+    {
+      "name": "recording_stop_uses_stored_job_channel",
+      "operation": "POST /recording-jobs/{job_id}/stop",
+      "service_id": "recorder-01",
+      "job_id": "recording-100-01",
+      "stored_channel_id": 100,
+      "channel_roles": {
+        "100": [
+          "recorder"
+        ],
+        "200": [
+          "recorder"
+        ]
+      },
+      "expected_authorization_channel_id": 100,
+      "expected": "allow"
+    }
+  ]
+}

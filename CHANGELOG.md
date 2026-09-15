@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Defines Management Plane effective authorization scopes for channel,
+  resource-owned, multi-channel, and global API operations.
+
 - Defines modulo-2^16 `audio_seq` ordering and External FEC v2 block
   membership across the wrap boundary.
 

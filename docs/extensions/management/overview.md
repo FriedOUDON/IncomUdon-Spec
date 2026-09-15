@@ -95,17 +95,42 @@ requirement in Management Plane v1.
 ## Roles and channel ACLs
 
 Authorization is evaluated for every request using the authenticated
-`service_id`, requested `channel_id`, and operation. Roles are channel-scoped;
-an implementation MUST NOT infer all-channel access from a certificate unless
-an administrator explicitly grants it.
+`service_id`, requested operation, and that operation's effective
+authorization scope. Roles are channel-scoped unless an administrator explicitly
+configures a global permission; an implementation MUST NOT infer all-channel or
+global access from possession of a certificate or channel-scoped role.
+
+1. A channel-scoped operation, including participant lookup, grant issuance,
+   and recording-job creation, MUST authorize `service_id`, target `channel_id`,
+   and operation.
+2. An operation on an existing channel-owned resource, including recording-job
+   stop, MUST resolve that resource's authoritative stored `channel_id` before
+   authorization. A caller-supplied channel ID MUST NOT override the stored
+   scope.
+3. A multi-channel list or stream operation MUST filter every returned resource
+   or event to channels for which the authenticated service has the required
+   channel-scoped operation. A service with no matching channel scope MUST
+   receive `403`, not an unfiltered or implicitly global result.
+4. A global operation has no channel ID and MUST require an explicitly
+   configured global permission. A channel-scoped role MUST NOT imply that
+   permission.
 
 | Role | Permitted operations |
 |---|---|
-| `viewer` | Read health, channel state, participant state, and events for allowed channels. |
+| `viewer` | Read channel state, participant state, and redacted events for allowed channels. |
 | `recorder` | `viewer` operations plus recording-job lifecycle and Managed Service Admission with receive-only permissions. |
 | `operator` | `viewer` operations plus explicitly configured channel operations. |
 | `auditor` | Read retained audit records and redacted events for explicitly authorized channels; unscoped records require an explicit global audit permission. |
 | `admin` | Manage Management Plane ACLs and signing-key configuration. |
+
+For the initial HTTP contract, `GET /channels` filters its channel summaries
+to the caller's `viewer` scope, and `GET /events` filters every event to the
+caller's `viewer` or `auditor` scope. `GET /health` instead requires the
+explicit global `health.read` permission. `GET /audit-records` follows the
+additional `auditor` and global-audit rules below. The
+`POST /recording-jobs/{job_id}/stop` endpoint resolves the stored job channel
+before applying the recorder or operator permission; it never trusts an
+inferred or client-supplied replacement channel scope.
 
 The initial `recorder` role MUST NOT grant PTT, media transmission, ordinary
 profile changes, or Relay policy changes. A future automation extension may permit talk only through an explicit `talk`
@@ -239,19 +264,21 @@ management extension. Those functions require separate versioned proposals.
 1. Disabled Management Plane leaves existing UDP Relay and Directory behavior
    unchanged.
 2. An untrusted, expired, or ACL-unmapped mTLS client cannot access the API.
-3. A `recorder` ACL can issue only a receive-only grant for an allowed channel.
-4. A service grant cannot join a different channel, use another sender ID, or
+3. A channel-scoped role does not authorize `GET /health` unless the service
+   also has explicit global `health.read` permission.
+4. A `recorder` ACL can issue only a receive-only grant for an allowed channel.
+5. A service grant cannot join a different channel, use another sender ID, or
    be used by a different proof-of-possession key.
-5. A valid Managed Service Admission can satisfy a required identity policy
+6. A valid Managed Service Admission can satisfy a required identity policy
    only for that service endpoint while managed-service admission is enabled.
-6. Revocation removes the affected membership without affecting unrelated
+7. Revocation removes the affected membership without affecting unrelated
    channel members.
-7. A Management API outage denies new grants while an uninterrupted existing
+8. A Management API outage denies new grants while an uninterrupted existing
    receive-only membership follows the bounded grace rule.
-8. API responses, SSE events, audit records, and normal Relay logs contain no
+9. API responses, SSE events, audit records, and normal Relay logs contain no
    channel password, derived key, admission grant, certificate private key,
    or media payload.
-9. An `auditor` retrieves only records for explicitly authorized channels; a
-   request for another channel is rejected.
-10. Audit pagination is stable, and an audit cursor outside the retained window
+10. An `auditor` retrieves only records for explicitly authorized channels; a
+    request for another channel is rejected.
+11. Audit pagination is stable, and an audit cursor outside the retained window
     returns `410 Gone` rather than silently skipping history.
