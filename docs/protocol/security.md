@@ -6,8 +6,11 @@
 |---|---|---:|
 | `no-crypto` | Compatibility/testing only | 0 |
 | `legacy-xor` | Deprecated compatibility mode | 1 |
-| `aes-gcm` | Legacy AES-GCM | 1 |
-| `aes-gcm-v2` | Default for new clients | 2 |
+| `aes-gcm-v2` | Required AES-GCM media profile | 2 |
+
+This registry is exhaustive for Version 1 media security modes. A conforming
+implementation MUST reject an unknown media security mode and MUST NOT
+advertise, negotiate, or transmit one.
 
 ## Channel credential and root-key derivation
 
@@ -72,12 +75,12 @@ password_key = HKDF-SHA-256(
 )
 ```
 
-Secure modes MUST reject an empty credential. `no-crypto` ignores the
-credential and is the only mode that may be used without one. Implementations
-MUST select the credential kind from the configured input before attempting
-packet authentication and MUST NOT silently fall back to the removed SHA-256
-scheme or try multiple credential kinds for an incoming packet. The credential
-kind is local channel configuration, not UDP packet metadata.
+`aes-gcm-v2` and `legacy-xor` MUST reject an empty credential. `no-crypto`
+ignores the credential and is the only mode that may be used without one.
+Implementations MUST select the credential kind from the configured input
+before attempting packet authentication and MUST NOT silently fall back to the
+removed SHA-256 scheme or try multiple credential kinds for an incoming packet.
+The credential kind is local channel configuration, not UDP packet metadata.
 
 Argon2id is performed only while establishing or reconfiguring a local channel
 session, never once per packet. Implementations SHOULD retain only the derived
@@ -86,13 +89,17 @@ memory where the platform permits it. A 256-bit `secret:` credential is
 recommended for unattended or high-security deployments; Argon2id raises the
 cost of offline guessing but cannot make a weak passphrase strong.
 
-## AES-GCM keys
+## AES-GCM media key
 
 Use HKDF-SHA-256 with empty salt:
 
 ```text
-aes-gcm:    HKDF(password_key, "incomudon-session-aesgcm", 32)
-aes-gcm-v2: HKDF(password_key, "incomudon-session-aesgcm-v2", 32)
+media_key = HKDF-SHA-256(
+  IKM = password_key,
+  salt = empty,
+  info = "incomudon-session-aesgcm-v2",
+  length = 32
+)
 ```
 
 ## Control Authentication key
@@ -216,19 +223,20 @@ across a full receiver-state loss; deployments requiring that stronger property
 need a future Relay-issued epoch, persistent state, or per-sender credential
 extension.
 
-## AES-GCM v2
+## AES-GCM media profile
 
-AES-GCM v2 sets flag `0x0001`, uses `media_key_id = 2` in its wire `key_id`
-field, requires `header_len = 36` for encrypted `AUDIO` and `FEC` packets, and
-authenticates the exact 36-byte packet prefix as AAD. The header carries
-`media_nonce_base_96`, `media_counter`, and `media_key_id`; the final 16 bytes
-of every encrypted payload are the GCM authentication tag.
+`aes-gcm-v2` is the sole AES-GCM media profile. It sets flag `0x0001`, uses
+`media_key_id = 2` in its wire `key_id` field, requires `header_len = 36` for
+encrypted `AUDIO` and `FEC` packets, and authenticates the exact 36-byte packet
+prefix as AAD. The header carries `media_nonce_base_96`, `media_counter`, and
+`media_key_id`; the final 16 bytes of every encrypted payload are the GCM
+authentication tag.
 
 The 28-byte Control Authentication v1 header is a separate HMAC construction;
 it is not an AES-GCM v2 nonce format and MUST NOT be used for encrypted media.
 
-AES-GCM v1 uses no AAD. A receiver configured for v2 MUST reject a packet that
-lacks the v2 flag, and a legacy receiver MUST reject a packet carrying it.
+A receiver MUST reject an encrypted media packet that does not use this exact
+header, flag, key ID, nonce construction, and AAD rule.
 
 ## Legacy XOR
 

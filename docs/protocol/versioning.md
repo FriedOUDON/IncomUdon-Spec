@@ -71,7 +71,8 @@ checkout.
   versioned payload.
 - Preserve raw AES-GCM v2 media packets while relaying.
 - Keep legacy decoding only where a documented compatibility mode requires it.
-- New clients MUST default to AES-GCM v2 and MUST NOT default to legacy XOR.
+- When media encryption is selected, new clients MUST use `aes-gcm-v2` and
+  MUST NOT default to `legacy-xor`.
 
 ## First-release coordinated migration
 

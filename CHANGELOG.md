@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Removes legacy AES-GCM v1 from the normative media-security registry.
+  AES-GCM media encryption is now exclusively `aes-gcm-v2`; the `no-crypto`
+  and `legacy-xor` compatibility modes remain available.
+
 - Clarified independent reference-validator suite scopes and strengthened the
   structural suite with OpenAPI 3.1 validation for the Management API,
   including component and `$ref` resolution.

@@ -23,9 +23,9 @@ resampler state separate for each sender ID, then mix eligible output under
 2. Send a 19-byte `CODEC_CONFIG` before the first media frame for a sender.
    It MUST use Control Authentication v1 when required by the channel policy,
    and always for AES-GCM v2. A policy-permitted unauthenticated configuration
-   is limited to `no-crypto` and legacy media modes. For AES-GCM v2 the
-   configuration announces the fresh media nonce base and establishes the
-   receiver replay domain.
+   is limited to `no-crypto` and `legacy-xor`. For AES-GCM v2 the configuration
+   announces the fresh media nonce base and establishes the receiver replay
+   domain.
 3. Send ordinary `PTT_ON`, or authorized `PTT_REQUEST` for Floor Interrupt;
    wait for `TALK_GRANT` before treating media as authorized.
 4. Send `AUDIO` and optional `FEC` while granted and before any Relay-enforced

@@ -265,8 +265,8 @@ membership. Membership refresh eligibility for accepted `KEEPALIVE`,
 `CODEC_CONFIG`, and PTT control is defined in `membership-lease.md`; this also
 includes valid unauthenticated control accepted for an `optional` unconfigured
 legacy channel or an `off` channel. Such an unauthenticated `CODEC_CONFIG`
-MUST select only `no-crypto`, `legacy-xor`, or legacy `aes-gcm`; it MUST NOT
-configure AES-GCM v2. A Relay MUST reject an unauthenticated AES-GCM v2
+MUST select only `no-crypto` or `legacy-xor`; it MUST NOT configure AES-GCM
+v2. A Relay MUST reject an unauthenticated AES-GCM v2
 `CODEC_CONFIG` even when its Control Authentication policy is `off`.
 
 For AES-GCM v2, the Relay
@@ -315,8 +315,8 @@ Relay policy has three modes:
 
 Production deployments SHOULD use `required`. First-release secure clients
 MUST use AES-GCM v2 media with Control Authentication v1. `no-crypto`,
-`legacy-xor`, and legacy AES-GCM are weak compatibility modes and MUST NOT be
-accepted by a Relay in `required` mode.
+and `legacy-xor` are compatibility modes and MUST NOT be accepted by a Relay
+in `required` mode.
 
 ## Key rotation
 
