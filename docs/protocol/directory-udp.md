@@ -143,6 +143,10 @@ is scoped to the authenticated envelope `channelId`.
    "speakers":[{"channelId":111,"senderId":1002,"name":"Unit A"}]}
   ```
 
+A directory speaker `senderId` identifies an endpoint and MUST be non-zero.
+`senderId = 0` is reserved for Relay/System use and MUST NOT appear in a
+speaker record.
+
   A speaker row with `channelId` set to the string `all` in source CSV input
   is resolved by the Relay into the requested channel; a channel-specific row
   wins. Source CSV field definitions and validation rules are in

@@ -14,6 +14,21 @@ All multibyte integers use network byte order (big endian).
 | 12 | 2 | `seq` |
 | 14 | 2 | `flags` |
 
+## Sender ID namespace
+
+`sender_id` is an unsigned 32-bit value. `0x00000000` is reserved for
+Relay/System packets and protocol sentinel values. A valid endpoint sender ID
+is in the inclusive range `0x00000001` through `0xffffffff`.
+
+A client MUST use a non-zero endpoint sender ID in every endpoint-originated
+datagram. A Relay MUST reject an endpoint-originated datagram whose header
+`sender_id` is zero before it creates or refreshes admission, membership, talk,
+or media state. Relay/System packets that do not assert a concrete endpoint
+identity MAY use `sender_id = 0`, including `SERVER_CONFIG`. A
+Relay-originated packet that represents a concrete endpoint or talker MUST use
+that endpoint's non-zero sender ID. `sender_id = 0` is a namespace value only;
+it does not authenticate a Relay or System origin.
+
 The fixed header is 16 bytes. `seq` increments for every packet sent by a
 client and wraps modulo 65536. A Relay MUST likewise assign `seq` from its own
 outbound counter to every Relay-originated or Relay-reauthenticated downstream

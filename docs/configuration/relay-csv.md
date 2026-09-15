@@ -75,8 +75,9 @@ Columns:
 channel_id,sender_id,name
 ```
 
-`sender_id` is a `u32`; `name` is the display name. A numeric `channel_id`
-MUST name an existing row in `channels.csv`. The exact pair
+`sender_id` is a non-zero endpoint `u32` (`1` through `4294967295`); `name`
+is the display name. A numeric `channel_id` MUST name an existing row in
+`channels.csv`. The exact pair
 `(channel_id, sender_id)` MUST be unique.
 
 The special case-insensitive value `all` is permitted only in the
@@ -183,7 +184,7 @@ service_id,channel_id,sender_id,admission_role,allow_listen,allow_talk,allow_int
 |---|---|
 | `service_id` | Existing enabled `management-services.csv` service ID. |
 | `channel_id` | Exact authorized `u32` channel ID. Wildcards and `all` are forbidden. |
-| `sender_id` | Exact `u32` sender ID bound into a Managed Service Admission grant. |
+| `sender_id` | Exact non-zero endpoint `u32` sender ID bound into a Managed Service Admission grant. |
 | `admission_role` | `recorder`, `observer`, or `automation`. |
 | `allow_listen` | Must be `true` for an issuable Managed Service Admission grant. |
 | `allow_talk` | Permits ordinary `PTT_ON` only when `true`. |

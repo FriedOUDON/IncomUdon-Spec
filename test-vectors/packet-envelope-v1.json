@@ -1,6 +1,15 @@
 {
   "specVersion": "unreleased",
   "endianness": "big-endian for envelope and control integers",
+  "senderIdNamespaces": {
+    "relaySystemReserved": 0,
+    "validEndpointSenderIds": [1, 4294967295],
+    "invalidEndpointSenderIds": [0],
+    "requirements": [
+      "Endpoint-originated datagrams use senderId from 1 through 4294967295.",
+      "Relay/System datagrams without a concrete endpoint identity may use senderId 0."
+    ]
+  },
   "vectors": [
     {
       "name": "no_crypto_codec_config_opus_12000",
@@ -36,6 +45,13 @@
       "datagramHex": "010700100000006f000003ea00000000000003ea"
     },
     {
+      "name": "no_crypto_talk_deny_no_selectable_talker",
+      "fields": {"version": 1, "type": "TALK_DENY", "headerLen": 16, "channelId": 111, "senderId": 0, "seq": 3, "flags": 0},
+      "payloadHex": "00000000",
+      "datagramHex": "010900100000006f000000000003000000000000",
+      "notes": "Both header senderId and payload talker_id are the zero Relay/System sentinel when no active talker can be selected."
+    },
+    {
       "name": "no_crypto_talk_release_server_timeout",
       "fields": {"version": 1, "type": "TALK_RELEASE", "headerLen": 16, "channelId": 111, "senderId": 1001, "seq": 1, "flags": 0},
       "payloadHex": "000003e901",
@@ -47,7 +63,7 @@
       "serverConfig": {"maximumTalkSeconds": 0, "multiTalkEnabled": false, "maximumActiveTalkers": 1, "membershipLeaseSeconds": 30, "keepaliveIntervalSeconds": 10},
       "payloadHex": "00000001001e000a",
       "datagramHex": "010d00100000006f000000000002000000000001001e000a",
-      "notes": "Canonical eight-byte SERVER_CONFIG with the standard 30-second membership lease and 10-second idle keepalive; maximum_talk_seconds is disabled for this example."
+      "notes": "Canonical Relay/System senderId 0 eight-byte SERVER_CONFIG with the standard 30-second membership lease and 10-second idle keepalive; maximum_talk_seconds is disabled for this example."
     },
     {
       "name": "no_crypto_ping",

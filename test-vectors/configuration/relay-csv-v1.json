@@ -26,6 +26,7 @@
   "invalid_semantic_conditions": [
     "duplicate channels.csv channel_id",
     "speakers.csv numeric channel_id absent from channels.csv",
+    "speakers.csv sender_id equal to zero",
     "duplicate speakers.csv all/sender_id",
     "duplicate speakers.csv numeric channel_id/sender_id",
     "control-keys.csv key_id equal to zero",
@@ -34,6 +35,7 @@
     "management-services.csv duplicate service_id or certificate_sha256",
     "management-channel-acl.csv unknown or disabled service_id",
     "management-channel-acl.csv channel_id equal to all or any wildcard",
+    "management-channel-acl.csv sender_id equal to zero",
     "recorder or observer ACL with talk or interrupt enabled",
     "interrupt ACL without talk, or with priority outside 1 through 255"
   ]

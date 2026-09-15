@@ -1,8 +1,10 @@
 # Control Packets
 
-Unless otherwise stated, a client control request uses its own `sender_id` in
-the common header. Relay-generated `TALK_*` packets set both the header
-`sender_id` and the payload talker ID to the resolved talker.
+Unless otherwise stated, a client control request uses its own non-zero
+endpoint `sender_id` in the common header. A Relay MUST reject a client
+control request with `sender_id = 0`. Relay-generated `TALK_GRANT` and
+`TALK_RELEASE` packets set both the header `sender_id` and payload talker ID to
+the resolved non-zero endpoint sender ID.
 
 | Type | Client payload | Relay behavior |
 |---|---|---|
@@ -38,13 +40,16 @@ admission is defined in `../extensions/management/service-admission.md`.
 |---:|---:|---|
 | 0 | 4 | `talker_id` (`u32`) |
 
-`TALK_RELEASE` has a five-byte payload: `talker_id:u32 || release_reason:u8`.
-Release reason values and authoritative Relay timeout behavior are defined in
-`ptt-timeout.md`.
+`TALK_GRANT` and `TALK_RELEASE` payload `talker_id` values MUST be non-zero
+endpoint sender IDs. `TALK_RELEASE` has a five-byte payload:
+`talker_id:u32 || release_reason:u8`. Release reason values and authoritative
+Relay timeout behavior are defined in `ptt-timeout.md`.
 
-`TALK_DENY` identifies the current lowest sender ID among active talkers, or
-zero when none can be selected. A client MUST stop pending transmission after
-a deny and MUST discard stale queued frames.
+`TALK_DENY` MUST set both the common-header `sender_id` and payload
+`talker_id` to the current lowest non-zero endpoint sender ID among active
+talkers. When no active talker can be selected, both fields MUST be zero; this
+is the Relay/System sentinel and never identifies an endpoint. A client MUST
+stop pending transmission after a deny and MUST discard stale queued frames.
 
 `PTT_REQUEST` payload and Relay preemption rules are defined in
 `floor-interrupt.md`. Floor Interrupt uses a new packet type so legacy empty

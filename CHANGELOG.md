@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Reserves `sender_id = 0` for Relay/System packets and protocol sentinels;
+  endpoint sender IDs, Identity and Managed Service Admission `sid` claims,
+  management API resources, diagnostics, directory speakers, and Relay CSV
+  inputs now require the inclusive range `1` through `4294967295`. Canonical
+  vectors cover the zero `TALK_DENY` sentinel and sender-ID boundaries.
+
 - Aligns Diagnostics v1 platform-dependent metrics with unavailable-value
   handling: MTU send-error classification, output underruns, and applied QoS
   may be omitted or null and are never fabricated as zero.

@@ -34,6 +34,11 @@
       "minimum": 0,
       "maximum": 4294967295
     },
+    "endpointSenderId": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4294967295
+    },
     "priority": {
       "type": "integer",
       "minimum": 0,
@@ -107,7 +112,7 @@
             "replaced_sender_id": {
               "oneOf": [
                 {
-                  "$ref": "#/$defs/u32"
+                  "$ref": "#/$defs/endpointSenderId"
                 },
                 {
                   "type": "null"
@@ -150,7 +155,7 @@
               "if": {
                 "properties": {
                   "replaced_sender_id": {
-                    "$ref": "#/$defs/u32"
+                    "$ref": "#/$defs/endpointSenderId"
                   }
                 },
                 "required": [

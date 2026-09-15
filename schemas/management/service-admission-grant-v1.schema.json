@@ -24,7 +24,7 @@
     "iat": { "type": "integer", "minimum": 0 },
     "exp": { "type": "integer", "minimum": 0 },
     "ch": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
-    "sid": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "sid": { "type": "integer", "minimum": 1, "maximum": 4294967295 },
     "role": { "enum": ["recorder", "observer", "automation"] },
     "perm": { "enum": [1, 3, 7] },
     "pri": { "type": "integer", "minimum": 1, "maximum": 255 },

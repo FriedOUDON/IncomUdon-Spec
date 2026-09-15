@@ -47,7 +47,7 @@ with reason `SERVER_POLICY`.
 
 | Offset | Bytes | Field |
 |---:|---:|---|
-| 0 | 4 | `talker_id` (`u32`) |
+| 0 | 4 | `talker_id` (non-zero endpoint `u32`) |
 | 4 | 1 | `release_reason` |
 
 | Value | Name | Meaning |

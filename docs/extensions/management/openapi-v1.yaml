@@ -163,7 +163,7 @@ paths:
               required: [channel_id, sender_id, role, service_public_key]
               properties:
                 channel_id: { $ref: '#/components/schemas/U32' }
-                sender_id: { $ref: '#/components/schemas/U32' }
+                sender_id: { $ref: '#/components/schemas/EndpointSenderId' }
                 role:
                   enum: [recorder, observer, automation]
                 request_talk:
@@ -255,6 +255,10 @@ components:
       type: integer
       minimum: 0
       maximum: 4294967295
+    EndpointSenderId:
+      type: integer
+      minimum: 1
+      maximum: 4294967295
     Priority:
       type: integer
       minimum: 0
@@ -270,7 +274,7 @@ components:
       type: object
       required: [sender_id, state]
       properties:
-        sender_id: { $ref: '#/components/schemas/U32' }
+        sender_id: { $ref: '#/components/schemas/EndpointSenderId' }
         state: { enum: [joined, talking, idle] }
       additionalProperties: false
     AuditRecord:
@@ -313,7 +317,7 @@ components:
         requester_priority: { $ref: '#/components/schemas/Priority' }
         replaced_sender_id:
           oneOf:
-            - { $ref: '#/components/schemas/U32' }
+            - { $ref: '#/components/schemas/EndpointSenderId' }
             - { type: 'null' }
         replaced_priority:
           oneOf:
@@ -330,7 +334,7 @@ components:
               replaced_priority: { type: 'null' }
         - if:
             properties:
-              replaced_sender_id: { $ref: '#/components/schemas/U32' }
+              replaced_sender_id: { $ref: '#/components/schemas/EndpointSenderId' }
             required: [replaced_sender_id]
           then:
             properties:

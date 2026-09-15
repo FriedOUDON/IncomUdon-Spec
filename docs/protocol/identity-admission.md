@@ -105,7 +105,7 @@ The signed payload MUST contain these claims:
 | `jti` | Cryptographically random ticket ID. |
 | `iat` / `exp` | Numeric Unix seconds. `exp - iat` MUST NOT exceed 300 seconds. |
 | `ch` | Authorized `channel_id` (`u32`). |
-| `sid` | Authorized `sender_id` (`u32`). |
+| `sid` | Authorized endpoint `sender_id` (`u32`, `1` through `4294967295`). |
 | `perm` | Permission bitset: bit 0 `listen`, bit 1 `talk`, bit 2 `interrupt`. Bit 0 MUST be set; bit 2 requires bit 1. |
 | `pri` | Interrupt priority (`u8`), required and non-zero only when bit 2 is set. |
 | `cnf.jkt` | Base64url SHA-256 digest of the raw 32-byte Ed25519 client public key. |
@@ -116,8 +116,9 @@ channel passwords, keys, and arbitrary group claims from the ticket.
 
 The Relay verifies the JWS against a locally configured active or previous
 Ed25519 public key selected by `kid`. It MUST validate `iss`, `aud`, `iat`,
-`exp`, maximum lifetime, `ch`, `sid`, permissions, `pri` when present, and `cnf.jkt` before marking
-a peer admitted. A Relay MAY allow at most 30 seconds of clock skew. Ticket
+`exp`, maximum lifetime, `ch`, non-zero `sid`, permissions, `pri` when present,
+and `cnf.jkt` before marking a peer admitted. A ticket with `sid = 0` MUST be
+rejected. A Relay MAY allow at most 30 seconds of clock skew. Ticket
 keys MUST support overlap during signing-key rotation.
 
 ## UDP admission flow

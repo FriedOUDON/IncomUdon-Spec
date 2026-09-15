@@ -96,7 +96,7 @@ the standard cap is 16. Additional talkers are aggregated in
 
 | Field | Meaning |
 |---|---|
-| `sender_id` | Remote talker sender ID |
+| `sender_id` | Remote non-zero endpoint talker sender ID |
 | `active` | Whether the Relay currently reports the sender as talking |
 | `codec_id` / `codec_mode` | Last authenticated codec configuration; `codec_mode` is the exact `u32` codec mode/bitrate value |
 | `last_packet_age_ms` | Monotonic age of the latest media packet |

@@ -51,7 +51,7 @@ verification. It contains the following claims:
 | `jti` | Cryptographically random grant ID. |
 | `iat` / `exp` | Numeric Unix seconds; `exp - iat` MUST be from 60 through 3600 seconds. |
 | `ch` | Authorized `channel_id` (`u32`). |
-| `sid` | Authorized `sender_id` (`u32`). |
+| `sid` | Authorized endpoint `sender_id` (`u32`, `1` through `4294967295`). |
 | `role` | `recorder`, `observer`, or `automation`. |
 | `perm` | Permission bitset: bit 0 `listen`, bit 1 `talk`, bit 2 `interrupt`; bit 0 MUST be set and bit 2 requires bit 1. |
 | `pri` | Interrupt priority (`u8`), required and non-zero only when bit 2 is set. |
@@ -114,7 +114,8 @@ SHA-256(
 
 The Relay verifies the proof from the same source endpoint, consumes the
 pending challenge once, and marks the endpoint service-admitted until grant
-expiry. The service then sends the ordinary authenticated JOIN cookie payload.
+expiry. A grant with `sid = 0` MUST be rejected. The service then sends the
+ordinary authenticated JOIN cookie payload.
 A valid service-admitted state is bound to the endpoint, channel ID, sender ID,
 permission set, grant ID, and proof key.
 
