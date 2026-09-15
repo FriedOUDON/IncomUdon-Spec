@@ -27,9 +27,17 @@ The modern media payload is:
 | 0 | 2 | `audio_seq` (`u16`) |
 | 2 | variable | Codec frame |
 
-`audio_seq` increments per media frame and is independent of envelope `seq`.
-It drives loss detection and external-FEC grouping. Media frames are normally
-20 ms.
+`audio_seq` is an unsigned 16-bit modular sequence number. It increments by
+one per media frame, independently of envelope `seq`, and wraps from 65535 to
+0 modulo 65536. It drives loss detection and external-FEC grouping. Media
+frames are normally 20 ms.
+
+All ordering, continuity, loss detection, and FEC membership operations on
+`audio_seq` MUST use modulo-2^16 sequence arithmetic, not ordinary integer
+comparison. Within a bounded receive window, sequence `a` follows `b` when
+`0 < ((a - b) mod 65536) < 32768`. A distance of exactly 32768 is ambiguous
+and MUST be treated as outside the active receive window rather than as an
+ordered frame.
 
 `MAX_MEDIA_FRAME_BYTES` is `4096`. It is a receiver-side codec and FEC
 validation ceiling: a codec frame excludes the two-byte `audio_seq` prefix and

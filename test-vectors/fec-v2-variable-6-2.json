@@ -165,6 +165,78 @@
           ]
         }
       ]
+    },
+    {
+      "name": "wrap-boundary-six-frame-block",
+      "blockStart": 65532,
+      "blockSize": 6,
+      "frames": [
+        {
+          "audioSeq": 65532,
+          "dataHex": "1020"
+        },
+        {
+          "audioSeq": 65533,
+          "dataHex": "304050"
+        },
+        {
+          "audioSeq": 65534,
+          "dataHex": "60708090"
+        },
+        {
+          "audioSeq": 65535,
+          "dataHex": "a0"
+        },
+        {
+          "audioSeq": 0,
+          "dataHex": "b0c0d0e0f0"
+        },
+        {
+          "audioSeq": 1,
+          "dataHex": "010203040506"
+        }
+      ],
+      "parity": [
+        {
+          "parityIndex": 0,
+          "dataHex": "51d20374f506",
+          "fecPayloadHex": "02fffc060000020003000400010005000651d20374f506"
+        },
+        {
+          "parityIndex": 1,
+          "dataHex": "6ba17b5c1bc0",
+          "fecPayloadHex": "02fffc06010002000300040001000500066ba17b5c1bc0"
+        }
+      ],
+      "recoveryCases": [
+        {
+          "name": "one-missing-frame-after-wrap",
+          "receivedSequences": [
+            65532,
+            65533,
+            65534,
+            65535,
+            1
+          ],
+          "missingSequences": [
+            0
+          ],
+          "expectedRecovered": [
+            {
+              "audioSeq": 0,
+              "dataHex": "b0c0d0e0f0"
+            }
+          ],
+          "expectedOutputSequences": [
+            65532,
+            65533,
+            65534,
+            65535,
+            0,
+            1
+          ]
+        }
+      ]
     }
   ]
 }

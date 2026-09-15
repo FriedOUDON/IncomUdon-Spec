@@ -24,11 +24,19 @@ Opus because it applies two sources of redundancy.
 
 ## External parity FEC v2
 
-The encoder groups up to six consecutive codec frames by their `audio_seq`.
-For each complete group, it emits two parity packets after the final audio
-frame. When a talker releases PTT, an incomplete final group MUST also be
-emitted using its actual `block_size`, from 1 through 6. Both P and Q parity
-packets MUST be emitted for every complete and short final block.
+The encoder groups up to six consecutive codec frames by their modular
+`audio_seq`. For each complete group, it emits two parity packets after the
+final audio frame. When a talker releases PTT, an incomplete final group MUST
+also be emitted using its actual `block_size`, from 1 through 6. Both P and Q
+parity packets MUST be emitted for every complete and short final block.
+
+`block_start` identifies member `D[0]`. For member index `i`, where
+`0 <= i < block_size`, its AUDIO sequence is
+`(block_start + i) mod 65536`. A block MAY cross the wrap boundary; for
+example, `block_start = 65532` and `block_size = 6` identifies sequences
+65532, 65533, 65534, 65535, 0, and 1 in that exact D-index order. Receivers
+MUST use this modular membership mapping when matching AUDIO frames to FEC
+length metadata and P/Q parity.
 
 ### PTT release ordering
 

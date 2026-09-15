@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Defines modulo-2^16 `audio_seq` ordering and External FEC v2 block
+  membership across the wrap boundary.
+
 - Clarifies that Directory UDP v2 HKDF and AAD use decoded 16-byte
   `epoch_raw`, not the base64url JSON text.
 
