@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Adds canonical `SERVICE_ADMISSION_REVOKED` `TALK_RELEASE` payload coverage
+  and an eight-byte `SERVER_CONFIG` datagram using the standard 30-second
+  membership lease and 10-second idle keepalive.
+
 - Adds the required Relay-reauthenticated `CODEC_CONFIG` vector to the vector
   index and fixes the wire-format packet-envelope relative reference.
 

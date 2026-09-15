@@ -42,6 +42,14 @@
       "datagramHex": "010800100000006f000003e900010000000003e901"
     },
     {
+      "name": "no_crypto_server_config_standard_membership",
+      "fields": {"version": 1, "type": "SERVER_CONFIG", "headerLen": 16, "channelId": 111, "senderId": 0, "seq": 2, "flags": 0},
+      "serverConfig": {"maximumTalkSeconds": 0, "multiTalkEnabled": false, "maximumActiveTalkers": 1, "membershipLeaseSeconds": 30, "keepaliveIntervalSeconds": 10},
+      "payloadHex": "00000001001e000a",
+      "datagramHex": "010d00100000006f000000000002000000000001001e000a",
+      "notes": "Canonical eight-byte SERVER_CONFIG with the standard 30-second membership lease and 10-second idle keepalive; maximum_talk_seconds is disabled for this example."
+    },
+    {
       "name": "no_crypto_ping",
       "fields": {"version": 1, "type": "PING", "headerLen": 16, "channelId": 111, "senderId": 1002, "seq": 44, "flags": 0},
       "payloadHex": "1020304050607080",

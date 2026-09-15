@@ -8,6 +8,7 @@
     {"talker_id": 1001, "reason": "CLIENT_LEAVE", "reason_byte": 3, "payload_hex": "000003e903"},
     {"talker_id": 1001, "reason": "SERVER_POLICY", "reason_byte": 4, "payload_hex": "000003e904"},
     {"talker_id": 1001, "reason": "IDENTITY_EXPIRED", "reason_byte": 5, "payload_hex": "000003e905"},
+    {"talker_id": 1001, "reason": "SERVICE_ADMISSION_REVOKED", "reason_byte": 6, "payload_hex": "000003e906"},
     {"talker_id": 1001, "reason": "SERVICE_ADMISSION_EXPIRED", "reason_byte": 8, "payload_hex": "000003e908"}
   ],
   "timeline_cases": [
