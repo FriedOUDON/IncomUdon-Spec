@@ -60,7 +60,7 @@ with reason `SERVER_POLICY`.
 | `0x05` | `IDENTITY_EXPIRED` | The optional Identity Admission Ticket expired or was no longer valid. |
 | `0x06` | `SERVICE_ADMISSION_REVOKED` | Managed Service Admission was revoked. |
 | `0x07` | `PREEMPTED` | A higher-priority authorized Floor Interrupt replaced this talker. |
-| `0x08` | `SERVICE_ADMISSION_EXPIRED` | Managed Service Admission reached its effective expiry. |
+| `0x08` | `SERVICE_ADMISSION_EXPIRED` | Managed Service Admission deadline was strictly earlier than the normal membership deadline. |
 | `0x09-0xff` | reserved | A receiver MUST treat an unknown value as a release. |
 
 Relay-generated `TALK_RELEASE` packets MUST use the resolved talker ID in both

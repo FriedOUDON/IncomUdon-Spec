@@ -10,7 +10,12 @@ This document defines Version 1 endpoint membership lifetime after a successful
 A membership lease is a Relay-side monotonic deadline. On expiry, the Relay
 MUST remove the endpoint membership. If that endpoint has an active talk grant,
 the Relay MUST immediately stop forwarding its `AUDIO` and `FEC` and broadcast
-exactly one `TALK_RELEASE` with reason `MEMBERSHIP_TIMEOUT` (`0x02`).
+exactly one `TALK_RELEASE` with reason `MEMBERSHIP_TIMEOUT` (`0x02`). For a
+Managed Service Admission endpoint, this rule applies when the normal
+membership deadline is earlier than or equal to the service admission deadline;
+the strictly earlier service-admission deadline uses
+`SERVICE_ADMISSION_EXPIRED` (`0x08`) as defined in
+`../extensions/management/service-admission.md`.
 
 ## Advertised timing
 

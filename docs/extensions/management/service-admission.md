@@ -158,15 +158,25 @@ MUST NOT weaken Identity Admission requirements for ordinary endpoints.
 The service admission deadline is `exp`, except that a continuous
 receive-only membership satisfying every grace condition above has a deadline of
 `exp + grace_seconds`. The effective membership expiry is the earlier of this
-service admission deadline and the normal membership deadline.
+service admission deadline and the normal membership deadline. The Relay MUST
+retain which deadline caused that expiry; `effective membership expiry` alone
+does not determine the `TALK_RELEASE` reason.
 
-At effective membership expiry, the Relay MUST invalidate the matching
-service-admitted state and remove membership. This is natural expiry, not
-revocation. If the endpoint is actively talking, the Relay MUST immediately stop
-forwarding AUDIO and FEC, then broadcast `TALK_RELEASE` with reason
-`SERVICE_ADMISSION_EXPIRED`. A receive-only service cannot be actively talking;
-when its grace deadline is reached, the Relay removes its membership without a
-talk release.
+When the normal membership deadline is earlier than or equal to the service
+admission deadline, the Relay MUST invalidate matching service-admitted state
+and remove membership through the ordinary membership-expiry path. If the
+endpoint is actively talking, it MUST immediately stop forwarding AUDIO and
+FEC, then broadcast `TALK_RELEASE` with reason `MEMBERSHIP_TIMEOUT` (`0x02`).
+Normal membership expiry wins this equality case deterministically.
+
+Only when the service admission deadline is strictly earlier than the normal
+membership deadline does natural Service Admission expiry apply. The Relay MUST
+invalidate matching service-admitted state and remove membership. If the
+endpoint is actively talking, it MUST immediately stop forwarding AUDIO and
+FEC, then broadcast `TALK_RELEASE` with reason
+`SERVICE_ADMISSION_EXPIRED` (`0x08`). A receive-only service cannot be actively
+talking; when its applicable deadline is reached, the Relay removes its
+membership without a talk release.
 
 A renewal that completes before the effective membership expiry replaces the
 current admission state without resetting an active PTT deadline. When renewal
@@ -234,6 +244,8 @@ defines the required client-to-Relay Control Authentication counter sequence.
 Implementations that support Managed Service Admission v1 MUST verify the
 grant, proof, and counter sequence before claiming compatibility. They MUST also
 verify the grant-expiry cases: expiry of a talk-capable service removes membership
-and releases an active talker with `SERVICE_ADMISSION_EXPIRED`; receive-only
-grace cannot exceed `exp + grace_seconds` or a normal membership deadline,
-including when Identity Admission is `required`.
+and uses `SERVICE_ADMISSION_EXPIRED` only when the service admission deadline is
+strictly earlier than the normal membership deadline; normal membership expiry
+uses `MEMBERSHIP_TIMEOUT`, including equal-deadline cases. Receive-only grace
+cannot exceed `exp + grace_seconds` or a normal membership deadline, including
+when Identity Admission is `required`.

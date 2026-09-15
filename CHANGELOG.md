@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Defines Managed Service Admission expiry attribution: normal membership
+  expiry wins equal deadlines and releases with `MEMBERSHIP_TIMEOUT`; only a
+  strictly earlier service-admission deadline releases with
+  `SERVICE_ADMISSION_EXPIRED`.
+
 - Adds canonical `SERVICE_ADMISSION_REVOKED` `TALK_RELEASE` payload coverage
   and an eight-byte `SERVER_CONFIG` datagram using the standard 30-second
   membership lease and 10-second idle keepalive.
