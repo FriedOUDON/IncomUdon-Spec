@@ -9,6 +9,9 @@ IncomUdon Relay, PWA client, Qt native client, and future Rust native client.
 It describes Version 1 behavior and provides deterministic vectors for new
 implementations.
 
+A future implementation becomes subject to a specification release's
+interoperability gate only when it claims compatibility with that release.
+
 ## Normative language
 
 The terms MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are to be interpreted as

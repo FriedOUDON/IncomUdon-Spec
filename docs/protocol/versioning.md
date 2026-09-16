@@ -40,7 +40,9 @@ current `specVersion`.
    on normal development commits.
 2. Change this repository before implementation code.
 3. Add or update deterministic vectors for every new encoding or security rule.
-4. Run the specification checks and Relay/PWA/Qt/Rust interoperability tests.
+4. Run the specification checks and interoperability tests for the Relay and
+   every client implementation that claims compatibility with the current
+   specification snapshot.
 5. Update supported consumers to declare the exact tagged specification release
    only after that release has been created.
 
@@ -48,7 +50,8 @@ current `specVersion`.
 
 1. Select a new semantic specification tag, such as `v0.7.0-draft`.
 2. Complete normative documentation, schemas, vectors, and implementation
-   interoperability validation.
+   interoperability validation for the Relay and every client implementation
+   that claims compatibility with the selected release.
 3. In the release commit, set `SPEC_VERSION` and every vector `specVersion` to
    the selected tag.
 4. Run `tools/check_spec_version.py --expected-version TAG` and all applicable
@@ -76,9 +79,9 @@ checkout.
 
 ## First-release coordinated migration
 
-The PWA, Qt, and Rust clients covered by the current coordinated draft have not
-yet reached a formal production release. They therefore MUST migrate together
-to the 19-byte `CODEC_CONFIG` with a media nonce base, five-byte
+The coordinated draft has not yet reached a formal production release. Every
+client implementation that claims compatibility with the first production
+release MUST support the 19-byte `CODEC_CONFIG` with a media nonce base, five-byte
 `TALK_RELEASE` with release reason, eight-byte `SERVER_CONFIG` with membership
 lease timing, FEC v2, Control Authentication v1, optional Identity Admission
 v1, the 1200-byte UDP datagram limit, the AES-GCM v2 36-byte media header with

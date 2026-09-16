@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Generalizes release gates and first-production migration requirements to the
+  Relay and client implementations that claim compatibility with the relevant
+  specification release. README continues to identify the Rust client as a
+  future implementation until it makes such a claim.
+
 - Defines `required` Control Authentication policy as the authenticated
   `aes-gcm-v2`-only media-security profile, including authentication-first
   rejection and canonical compatibility-mode policy vectors.
