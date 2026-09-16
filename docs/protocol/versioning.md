@@ -52,14 +52,28 @@ current `specVersion`.
 2. Complete normative documentation, schemas, vectors, and implementation
    interoperability validation for the Relay and every client implementation
    that claims compatibility with the selected release.
-3. In the release commit, set `SPEC_VERSION` and every vector `specVersion` to
-   the selected tag.
-4. Run `tools/check_spec_version.py --expected-version TAG` and all applicable
-   validation tests.
-5. Create an annotated Git tag with the same name on that exact commit and push
-   the commit and tag.
-6. Start the next development cycle in a follow-up commit by restoring
-   `SPEC_VERSION` and all vector `specVersion` values to `unreleased`.
+3. Finalize release metadata from the actual change set since the immediately
+   preceding specification tag. Create `## TAG - YYYY-MM-DD` directly below an
+   empty `## Unreleased` section in `CHANGELOG.md`; its notes MUST describe only
+   changes included in the selected release.
+4. Update README release metadata so both its visible specification snapshot
+   and latest tagged specification identify `TAG`.
+5. In the release commit, set `SPEC_VERSION` and every vector `specVersion` to
+   `TAG`.
+6. Review the complete release tree, including its metadata, then validate the
+   specification, vectors, and implementations with
+   `tools/check_spec_version.py --expected-version TAG`,
+   `tools/validate_vectors.py --suite all`, and the required interoperability
+   tests.
+7. Without modifying the validated tree, create the release commit and an
+   annotated Git tag named `TAG` on that exact commit, then push both. The
+   validated commit and tagged commit MUST be identical.
+8. Confirm that tag-triggered Specification CI succeeds.
+9. Start the next development cycle in a follow-up commit by restoring
+   `SPEC_VERSION` and all vector `specVersion` values to `unreleased`, updating
+   README to show the development snapshot and `TAG` as the latest tagged
+   specification, and retaining the finalized `TAG` CHANGELOG section below a
+   new empty `## Unreleased` section.
 
 A GitHub Actions tag build MUST reject a tag whose name differs from
 `SPEC_VERSION`. Tagged release compatibility MUST always be evaluated from the

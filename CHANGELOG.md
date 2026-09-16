@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Defines metadata-aware specification release handling: release notes are
+  frozen from the actual delta since the prior tag, README and CHANGELOG are
+  reviewed in the release tree, the annotated tag identifies that exact
+  validated commit, and tag-triggered CI confirms the snapshot.
+
 - Generalizes release gates and first-production migration requirements to the
   Relay and client implementations that claim compatibility with the relevant
   specification release. README continues to identify the Rust client as a
