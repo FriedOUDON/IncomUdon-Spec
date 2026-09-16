@@ -25,6 +25,7 @@ RELEASE_REASONS = {
     "SERVICE_ADMISSION_EXPIRED": 8,
 }
 MAX_DIRECTORY_REPLAY_SEQUENCE = (1 << 53) - 1
+MEDIA_SECURITY_MODES = frozenset({"no-crypto", "legacy-xor", "aes-gcm-v2"})
 
 
 def _integer(value: Any, label: str, maximum: int) -> int:
@@ -125,6 +126,33 @@ def _control_packet_accepted(control: dict[str, Any], packet: dict[str, Any]) ->
         raise VectorValidationError(f"unknown Control Authentication mode: {mode!r}")
     authentication_required = mode == "required" or (mode == "optional" and configured)
     return valid and (authenticated or not authentication_required)
+
+
+def _validate_media_security_mode_registry(root: Path) -> list[str]:
+    document = _load(root, "test-vectors/packet-envelope-v1.json")
+    cases = document.get("codecConfigPolicyCases")
+    if not isinstance(cases, list):
+        raise VectorValidationError("codecConfigPolicyCases must be an array")
+
+    errors: list[str] = []
+    for index, case in enumerate(cases):
+        if not isinstance(case, dict):
+            raise VectorValidationError(f"codec configuration policy case {index} must be an object")
+        name = case.get("name", f"codec configuration policy case {index}")
+        mode = case.get("mediaSecurityMode")
+        expected = case.get("expected")
+        if not isinstance(name, str) or not isinstance(mode, str) or not isinstance(expected, str):
+            raise VectorValidationError(f"codec configuration policy case {index} has invalid metadata")
+        if mode not in MEDIA_SECURITY_MODES:
+            _compare(
+                errors,
+                f"{name} rejected unknown media security mode",
+                "reject_unknown_media_security_mode",
+                expected,
+            )
+        elif expected == "reject_unknown_media_security_mode":
+            errors.append(f"{name}: registered media security mode {mode!r} is marked unknown")
+    return errors
 
 
 def _validate_membership(root: Path) -> list[str]:
@@ -571,6 +599,7 @@ def validate_lifecycle_vectors(root: Path) -> list[str]:
     validators = (
         ("PTT timeout", _validate_ptt_timeout),
         ("Membership lease", _validate_membership),
+        ("Media security mode registry", _validate_media_security_mode_registry),
         ("Admission expiry", _validate_admission_expiry),
         ("Directory lifecycle", _validate_directory_lifecycle),
         ("Media replay", _validate_media_replay),

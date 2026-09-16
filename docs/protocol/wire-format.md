@@ -74,8 +74,9 @@ selects Control Authentication key material and MUST NOT be interpreted as a
 
 This form is used by Control Authentication v1 and documented in
 `control-auth.md`. It MUST NOT be used for AES-GCM v2 encrypted media. Legacy
-plain control packets in encrypted modes may carry a 28-byte zero nonce/key-ID
-header, their plaintext payload, and a 16-byte zero tag for compatibility.
+plain control packets in the `legacy-xor` compatibility mode may carry a
+28-byte zero nonce/key-ID header, their plaintext payload, and a 16-byte zero
+tag for compatibility.
 
 ## Datagram size
 

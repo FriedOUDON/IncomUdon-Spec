@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Clarifies that the 28-byte zero-header compatibility control form applies
+  only to `legacy-xor`, and adds independent negative vectors that reject the
+  removed `aes-gcm` name and other unknown media-security modes.
+
 - Removes legacy AES-GCM v1 from the normative media-security registry.
   AES-GCM media encryption is now exclusively `aes-gcm-v2`; the `no-crypto`
   and `legacy-xor` compatibility modes remain available.
