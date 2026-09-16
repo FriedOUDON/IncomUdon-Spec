@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Defines `required` Control Authentication policy as the authenticated
+  `aes-gcm-v2`-only media-security profile, including authentication-first
+  rejection and canonical compatibility-mode policy vectors.
+
 - Clarifies that the 28-byte zero-header compatibility control form applies
   only to `legacy-xor`, and adds independent negative vectors that reject the
   removed `aes-gcm` name and other unknown media-security modes.

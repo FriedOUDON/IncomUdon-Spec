@@ -269,6 +269,13 @@ MUST select only `no-crypto` or `legacy-xor`; it MUST NOT configure AES-GCM
 v2. A Relay MUST reject an unauthenticated AES-GCM v2
 `CODEC_CONFIG` even when its Control Authentication policy is `off`.
 
+Under the `required` policy, the Relay MUST reject every unauthenticated
+`CODEC_CONFIG` before media-mode processing. It MUST then reject every
+authenticated `CODEC_CONFIG` that selects `no-crypto` or `legacy-xor`; only an
+authenticated `aes-gcm-v2` configuration is permitted. This policy therefore
+defines the Version 1 strong media-security profile as well as requiring
+Control Authentication.
+
 For AES-GCM v2, the Relay
 MUST cache the verified CodecConfig and reauthenticate it before forwarding the
 configuration, including before forwarding `AUDIO` or `FEC` with that sender's
@@ -309,14 +316,14 @@ Relay policy has three modes:
 
 | Mode | Behavior |
 |---|---|
-| `required` | Reject channels without a configured Control Key and reject all unauthenticated controls. |
+| `required` | Reject channels without a configured Control Key, reject all unauthenticated controls, and permit only authenticated `aes-gcm-v2` `CODEC_CONFIG`. |
 | `optional` | Require authentication for configured channels; permit legacy behavior for unconfigured channels. |
 | `off` | Disable Control Authentication v1; development/compatibility only. |
 
 Production deployments SHOULD use `required`. First-release secure clients
-MUST use AES-GCM v2 media with Control Authentication v1. `no-crypto`,
-and `legacy-xor` are compatibility modes and MUST NOT be accepted by a Relay
-in `required` mode.
+MUST use AES-GCM v2 media with Control Authentication v1. `no-crypto` and
+`legacy-xor` are compatibility modes and MUST NOT be accepted by a Relay in
+`required` mode.
 
 ## Key rotation
 

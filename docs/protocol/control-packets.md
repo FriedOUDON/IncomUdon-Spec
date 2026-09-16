@@ -96,11 +96,12 @@ configuration but MUST NOT be used as its media replay-domain key ID.
 For `no-crypto` and `legacy-xor`, the 12-byte `media_nonce_base_96` field
 (bytes 7 through 18) MUST be all zero and receivers MUST ignore it. It remains
 present so the payload length is unambiguous across the coordinated release.
-These modes MUST use Control Authentication v1 when the current channel policy
-requires it. An unauthenticated `CODEC_CONFIG` is valid only when that policy
-permits legacy unauthenticated control: an `optional` channel without a
-configured Control Key or an `off` channel. It MUST NOT configure
-`aes-gcm-v2`.
+Under an `optional` policy with a configured Control Key, these modes MUST use
+Control Authentication v1. They MUST NOT be selected under the `required`
+policy, even when Control Authentication succeeds. An unauthenticated
+`CODEC_CONFIG` is valid only when the policy permits legacy unauthenticated
+control: an `optional` channel without a configured Control Key or an `off`
+channel. It MUST NOT configure `aes-gcm-v2`.
 
 FEC option bits are:
 

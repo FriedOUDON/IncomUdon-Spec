@@ -143,15 +143,32 @@ def _validate_media_security_mode_registry(root: Path) -> list[str]:
         expected = case.get("expected")
         if not isinstance(name, str) or not isinstance(mode, str) or not isinstance(expected, str):
             raise VectorValidationError(f"codec configuration policy case {index} has invalid metadata")
-        if mode not in MEDIA_SECURITY_MODES:
-            _compare(
-                errors,
-                f"{name} rejected unknown media security mode",
-                "reject_unknown_media_security_mode",
-                expected,
-            )
-        elif expected == "reject_unknown_media_security_mode":
-            errors.append(f"{name}: registered media security mode {mode!r} is marked unknown")
+        policy = case.get("policy")
+        if policy is None:
+            if mode in MEDIA_SECURITY_MODES:
+                raise VectorValidationError(f"{name}: registered media security mode requires a policy case")
+            actual = "reject_unknown_media_security_mode"
+        else:
+            configured = case.get("controlKeyConfigured")
+            authenticated = case.get("authenticated")
+            if policy not in {"required", "optional", "off"}:
+                raise VectorValidationError(f"{name}: invalid Control Authentication policy {policy!r}")
+            if not isinstance(configured, bool) or not isinstance(authenticated, bool):
+                raise VectorValidationError(f"{name}: policy cases require boolean control-key and authentication state")
+            if policy == "required" and not configured:
+                actual = "reject_control_key_required"
+            elif (policy == "required" or (policy == "optional" and configured)) and not authenticated:
+                # Required policy rejects unauthenticated control before inspecting its media mode.
+                actual = "reject_control_auth_required"
+            elif mode not in MEDIA_SECURITY_MODES:
+                actual = "reject_unknown_media_security_mode"
+            elif policy == "required" and mode != "aes-gcm-v2":
+                actual = "reject_media_security_mode_required"
+            elif mode == "aes-gcm-v2" and not authenticated:
+                actual = "reject_aes_gcm_v2_requires_control_auth"
+            else:
+                actual = "accept"
+        _compare(errors, f"{name} media security policy", actual, expected)
     return errors
 
 

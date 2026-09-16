@@ -89,11 +89,11 @@ python tools/validate_vectors.py --suite fec
 The `lifecycle` suite evaluates state-transition fixtures from the protocol
 rules rather than accepting their expected labels as data. It covers
 server-managed PTT deadlines and release payloads, membership timing and
-Control Authentication acceptance, the exhaustive media-security mode registry,
-Identity and Managed Service admission expiry attribution, Directory v3
-replay/reassembly/pagination/registration, AES-GCM media replay windows, and
-Floor Interrupt authorization, deterministic victim selection, preempted
-playout cleanup, and authenticated control packets.
+Control Authentication acceptance, the exhaustive media-security mode registry
+and `required`-policy matrix, Identity and Managed Service admission expiry
+attribution, Directory v3 replay/reassembly/pagination/registration, AES-GCM
+media replay windows, and Floor Interrupt authorization, deterministic victim
+selection, preempted playout cleanup, and authenticated control packets.
 
 Run only this suite with:
 
