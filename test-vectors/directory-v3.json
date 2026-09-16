@@ -1,5 +1,5 @@
 {
-  "specVersion": "unreleased",
+  "specVersion": "v0.7.0-draft",
   "scheme": "directory-udp-v3",
   "limits": {
     "maxUdpPayloadBytes": 1200,

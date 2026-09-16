@@ -1,5 +1,5 @@
 {
-  "specVersion": "unreleased",
+  "specVersion": "v0.7.0-draft",
   "title": "Relay operational CSV configuration v1",
   "encoding": "UTF-8 without BOM",
   "valid": {

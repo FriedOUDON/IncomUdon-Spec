@@ -1,5 +1,5 @@
 {
-  "specVersion": "unreleased",
+  "specVersion": "v0.7.0-draft",
   "parameters": {
     "maximumMixTalkers": 16,
     "gainRule": "1/sqrt(N)",

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.7.0-draft - 2026-09-16
+
 - Defines metadata-aware specification release handling: release notes are
   frozen from the actual delta since the prior tag, README and CHANGELOG are
   reviewed in the release tree, the annotated tag identifies that exact
@@ -240,6 +242,8 @@
   a 32-bit big-endian bps value. The authenticated configuration payload is
   now 19 bytes, so Opus 96 kbps and 128 kbps are represented without
   truncation; packet vectors cover 128 kbps explicitly.
+
+## Earlier draft history (through v0.6.0-draft)
 
 - Defines Relay Operational CSV Configuration v1: UTF-8/RFC 4180 parsing,
   Directory channel/speaker metadata, Control Authentication key rows, and

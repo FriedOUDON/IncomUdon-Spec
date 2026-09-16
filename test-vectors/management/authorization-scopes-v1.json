@@ -1,5 +1,5 @@
 {
-  "specVersion": "unreleased",
+  "specVersion": "v0.7.0-draft",
   "scheme": "management-authorization-v1",
   "cases": [
     {

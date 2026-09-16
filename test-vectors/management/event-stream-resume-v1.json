@@ -1,5 +1,5 @@
 {
-  "specVersion": "unreleased",
+  "specVersion": "v0.7.0-draft",
   "scheme": "management-sse-resume-v1",
   "cursor_semantics": "exclusive",
   "cases": [
