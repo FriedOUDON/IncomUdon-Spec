@@ -130,19 +130,22 @@ explicit service/channel assignment. The grant-issuance API MUST derive the
 claim from that ACL; it MUST NOT accept a caller-selected priority value.
 
 A Relay SHOULD expose redacted diagnostics counters for interrupt requests,
-grants, denials, preemptions, and rejected unauthorized requests. Audit records
-for every admission-identified `PTT_REQUEST` MUST use the canonical Management
-Plane v1 `AuditRecord` model with `action: "floor_interrupt"`. The record MUST
-contain the requesting admitted identity/service as `actor_type` and `actor_id`,
-the channel ID, requester effective priority, result, and timestamp. Its
-`floor_interrupt.replaced_sender_id` and
+grants, denials, preemptions, and rejected unauthorized requests. When the
+Management Service advertises `audit_retrieval: true`, every
+admission-identified `PTT_REQUEST` MUST be represented by the canonical
+Management Plane v1 `AuditRecord` model with `action: "floor_interrupt"`. The
+record MUST contain the requesting admitted identity/service as `actor_type`
+and `actor_id`, the channel ID, requester effective priority, result, and
+timestamp. Its `floor_interrupt.replaced_sender_id` and
 `floor_interrupt.replaced_priority` MUST identify the preempted talker and its
 effective priority when a preemption occurs; both fields MUST be `null` when a
 request is granted without replacement or does not actually preempt a talker.
-The Relay MUST retain this canonical record in its configured audit sink. When
-Management Plane v1 is enabled, it MUST expose the retained record through
-`GET /audit-records` subject to the caller's audit ACL. Audit records MUST NOT
-contain channel credentials, keys, full tickets, full grants, raw identity
+In that mode, the Relay MUST provide the required redacted audit input over
+the private control link, but MUST NOT be required to retain an audit sink. The
+Management Service MUST retain and expose the canonical record through `GET
+/audit-records` subject to the caller's audit ACL. When Audit Retrieval is not
+enabled, the protocol does not require this audit record. Audit records MUST
+NOT contain channel credentials, keys, full tickets, full grants, raw identity
 claims, or source network addresses.
 
 ## Required interoperability cases

@@ -10,7 +10,8 @@ an allowed channel.
 ## Components
 
 - `Management Service`: exposes the mTLS Management API, applies ACLs, issues
-  Managed Service Admission Grants, records audit events, and controls jobs.
+  Managed Service Admission Grants, controls jobs, and optionally retains audit
+  records.
 - `Recorder Worker`: an ordinary receive-only Relay participant operated by the
   organization. It validates, decrypts, decodes, timestamps, and stores media.
 - `Relay`: continues to forward authorized encrypted media; it does not decode
@@ -24,7 +25,8 @@ location, and channel ACL.
 
 1. An mTLS-authenticated caller with `recorder` permission requests a
    recording job for one allowed channel.
-2. The Management Service creates an auditable job with an opaque `job_id`.
+2. The Management Service creates a job with an opaque `job_id`. When Audit
+   Retrieval is enabled, the corresponding action is auditable.
 3. The Recorder Worker obtains a receive-only Service Admission Grant and joins
    the channel using the normal authenticated UDP protocol.
 4. The Recorder Worker emits `recording_state_changed` events such as
@@ -76,19 +78,20 @@ revocation; it MUST NOT attempt to reuse an expired grant for a new JOIN.
 
 ## Audit and privacy
 
-The Management Service MUST audit job creation, start, stop, failure, grant
-issuance, renewal, and revocation using the canonical Management Plane v1
-`AuditRecord`. The corresponding actions are `recording_create`,
-`recording_start`, `recording_stop`, `recording_failure`,
-`recording_grant_issued`, `recording_grant_renewed`, and
+When the Management Service advertises `audit_retrieval: true`, it MUST audit
+job creation, start, stop, failure, grant issuance, renewal, and revocation
+using the canonical Management Plane v1 `AuditRecord`. The corresponding
+actions are `recording_create`, `recording_start`, `recording_stop`,
+`recording_failure`, `recording_grant_issued`, `recording_grant_renewed`, and
 `recording_grant_revoked`. Each such record MUST contain `recording_job` details
 with the opaque `job_id` and the assigned Recorder Worker
 `recorder_service_id`, in addition to channel ID, timestamp, actor, and result.
 `actor_type` and `actor_id` identify the principal that caused the operation;
 the separate `recorder_service_id` identifies the Worker associated with the
-job even when it did not initiate that operation. Events and ordinary logs MUST
-NOT include media content, channel credentials, keys, full grants, or
-certificate private keys.
+job even when it did not initiate that operation. When Audit Retrieval is not
+enabled, the protocol does not require recording audit records. Events and
+ordinary logs MUST NOT include media content, channel credentials, keys, full
+grants, or certificate private keys.
 
 Retention, consent, export format, access to recorded media, legal hold, and
 regional privacy requirements are deployment policy. They are intentionally

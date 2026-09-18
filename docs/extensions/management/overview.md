@@ -4,9 +4,9 @@
 
 Management Plane v1 is an optional, administratively isolated TCP/TLS plane
 for organization-operated participant management, recording orchestration,
-health monitoring, audit retrieval, and Managed Service Admission. It is not a
-replacement for the Version 1 UDP Relay, the optional Directory UDP protocol,
-or client media transport.
+health monitoring, optional event delivery and audit retrieval, and Managed
+Service Admission. It is not a replacement for the Version 1 UDP Relay, the
+optional Directory UDP protocol, or client media transport.
 
 Management Plane v1 is disabled by default. A deployment that does not enable
 it MUST retain the existing Relay, Directory, and client behavior without
@@ -45,18 +45,47 @@ boundary.
 The external Management API uses HTTPS over TCP. It provides:
 
 - REST resources for health, channel/participant state, ACL-backed admission
-  grant issuance, recording-job control, and audit retrieval.
-- Server-Sent Events (SSE) for ordered, resumable management events.
+  grant issuance, and recording-job control.
+- Optional SSE event delivery, either live-only or replay-capable.
+- Optional audit retrieval.
 - JSON request and response bodies encoded as UTF-8.
 
 `docs/extensions/management/openapi-v1.yaml` defines the initial HTTP contract.
-`GET /audit-records` is the canonical paginated read API for retained audit records;
-it is distinct from the transient redacted SSE `/events` stream.
-`schemas/management/management-event-v1.schema.json` defines the common event envelope.
-`schemas/management/audit-retrieval-v1.schema.json` defines the audit retrieval page.
-Every `GET /audit-records` response MUST include
+`GET /audit-records`, when enabled, is the canonical paginated read API for
+retained audit records; it is distinct from the redacted SSE `/events` stream.
+`schemas/management/management-event-v1.schema.json` defines the common event
+envelope. `schemas/management/audit-retrieval-v1.schema.json` defines the audit
+retrieval page. Every enabled `GET /audit-records` response MUST include
 `schema_version: "audit-retrieval-v1"`; the OpenAPI `AuditRecordPage` schema
 and JSON Schema define the same canonical response object.
+
+### Event and audit capabilities
+
+Event delivery and Audit Retrieval are independently optional. `GET /health`
+MUST advertise both capabilities in its `capabilities` object:
+
+- `event_delivery` is `disabled`, `live`, or `replay`.
+- `audit_retrieval` is a boolean.
+
+With `event_delivery: "disabled"`, the Management Service MUST return `404 Not
+Found` for `GET /events`. With `event_delivery: "live"`, `GET /events` MAY
+stream only events emitted after the connection is established. It MUST NOT
+claim replay support, and a request containing `since` or `Last-Event-ID` MUST
+return `400 Bad Request`. A live-only event stream does not require durable
+event retention, and a reconnect without a cursor may miss events.
+
+With `event_delivery: "replay"`, the Management Service MUST durably retain
+redacted events for its documented retention period before exposing them to an
+external subscriber. It MUST implement the cursor and recovery rules below.
+A Relay is never required to retain SSE history; the Management Service owns
+that durable state.
+
+With `audit_retrieval: false`, the Management Service MUST return `404 Not
+Found` for `GET /audit-records` and MUST NOT claim to provide retained audit
+records. With `audit_retrieval: true`, it MUST durably retain the audit records
+that it exposes for its documented retention period. A deployment without Audit
+Retrieval has no protocol requirement to create, retain, or export audit
+records.
 `test-vectors/management/management-event-v1.json` contains canonical event
 instances under its `events` scenario array. Its root `specVersion` is test
 metadata, not part of an SSE event. `test-vectors/management/audit-retrieval-v1.json`
@@ -66,16 +95,18 @@ Management APIs MUST use explicit `/v1/` versioning and MUST NOT return channel
 passwords, derived keys, media plaintext, OIDC credentials, or client certificate private keys. The grant-issuance endpoint is the only API response permitted to return a Service Admission Grant; it MUST use `Cache-Control: no-store`, and grants MUST NOT appear in logs, audit records, or event streams.
 
 Management API methods MUST use TLS. HTTP/2 MAY be used, but HTTP/1.1
-compatibility is REQUIRED. Every SSE event MUST carry its monotonic
-`event_id` as the SSE `id` field. Event IDs are opaque decimal cursors scoped
-to one Management Service instance.
+compatibility is REQUIRED. Every SSE event, when event delivery is enabled,
+MUST carry its monotonic `event_id` as the SSE `id` field. Event IDs are opaque
+decimal cursors scoped to one Management Service instance.
 
-`since` is an optional query parameter for an initial connection or an
-explicit historical replay. `Last-Event-ID` is the authoritative resume cursor
-for SSE reconnection. Both cursors are exclusive: when either is selected, the
-first replay candidate is the first retained event ordered after that cursor. A
-request with neither cursor starts a live stream and MUST NOT imply historical
-replay. Clients SHOULD omit `since` when reconnecting an established stream.
+The following cursor and recovery rules apply only when `event_delivery` is
+`"replay"`. `since` is an optional query parameter for an initial connection
+or an explicit historical replay. `Last-Event-ID` is the authoritative resume
+cursor for SSE reconnection. Both cursors are exclusive: when either is
+selected, the first replay candidate is the first retained event ordered after
+that cursor. A request with neither cursor starts a live stream and MUST NOT
+imply historical replay. Clients SHOULD omit `since` when reconnecting an
+established stream.
 
 If both `Last-Event-ID` and `since` are present, the Management Service MUST
 use `Last-Event-ID` and MUST ignore `since`. A malformed cursor MUST return
@@ -89,9 +120,9 @@ stream. It MUST then resynchronize according to its authorized scope:
   participant snapshot before opening a cursor-free live stream.
 - For a channel visible only through `auditor` scope, a participant snapshot is
   neither required nor authorized. The caller MUST record that the SSE history
-  is discontinuous for that channel, and MAY retrieve retained authorized audit
-  records through `GET /audit-records`; audit retrieval does not reconstruct
-  omitted redacted events.
+  is discontinuous for that channel and, when Audit Retrieval is enabled, MAY
+  retrieve retained authorized audit records through `GET /audit-records`; audit
+  retrieval does not reconstruct omitted redacted events.
 - An auditor-only caller MUST NOT be required to call a viewer-only state
   resource to recover. It records the discontinuity and opens a new stream
   without `Last-Event-ID` or `since`, receiving only subsequently emitted
@@ -161,7 +192,7 @@ global access from possession of a certificate or channel-scoped role.
 | `viewer` | Read channel state, participant state, and redacted events for allowed channels. |
 | `recorder` | `viewer` operations plus recording-job lifecycle and Managed Service Admission with receive-only permissions. |
 | `operator` | `viewer` operations plus explicitly configured channel operations. |
-| `auditor` | Read retained audit records and redacted events for explicitly authorized channels; unscoped records require an explicit global audit permission. |
+| `auditor` | Read redacted events for explicitly authorized channels and, when Audit Retrieval is enabled, retained audit records; unscoped records require an explicit global audit permission. |
 | `admin` | Manage Management Plane ACLs and signing-key configuration. |
 
 For the initial HTTP contract, `GET /channels` filters its channel summaries
@@ -207,8 +238,11 @@ policy.
 
 ## Relay event integration
 
-The Relay emits only minimally necessary, redacted lifecycle events to the
-private control link. The initial event set is:
+A Relay MAY emit only minimally necessary, redacted lifecycle events to the
+private control link. A deployment that enables event delivery or Audit
+Retrieval MUST make the required lifecycle input available to its Management
+Service without making the Relay retain event or audit history. The initial
+event set is:
 
 - `participant_joined`
 - `participant_left`
@@ -250,16 +284,16 @@ permitted `GET /events` stream. Conversely, `health.read` authorizes delivery
 only of this mapped global event; it grants no channel-scoped event, participant,
 or channel-state access.
 
-A caller MAY open `GET /events` when it has at least one authorized
-channel-scoped event role or an explicit global event permission. On every
-delivery, the Management Service MUST independently apply the channel scope for
-a non-null `channel_id` or the event-type-specific global permission for a null
-`channel_id`. This rule applies equally to `viewer` and `auditor` callers.
+When event delivery is enabled, a caller MAY open `GET /events` when it has
+at least one authorized channel-scoped event role or an explicit global event
+permission. On every delivery, the Management Service MUST independently apply
+the channel scope for a non-null `channel_id` or the event-type-specific global
+permission for a null `channel_id`. This rule applies equally to `viewer` and
+`auditor` callers.
 
-The Management Service MUST durably retain events for its documented retention
-period before acknowledging them to an external subscriber. Implementations
-MUST bound queues and may coalesce state-change events under backpressure; they
-MUST NOT let an unavailable subscriber delay Relay media forwarding.
+Implementations MUST bound private-link and subscriber queues and MAY coalesce
+state-change events under backpressure. They MUST NOT let an unavailable
+Management Service or subscriber delay Relay media forwarding.
 
 ## Revocation and availability
 
@@ -293,18 +327,19 @@ Management API controls recording jobs and reports their state; it MUST NOT
 place channel credentials or media keys in ordinary API responses. See
 `recording-integration.md`.
 
-## Audit retrieval
+## Optional audit retrieval
 
-`GET /audit-records` is a canonical, read-only Management Plane v1 resource.
-It MUST require the `auditor` operation in the authenticated mTLS ACL. For a
-channel-scoped record, the service MUST also be authorized for that channel.
-For a record with `channel_id = null`, the service MUST have an explicitly
-configured global audit permission; a certificate MUST NOT gain global audit
-access implicitly.
+When `audit_retrieval` is `true`, `GET /audit-records` is a canonical,
+read-only Management Plane v1 resource. It MUST require the `auditor`
+operation in the authenticated mTLS ACL. For a channel-scoped record, the
+service MUST also be authorized for that channel. For a record with
+`channel_id = null`, the service MUST have an explicitly configured global
+audit permission; a certificate MUST NOT gain global audit access implicitly.
 
 The Management Service MUST durably retain redacted audit records for its
-documented deployment retention period. Records are append-only through the
-v1 API: no endpoint may modify or delete them. Each returned record MUST
+documented deployment retention period before exposing them through the v1 API.
+Records are append-only through the v1 API: no endpoint may modify or delete
+them. Each returned record MUST
 contain an opaque `record_id`, RFC 3339 UTC `timestamp`, `actor_type`,
 privacy-preserving `actor_id`, nullable `channel_id`, `action`, and `result`.
 `actor_type` is `identity`, `service`, or `relay`. An `identity` actor uses the
@@ -328,10 +363,11 @@ details contain the opaque `job_id` and `recorder_service_id` for the Recorder
 Worker assigned to that job. `actor_type` and `actor_id` identify the principal
 that caused the recorded operation; they MUST NOT be treated as the Recorder
 Worker identity unless they actually identify that worker.
-This canonical record format applies to Relay audit storage even when the
-optional Management API listener is disabled; when that listener is enabled,
-the records are retrieved through `GET /audit-records` subject to the caller's
-audit ACL.
+This canonical record format applies when Audit Retrieval is enabled. The
+Management Service, rather than the Relay, retains and exposes the records
+through `GET /audit-records` subject to the caller's audit ACL. A Relay that
+does not provide a Management Service is not required to maintain an audit
+sink.
 
 The endpoint returns records newest first, using `record_id` as a stable
 tie-breaker. It accepts optional `channel_id`, inclusive `since`, exclusive
@@ -342,16 +378,19 @@ range MUST return `400`; a cursor outside the retained window MUST return
 `410 Gone`; an unauthorized requested channel MUST return `403`.
 
 `/events` remains an SSE lifecycle feed and MUST NOT be used as an audit
-record substitute. Audit retrieval is pull-based and paginated so it can
-safely support long-lived organization-operated audit consumers.
+record substitute. When enabled, Audit Retrieval is pull-based and paginated so
+it can safely support long-lived organization-operated audit consumers.
 
 ## Audit and non-goals
 
-Grant issuance, grant renewal, revocation, recording start/stop, ACL changes,
-and administrative requests MUST produce an auditable, redacted record that
-identifies the authenticated actor, requested channel, action, result, and
-timestamp. Management-originated records use `actor_type: "service"` and the
-authenticated `service_id` as `actor_id`.
+When `audit_retrieval` is `true`, grant issuance, grant renewal, revocation,
+recording start/stop, ACL changes, and administrative requests MUST produce an
+auditable, redacted record that identifies the authenticated actor, requested
+channel, action, result, and timestamp. Management-originated records use
+`actor_type: "service"` and the authenticated `service_id` as `actor_id`.
+When `audit_retrieval` is `false`, the protocol does not require a Relay or
+Management Service to create, retain, or export an audit record; deployments
+MAY still maintain local logs under their own policy.
 
 Management Plane v1 does not define media upload, media proxying, centralized
 key escrow, general user login, browser client replacement, or a Directory UDP
@@ -381,7 +420,16 @@ management extension. Those functions require separate versioned proposals.
 11. API responses, SSE events, audit records, and normal Relay logs contain no
     channel password, derived key, admission grant, certificate private key,
     or media payload.
-12. An `auditor` retrieves only records for explicitly authorized channels; a
-    request for another channel is rejected.
-13. Audit pagination is stable, and an audit cursor outside the retained window
-    returns `410 Gone` rather than silently skipping history.
+12. When `audit_retrieval` is `true`, an `auditor` retrieves only records for
+    explicitly authorized channels; a request for another channel is rejected.
+13. When `event_delivery` is `replay`, an SSE cursor outside the retained
+    window returns `410 Gone` rather than silently skipping history.
+14. With `event_delivery` set to `live`, `GET /events` accepts a cursor-free
+    connection and rejects `since` or `Last-Event-ID` with `400 Bad Request`.
+15. With `event_delivery` set to `disabled`, `GET /events` returns `404 Not
+    Found`.
+16. With `audit_retrieval` set to `false`, `GET /audit-records` returns `404
+    Not Found` and no audit retention is required.
+17. When `audit_retrieval` is `true`, audit pagination is stable, and an audit
+    cursor outside the retained window returns `410 Gone` rather than silently
+    skipping history.

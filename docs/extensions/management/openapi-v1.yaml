@@ -23,10 +23,12 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [status]
+                required: [status, capabilities]
                 properties:
                   status:
                     enum: [healthy, degraded, unhealthy]
+                  capabilities:
+                    $ref: '#/components/schemas/ManagementCapabilities'
                 additionalProperties: false
         '403': { $ref: '#/components/responses/Forbidden' }
   /channels:
@@ -75,10 +77,11 @@ paths:
       operationId: listAuditRecords
       summary: List retained redacted audit records visible to the authenticated service.
       description: |
-        This is a paginated, read-only audit-retrieval resource. It is distinct
-        from the SSE /events stream. The caller requires the auditor operation for
-        each returned channel, or an explicitly configured global audit permission
-        for records whose channel_id is null.
+        This optional resource is available only when GET /health advertises
+        capabilities.audit_retrieval as true. It is a paginated, read-only
+        audit-retrieval resource distinct from the SSE /events stream. The caller
+        requires the auditor operation for each returned channel, or an explicitly
+        configured global audit permission for records whose channel_id is null.
       parameters:
         - name: channel_id
           in: query
@@ -120,6 +123,8 @@ paths:
         '400':
           description: Invalid time range, filter, or cursor/filter combination.
         '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Audit Retrieval is disabled by the advertised capability.
         '410':
           description: Requested audit cursor is no longer retained; start a new query.
   /events:
@@ -127,30 +132,33 @@ paths:
       operationId: streamEvents
       summary: Subscribe to redacted management events using SSE.
       description: >
-        Delivers channel-scoped events only within viewer or auditor channel scope,
-        and global events only when the event type's explicit global permission
-        authorizes the caller. relay_health_changed requires health.read.
+        Available only when GET /health advertises capabilities.event_delivery as
+        live or replay. Delivers channel-scoped events only within viewer or auditor
+        channel scope, and global events only when the event type's explicit global
+        permission authorizes the caller. relay_health_changed requires health.read.
       parameters:
         - name: since
           in: query
           required: false
-          description: Optional exclusive initial-replay cursor; ignored when Last-Event-ID is present.
+          description: Optional exclusive initial-replay cursor for event_delivery=replay; ignored when Last-Event-ID is present.
           schema: { type: string, minLength: 1, maxLength: 64, pattern: '^[0-9]+$' }
         - name: Last-Event-ID
           in: header
           required: false
-          description: Authoritative exclusive SSE reconnection cursor; takes precedence over since.
+          description: Authoritative exclusive SSE reconnection cursor for event_delivery=replay; takes precedence over since.
           schema: { type: string, minLength: 1, maxLength: 64, pattern: '^[0-9]+$' }
       responses:
         '200':
-          description: Event stream. Each event's SSE id equals its event_id; selected cursors resume after that event.
+          description: Event stream. Each event's SSE id equals its event_id. Selected cursors resume after that event only when event_delivery is replay.
           content:
             text/event-stream:
               schema:
                 type: string
         '400':
-          description: Selected since or Last-Event-ID cursor is malformed.
+          description: Selected since or Last-Event-ID cursor is malformed, or a cursor was supplied while event_delivery is live.
         '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Event delivery is disabled by the advertised capability.
         '410':
           description: Selected event cursor is unknown, belongs to another Management Service instance, or is no longer retained. Discard it; viewer-authorized callers refresh participant snapshots, while auditor-only callers record a gap and reconnect without a cursor.
   /service-admission-grants:
@@ -254,6 +262,15 @@ components:
     Forbidden:
       description: The mTLS identity lacks the required Management Plane permission.
   schemas:
+    ManagementCapabilities:
+      type: object
+      required: [event_delivery, audit_retrieval]
+      properties:
+        event_delivery:
+          enum: [disabled, live, replay]
+        audit_retrieval:
+          type: boolean
+      additionalProperties: false
     U32:
       type: integer
       minimum: 0
