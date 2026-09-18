@@ -490,6 +490,75 @@ def _validate_directory_lifecycle(root: Path) -> list[str]:
     return errors
 
 
+def _validate_private_control_link(root: Path) -> list[str]:
+    document = _load(root, "test-vectors/management/private-control-link-v1.json")
+    errors: list[str] = []
+    framing = document.get("framing")
+    if not isinstance(framing, dict):
+        raise VectorValidationError("Private Control Link framing must be an object")
+    _compare(errors, "Private Control Link length encoding", framing.get("lengthEncoding"), "U32BE")
+    _compare(errors, "Private Control Link minimum frame", framing.get("minimumJsonLength"), 2)
+    _compare(errors, "Private Control Link maximum frame", framing.get("maximumJsonLength"), 65536)
+    _compare(errors, "Private Control Link hello deadline", framing.get("helloDeadlineSeconds"), 5)
+    retention = _integer(
+        framing.get("minimumIdempotencyRetentionSeconds"),
+        "Private Control Link idempotency retention",
+        0xFFFFFFFF,
+    )
+    if retention < 600:
+        errors.append("Private Control Link idempotency retention is shorter than ten minutes")
+
+    cases = document.get("revocation_cases")
+    if not isinstance(cases, list):
+        raise VectorValidationError("Private Control Link revocation_cases must be an array")
+    for index, case in enumerate(cases):
+        if not isinstance(case, dict):
+            raise VectorValidationError(
+                f"Private Control Link revocation case {index} must be an object"
+            )
+        name = case.get("name", f"Private Control Link revocation case {index}")
+        command = case.get("command")
+        memberships = case.get("memberships")
+        expected = case.get("expected")
+        if not isinstance(command, dict) or not isinstance(memberships, list) or not isinstance(expected, dict):
+            raise VectorValidationError(f"{name} is malformed")
+        duration = _integer(command.get("deny_for_seconds"), f"{name} deny_for_seconds", 0xFFFFFFFF)
+        if not 1 <= duration <= 5400:
+            errors.append(f"{name}: deny_for_seconds must be in 1..5400")
+        channel = _integer(command.get("channel_id"), f"{name} channel_id", 0xFFFFFFFF)
+        service = command.get("service_id")
+        grant_hash = command.get("grant_id_hash")
+        if service is None and grant_hash is None:
+            errors.append(f"{name}: command has no revocation target")
+            continue
+        matching: list[dict[str, Any]] = []
+        for membership in memberships:
+            if not isinstance(membership, dict):
+                raise VectorValidationError(f"{name} membership must be an object")
+            matches = membership.get("channel_id") == channel
+            if service is not None:
+                matches = matches and membership.get("service_id") == service
+            if grant_hash is not None:
+                matches = matches and membership.get("grant_id_hash") == grant_hash
+            if matches:
+                matching.append(membership)
+        if case.get("duplicate") is True:
+            _compare(errors, f"{name} first ACK", expected.get("first_ack_outcome"), "applied")
+            _compare(errors, f"{name} duplicate ACK", expected.get("duplicate_ack"), "cached_identical_ack")
+            _compare(errors, f"{name} duplicate TALK_RELEASE count", expected.get("additional_talk_release_count"), 0)
+            continue
+        releases = sum(1 for membership in matching if membership.get("active_talk") is True)
+        _compare(errors, f"{name} deny rule", expected.get("deny_rule_installed"), True)
+        _compare(errors, f"{name} affected membership count", expected.get("affected_membership_count"), len(matching))
+        _compare(errors, f"{name} TALK_RELEASE count", expected.get("talk_release_count"), releases)
+        _compare(
+            errors,
+            f"{name} TALK_RELEASE reason",
+            expected.get("talk_release_reason"),
+            "SERVICE_ADMISSION_REVOKED" if releases else None,
+        )
+    return errors
+
 def _validate_media_replay(root: Path) -> list[str]:
     document = _load(root, "test-vectors/media-replay-v1.json")
     errors: list[str] = []
@@ -619,6 +688,7 @@ def validate_lifecycle_vectors(root: Path) -> list[str]:
         ("Media security mode registry", _validate_media_security_mode_registry),
         ("Admission expiry", _validate_admission_expiry),
         ("Directory lifecycle", _validate_directory_lifecycle),
+        ("Private Control Link", _validate_private_control_link),
         ("Media replay", _validate_media_replay),
         ("Floor Interrupt", _validate_floor_interrupt),
     )

@@ -140,13 +140,16 @@ timestamp. Its `floor_interrupt.replaced_sender_id` and
 `floor_interrupt.replaced_priority` MUST identify the preempted talker and its
 effective priority when a preemption occurs; both fields MUST be `null` when a
 request is granted without replacement or does not actually preempt a talker.
-In that mode, the Relay MUST provide the required redacted audit input over
-the private control link, but MUST NOT be required to retain an audit sink. The
-Management Service MUST retain and expose the canonical record through `GET
-/audit-records` subject to the caller's audit ACL. When Audit Retrieval is not
-enabled, the protocol does not require this audit record. Audit records MUST
-NOT contain channel credentials, keys, full tickets, full grants, raw identity
-claims, or source network addresses.
+In that mode, the Relay MUST create the required redacted `relay_audit_input`
+and MUST submit it when a live Private Control Link v1 session has accepted
+audit inputs; the Relay MUST NOT be required to retain an audit sink. The
+Management Service assigns the canonical record ID, retains, and exposes the
+received record through `GET /audit-records` subject to the caller's audit ACL.
+Private Control Link v1 notification delivery is non-persistent, so a Management
+Service MUST treat a link outage as a possible audit-input gap.
+When Audit Retrieval is not enabled, the protocol does not require this audit
+record. Audit records MUST NOT contain channel credentials, keys, full tickets,
+full grants, raw identity claims, or source network addresses.
 
 ## Required interoperability cases
 

@@ -192,12 +192,14 @@ set grace to zero unless a recorder availability requirement justifies it.
 
 ## Revocation
 
-The Management Service sends a private authenticated revocation event to the
-Relay containing the affected grant ID and/or service ID, channel ID, and
-reason. The Relay MUST invalidate matching current service-admitted state,
-remove membership, stop media forwarding, and release an active talker with
-`TALK_RELEASE` reason `SERVICE_ADMISSION_REVOKED`. A Relay SHOULD complete
-revocation within five seconds of receiving the private event.
+The Management Service sends the authenticated Private Control Link v1
+`revoke_service_admission` command described in `private-control-link-v1.md`.
+It targets one channel and at least one of the affected service ID or grant ID
+hash; when both are present, both MUST match. The Relay MUST install the
+command's bounded deny rule, invalidate matching current service-admitted
+state, remove membership, stop media forwarding, and release an active talker
+with `TALK_RELEASE` reason `SERVICE_ADMISSION_REVOKED`. A Relay SHOULD complete
+revocation within five seconds of receiving the command.
 
 Relay-side grant deny lists MAY be retained across Management Service outages.
 They MUST be bounded, expire no later than the revoked grant's maximum possible

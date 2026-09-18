@@ -1,0 +1,179 @@
+{
+  "specVersion": "v0.7.0-draft",
+  "scheme": "private-control-link-v1",
+  "framing": {
+    "lengthEncoding": "U32BE",
+    "minimumJsonLength": 2,
+    "maximumJsonLength": 65536,
+    "helloDeadlineSeconds": 5,
+    "minimumIdempotencyRetentionSeconds": 600
+  },
+  "valid_messages": [
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "hello",
+      "message_id": "AAECAwQFBgcICQoLDA0ODw",
+      "management_service_id": "management-main",
+      "want_lifecycle_events": true,
+      "want_audit_inputs": true
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "hello_ack",
+      "message_id": "EBESExQVFhcYGRobHB0eHw",
+      "in_reply_to": "AAECAwQFBgcICQoLDA0ODw",
+      "session_id": "ICEiIyQlJicoKSorLC0uLw",
+      "relay_id": "relay-east-1",
+      "lifecycle_events_accepted": true,
+      "audit_inputs_accepted": true
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "revoke_service_admission",
+      "message_id": "MDEyMzQ1Njc4OTo7PD0-Pw",
+      "channel_id": 111,
+      "service_id": "recorder-01",
+      "grant_id_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "reason": "grant_revoked",
+      "deny_for_seconds": 5400
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "ack",
+      "message_id": "QEFCQ0RFRkdISUpLTE1OTw",
+      "in_reply_to": "MDEyMzQ1Njc4OTo7PD0-Pw",
+      "outcome": "applied",
+      "affected_membership_count": 1,
+      "talk_release_count": 1
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "ping",
+      "message_id": "cHFyc3R1dnd4eXp7fH1-fw"
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "pong",
+      "message_id": "gIGCg4SFhoeIiYqLjI2Ojw",
+      "in_reply_to": "cHFyc3R1dnd4eXp7fH1-fw"
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "error",
+      "message_id": "kJGSk5SVlpeYmZqbnJ2enw",
+      "in_reply_to": "MDEyMzQ1Njc4OTo7PD0-Pw",
+      "code": "unauthorized"
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "relay_lifecycle_event",
+      "message_id": "UFFSU1RVVldYWVpbXF1eXw",
+      "occurred_at": "2026-01-01T00:00:00Z",
+      "event_type": "service_admission_revoked",
+      "channel_id": 111,
+      "service_id": "recorder-01",
+      "reason": "SERVICE_ADMISSION_REVOKED"
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "relay_audit_input",
+      "message_id": "YGFiY2RlZmdoaWprbG1ubw",
+      "occurred_at": "2026-01-01T00:00:01Z",
+      "action": "floor_interrupt",
+      "actor_type": "service",
+      "actor_id": "automation-01",
+      "channel_id": 111,
+      "result": "success",
+      "floor_interrupt": {
+        "requester_priority": 200,
+        "replaced_sender_id": 1002,
+        "replaced_priority": 100
+      }
+    }
+  ],
+  "invalid_messages": [
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "revoke_service_admission",
+      "message_id": "cHFyc3R1dnd4eXp7fH1-fw",
+      "channel_id": 111,
+      "reason": "grant_revoked",
+      "deny_for_seconds": 5400
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "revoke_service_admission",
+      "message_id": "AAECAwQFBgcICQoLDA0ODx",
+      "channel_id": 111,
+      "service_id": "recorder-01",
+      "reason": "service_disabled",
+      "deny_for_seconds": 60
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "revoke_service_admission",
+      "message_id": "gIGCg4SFhoeIiYqLjI2Ojw",
+      "channel_id": 111,
+      "service_id": "recorder-01",
+      "reason": "service_disabled",
+      "deny_for_seconds": 5401
+    }
+  ],
+  "revocation_cases": [
+    {
+      "name": "matching_target_removes_active_talker_and_installs_deny_rule",
+      "command": {
+        "channel_id": 111,
+        "service_id": "recorder-01",
+        "grant_id_hash": "grant-hash-a",
+        "deny_for_seconds": 5400
+      },
+      "memberships": [
+        { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "active_talk": true },
+        { "channel_id": 111, "service_id": "recorder-02", "grant_id_hash": "grant-hash-b", "active_talk": false }
+      ],
+      "expected": {
+        "deny_rule_installed": true,
+        "affected_membership_count": 1,
+        "talk_release_count": 1,
+        "talk_release_reason": "SERVICE_ADMISSION_REVOKED"
+      }
+    },
+    {
+      "name": "intersection_target_does_not_widen_to_service_or_grant",
+      "command": {
+        "channel_id": 111,
+        "service_id": "recorder-01",
+        "grant_id_hash": "grant-hash-a",
+        "deny_for_seconds": 60
+      },
+      "memberships": [
+        { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-b", "active_talk": true },
+        { "channel_id": 111, "service_id": "recorder-02", "grant_id_hash": "grant-hash-a", "active_talk": true }
+      ],
+      "expected": {
+        "deny_rule_installed": true,
+        "affected_membership_count": 0,
+        "talk_release_count": 0,
+        "talk_release_reason": null
+      }
+    },
+    {
+      "name": "duplicate_command_replays_cached_ack_without_second_release",
+      "command": {
+        "channel_id": 111,
+        "service_id": "recorder-01",
+        "deny_for_seconds": 5400
+      },
+      "memberships": [
+        { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "active_talk": true }
+      ],
+      "duplicate": true,
+      "expected": {
+        "first_ack_outcome": "applied",
+        "duplicate_ack": "cached_identical_ack",
+        "additional_talk_release_count": 0
+      }
+    }
+  ]
+}

@@ -75,6 +75,21 @@
       "vector": "test-vectors/directory-v3.json",
       "pointer": "/typePayloadVariantCases/cases/7/payload",
       "schema": "schemas/directory-v3-error-payload.schema.json"
+    },
+    {
+      "name": "Private Control Link v1 valid messages",
+      "vector": "test-vectors/management/private-control-link-v1.json",
+      "pointer": "/valid_messages",
+      "each": true,
+      "schema": "schemas/management/private-control-link-v1.schema.json"
+    },
+    {
+      "name": "Private Control Link v1 invalid messages",
+      "vector": "test-vectors/management/private-control-link-v1.json",
+      "pointer": "/invalid_messages",
+      "each": true,
+      "schema": "schemas/management/private-control-link-v1.schema.json",
+      "expected": "invalid"
     }
   ]
 }

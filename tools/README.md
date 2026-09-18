@@ -91,7 +91,8 @@ rules rather than accepting their expected labels as data. It covers
 server-managed PTT deadlines and release payloads, membership timing and
 Control Authentication acceptance, the exhaustive media-security mode registry
 and `required`-policy matrix, Identity and Managed Service admission expiry
-attribution, Directory v3 replay/reassembly/pagination/registration, AES-GCM
+attribution, Private Control Link framing/revocation idempotency, Directory v3
+replay/reassembly/pagination/registration, AES-GCM
 media replay windows, and Floor Interrupt authorization, deterministic victim
 selection, preempted playout cleanup, and authenticated control packets.
 

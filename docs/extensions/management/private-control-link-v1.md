@@ -1,0 +1,198 @@
+# Private Control Link v1
+
+## Scope
+
+Private Control Link v1 is an optional Management Plane v1 extension for the
+trusted control connection between one Management Service and one Relay. It is
+not an HTTP API, a Directory protocol, or a client-facing transport. It carries
+narrow Relay-control commands and optional redacted Relay lifecycle and audit
+inputs.
+
+A deployment that does not enable this extension MUST retain normal Relay and
+Management API behavior. Managed Service Admission may remain disabled in that
+deployment. A deployment that enables Managed Service Admission and needs
+prompt ACL, service, or grant revocation MUST enable this extension.
+
+This extension does not carry media, channel credentials, derived keys,
+admission grants, OIDC material, client certificate private keys, source IP
+addresses, or UDP ports.
+
+## Separate listener and transport
+
+The Relay Control Endpoint and the Management Service form the two roles of a
+Private Control Link. The Management Service initiates the connection to the
+Relay Control Endpoint. The endpoint MUST use a listener distinct from the
+externally reachable Management API HTTPS listener. It MUST NOT share a TCP
+port, HTTP route, certificate authorization policy, or network exposure with
+that API.
+
+A deployment MUST use exactly one of these transports for a link instance:
+
+- On one host, an OS local socket with peer-credential checks is RECOMMENDED.
+  Unix Domain Sockets are the standard local-socket binding. The socket path
+  MUST be owned and permissioned so that only the Relay and the explicitly
+  authorized Management Service OS identities can connect.
+- Across hosts, the endpoint MUST listen on a dedicated internal TCP port using
+  TLS 1.3 or later with mutual TLS. The port MUST be reachable only from the
+  Management Service network boundary and MUST NOT be exposed to ordinary
+  client or Directory networks.
+
+For mTLS, the Relay MUST map the verified Management Service client certificate
+to one configured `management_service_id`. A certificate that is accepted by
+the external Management API MUST NOT gain Private Control Link access merely
+by that fact. The control link MUST have an explicit authorization mapping;
+using a separate private CA or separate certificate profile is RECOMMENDED.
+
+For a local socket, the Relay MUST derive the authorized service identity from
+verified OS peer credentials and its local mapping. If the operating system
+cannot provide peer credentials for the selected local-socket mechanism, the
+deployment MUST use mTLS instead. The `management_service_id` in `hello` is a
+consistency check and MUST exactly equal the identity derived by the Relay. It
+MUST NOT be trusted as authentication input.
+
+## Framing and messages
+
+The link is a bidirectional byte stream. Each message is one frame:
+
+```text
+U32BE(json_length) || UTF8(JSON message)
+```
+
+`json_length` MUST be from 2 through 65536. Senders MUST NOT compress frames.
+Receivers MUST reject a zero-length, oversized, malformed UTF-8, malformed JSON,
+or schema-invalid frame before dispatching it, and MUST close the connection for
+a framing violation. A receiver MUST NOT allocate an unbounded buffer from an
+untrusted length prefix.
+
+Every message validates against
+`../../../schemas/management/private-control-link-v1.schema.json`. The
+`schema_version` is always `"private-control-link-v1"`. Every `message_id` and
+`session_id` is the canonical unpadded Base64URL encoding of exactly 16 random
+bytes: receivers MUST decode, require exactly 16 bytes, re-encode using
+unpadded Base64URL, and compare the result byte-for-byte with the received
+string.
+
+All integer fields are JSON integers in the IEEE-754 safe range. Channel and
+sender identifiers use their ordinary unsigned 32-bit values. A peer MUST
+reject duplicate object member names and any field not permitted by the message
+variant.
+
+## Session establishment
+
+The Management Service MUST send `hello` as its first frame within five
+seconds of connecting. It contains its `management_service_id` and booleans
+that request optional Relay lifecycle events and audit inputs. The Relay MUST
+verify the transport identity and the `management_service_id`, then reply with
+`hello_ack` containing a fresh `session_id`, its opaque `relay_id`, and the
+accepted optional inputs.
+
+Before a valid `hello`/`hello_ack` exchange, neither peer may send a command or
+notification. The Relay MUST allow no more than one active session for the
+same authorized Management Service identity; it MUST close an older session
+before accepting a replacement. `ping` and `pong` are optional keepalives and
+do not change command or membership state.
+
+A Management Service MUST reconnect after transport loss. Reconnection does
+not replay Relay notifications and does not reset Relay admission state.
+
+## Service-admission revocation command
+
+After establishment, the Management Service may send
+`revoke_service_admission`. It contains:
+
+- `channel_id`: the affected channel.
+- At least one target: `service_id` and/or `grant_id_hash`.
+- `reason`: `acl_removed`, `service_disabled`, or `grant_revoked`.
+- `deny_for_seconds`: from 1 through 5400.
+
+`grant_id_hash` is the canonical unpadded Base64URL encoding of
+`SHA-256(ASCII(compact_jws_jti))`. When both target fields are present, every
+field MUST match; the command MUST NOT widen into an OR match. `deny_for_seconds`
+bounds the Relay-side deny rule. A Management Service revoking a service or
+grant MUST select a duration that covers every still-valid affected grant,
+including any permitted receive-only grace. It MAY renew the command before
+that period ends when policy requires a longer disablement.
+
+On accepting a valid command, the Relay MUST install the bounded deny rule
+before replying. It MUST reject matching future Managed Service Admission
+flows, invalidate matching current service-admitted state, remove matching
+memberships, stop their media forwarding, and send `TALK_RELEASE` with
+`SERVICE_ADMISSION_REVOKED` for every matching active talker. It MUST return an
+`ack` only after these effects are committed. The `affected_membership_count`
+and `talk_release_count` report the effects for the command and may both be
+zero when the deny rule was installed before the targeted service joined.
+
+The Relay SHOULD complete these effects within five seconds of receiving the
+command. An unauthorized sender or an unsupported command MUST produce `error`,
+not `ack`. A malformed JSON or schema-invalid command is a framing violation
+and closes the connection as defined above.
+
+`revoke_service_admission` is idempotent. The Management Service MUST retry an
+unacknowledged command after reconnecting with the identical `message_id` and
+identical command body. The Relay MUST retain a bounded idempotency entry for
+at least ten minutes after sending an `ack`; a duplicate MUST resend the cached
+acknowledgement and MUST NOT emit another `TALK_RELEASE`. Reusing a
+`message_id` with a different body is a protocol error. A Relay restart may
+lose this cache, but reapplying a revocation command remains state-idempotent.
+
+The Management Service MUST keep a revocation pending until it receives an
+`ack` or the bounded denial period no longer matters. It MUST NOT treat a lost
+connection as a successful revocation. The Relay MUST continue to fail closed
+for a matching deny rule when the Management Service is unavailable.
+
+Version 1 defines no arbitrary Relay configuration, key-management, channel
+credential, or media-control command. Such commands require a future extension
+with their own authorization and idempotency rules.
+
+## Relay notifications
+
+A Relay may send `relay_lifecycle_event` only when the Management Service
+requested and the Relay accepted lifecycle input in `hello`/`hello_ack`. It may
+send `relay_audit_input` only when audit input was similarly negotiated. A
+Management Service that advertises `event_delivery` other than `disabled`
+SHOULD request lifecycle inputs. One that advertises `audit_retrieval: true`
+SHOULD request audit inputs and MUST NOT treat rejected or disconnected input
+as complete audit coverage. The allowed event names and redaction requirements
+are those in `overview.md#relay-event-integration`.
+
+Private-link notifications have no replay cursor and no persistence
+requirement. The Relay MUST use bounded notification queues and MUST NOT let a
+slow or unavailable Management Service delay media forwarding. It MAY coalesce
+state-change lifecycle events and may drop notifications when the link is
+unavailable or a bounded queue is full. The Management Service MUST treat a
+link disconnect as a possible notification gap.
+
+A `relay_lifecycle_event` is input to the Management Service, not an external
+SSE event. It deliberately has no `event_id`. If the Management Service exposes
+it through `GET /events`, the Management Service assigns the external
+per-service `event_id` and applies the normal channel/global authorization and
+capability rules.
+
+A `relay_audit_input` similarly has no `record_id`. When Audit Retrieval is
+enabled, the Management Service may convert received input into the canonical
+`AuditRecord`, assign its `record_id`, and retain the record before exposing
+it. The Relay is not an audit store, and a private-link outage does not permit
+the Management Service to claim that the resulting retained record set is a
+complete Relay event history.
+
+## Error handling and limits
+
+An `error` contains the triggering `in_reply_to` message ID when one exists and
+one of the schema-defined error codes. `overloaded` means the peer MUST retry
+with exponential backoff; it does not imply that a revocation was applied.
+`unauthorized`, `identity_mismatch`, `handshake_required`, and
+`invalid_revocation_target` MUST NOT be retried without correcting the request.
+
+Implementations MUST rate-limit handshake and malformed-frame failures, bound
+all command, notification, and idempotency queues, and log only message type,
+reason class, opaque message-ID prefix, and aggregate counts. They MUST NOT log
+full service IDs, grant ID hashes, certificates, or message bodies unless an
+operator has explicitly configured a protected diagnostic sink.
+
+## Interoperability vector
+
+`../../../test-vectors/management/private-control-link-v1.json` defines framed
+message examples, canonical identifier validation, and revocation idempotency
+cases. Implementations that support this extension MUST validate the schema,
+framing limits, target intersection, bounded deny duration, and duplicate
+command behavior before claiming Private Control Link v1 compatibility.

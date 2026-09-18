@@ -26,12 +26,15 @@ VPN, dedicated interface, or equivalent firewall-restricted boundary. It MUST
 NOT be publicly reachable merely because the normal Relay UDP port is public.
 
 The Relay and Management Service communicate through a separate private
-control link:
+control link. `private-control-link-v1.md` defines its dedicated listener,
+local-socket or mTLS transport, framing, authentication, revocation command,
+and bounded notification behavior:
 
 - On one host, a Unix Domain Socket is RECOMMENDED.
 - Across hosts, TCP protected by a distinct internal mTLS deployment is
   RECOMMENDED.
-- The private control link MUST NOT be reachable from ordinary client or
+- The private control link MUST use a listener distinct from the external
+  Management API port and MUST NOT be reachable from ordinary client or
   Directory networks.
 
 A single-process implementation MAY expose the Management API directly, but
@@ -238,11 +241,11 @@ policy.
 
 ## Relay event integration
 
-A Relay MAY emit only minimally necessary, redacted lifecycle events to the
-private control link. A deployment that enables event delivery or Audit
-Retrieval MUST make the required lifecycle input available to its Management
-Service without making the Relay retain event or audit history. The initial
-event set is:
+A Relay MAY emit only minimally necessary, redacted lifecycle events and audit
+inputs over Private Control Link v1. A deployment that enables event delivery
+or Audit Retrieval MUST make the required lifecycle input available to its
+Management Service without making the Relay retain event or audit history. The
+initial lifecycle event set is:
 
 - `participant_joined`
 - `participant_left`
@@ -253,12 +256,19 @@ event set is:
 - `service_admission_issued`
 - `service_admission_revoked`
 
-Events MUST include a monotonic per-Management-Service `event_id`, an RFC 3339
-UTC timestamp, an event type, and a channel ID or explicit `null` for a global
-event. They MAY include a sender ID, service ID, reason code, or recording job
-ID. Events MUST NOT include IP addresses, UDP ports, media payloads, channel
-passwords, derived keys, OIDC material, admission grants, certificate contents,
-or private keys.
+A Private Control Link lifecycle input includes an RFC 3339 UTC timestamp, an
+event type, and a channel ID or explicit `null` for a global event. It MAY
+include a sender ID, service ID, reason code, or recording job ID. It has no
+external SSE `event_id`; the Management Service assigns that per-service
+cursor only when it publishes the input through `GET /events`. Audit inputs
+likewise have no `record_id`; the Management Service assigns it only when it
+creates a canonical retained `AuditRecord`. Private-link inputs and resulting
+Management events MUST NOT include IP addresses, UDP ports, media payloads,
+channel passwords, derived keys, OIDC material, admission grants, certificate
+contents, or private keys. Private-link notification delivery is bounded and
+non-persistent; a Management Service MUST treat a control-link outage as a
+possible input gap and MUST NOT represent a recovered stream as complete
+history.
 
 ### Global event authorization
 
@@ -297,10 +307,12 @@ Management Service or subscriber delay Relay media forwarding.
 
 ## Revocation and availability
 
-A Management Service MUST send revocation updates over the private control link
-when an ACL is removed, a service is disabled, or a grant is revoked. The Relay
-MUST stop forwarding media for a revoked service and remove its membership
-promptly. A target propagation time of five seconds is RECOMMENDED.
+A Management Service MUST send the Private Control Link v1
+`revoke_service_admission` command when an ACL is removed, a service is
+disabled, or a grant is revoked. The Relay MUST stop forwarding media for a
+revoked service and remove its membership promptly. The command is authenticated,
+bounded, and idempotent; a target propagation time of five seconds is
+RECOMMENDED.
 
 Service Admission Grants are intentionally short-lived. A service renews them
 through its mTLS-authenticated Management API session before expiry. To support

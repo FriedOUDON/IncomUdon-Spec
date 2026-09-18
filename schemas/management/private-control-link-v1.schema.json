@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://friedoudon.github.io/incomudon-spec/schemas/management/private-control-link-v1.schema.json",
+  "title": "IncomUdon Private Control Link v1 message",
+  "oneOf": [
+    { "$ref": "#/$defs/hello" },
+    { "$ref": "#/$defs/helloAck" },
+    { "$ref": "#/$defs/ping" },
+    { "$ref": "#/$defs/pong" },
+    { "$ref": "#/$defs/revokeServiceAdmission" },
+    { "$ref": "#/$defs/ack" },
+    { "$ref": "#/$defs/error" },
+    { "$ref": "#/$defs/relayLifecycleEvent" },
+    { "$ref": "#/$defs/relayAuditInput" }
+  ],
+  "$defs": {
+    "identifier16": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{21}[AQgw]$"
+    },
+    "grantIdHash": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$"
+    },
+    "serviceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "u32": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "endpointSenderId": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4294967295
+    },
+    "hello": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id", "management_service_id", "want_lifecycle_events", "want_audit_inputs"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "hello" },
+        "message_id": { "$ref": "#/$defs/identifier16" },
+        "management_service_id": { "$ref": "#/$defs/serviceId" },
+        "want_lifecycle_events": { "type": "boolean" },
+        "want_audit_inputs": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "helloAck": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id", "in_reply_to", "session_id", "relay_id", "lifecycle_events_accepted", "audit_inputs_accepted"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "hello_ack" },
+        "message_id": { "$ref": "#/$defs/identifier16" },
+        "in_reply_to": { "$ref": "#/$defs/identifier16" },
+        "session_id": { "$ref": "#/$defs/identifier16" },
+        "relay_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "lifecycle_events_accepted": { "type": "boolean" },
+        "audit_inputs_accepted": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "ping": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "ping" },
+        "message_id": { "$ref": "#/$defs/identifier16" }
+      },
+      "additionalProperties": false
+    },
+    "pong": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id", "in_reply_to"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "pong" },
+        "message_id": { "$ref": "#/$defs/identifier16" },
+        "in_reply_to": { "$ref": "#/$defs/identifier16" }
+      },
+      "additionalProperties": false
+    },
+    "revokeServiceAdmission": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id", "channel_id", "reason", "deny_for_seconds"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "revoke_service_admission" },
+        "message_id": { "$ref": "#/$defs/identifier16" },
+        "channel_id": { "$ref": "#/$defs/u32" },
+        "service_id": { "$ref": "#/$defs/serviceId" },
+        "grant_id_hash": { "$ref": "#/$defs/grantIdHash" },
+        "reason": { "enum": ["acl_removed", "service_disabled", "grant_revoked"] },
+        "deny_for_seconds": { "type": "integer", "minimum": 1, "maximum": 5400 }
+      },
+      "anyOf": [
+        { "required": ["service_id"] },
+        { "required": ["grant_id_hash"] }
+      ],
+      "additionalProperties": false
+    },
+    "ack": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id", "in_reply_to", "outcome", "affected_membership_count", "talk_release_count"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "ack" },
+        "message_id": { "$ref": "#/$defs/identifier16" },
+        "in_reply_to": { "$ref": "#/$defs/identifier16" },
+        "outcome": { "const": "applied" },
+        "affected_membership_count": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "talk_release_count": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
+      },
+      "additionalProperties": false
+    },
+    "error": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id", "code"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "error" },
+        "message_id": { "$ref": "#/$defs/identifier16" },
+        "in_reply_to": { "$ref": "#/$defs/identifier16" },
+        "code": { "enum": ["handshake_required", "identity_mismatch", "unsupported_message", "invalid_revocation_target", "unauthorized", "overloaded", "internal_error"] }
+      },
+      "additionalProperties": false
+    },
+    "floorInterrupt": {
+      "type": "object",
+      "required": ["requester_priority", "replaced_sender_id", "replaced_priority"],
+      "properties": {
+        "requester_priority": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "replaced_sender_id": { "type": ["integer", "null"], "minimum": 1, "maximum": 4294967295 },
+        "replaced_priority": { "type": ["integer", "null"], "minimum": 0, "maximum": 255 }
+      },
+      "additionalProperties": false
+    },
+    "relayLifecycleEvent": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id", "occurred_at", "event_type", "channel_id"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "relay_lifecycle_event" },
+        "message_id": { "$ref": "#/$defs/identifier16" },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "event_type": { "enum": ["participant_joined", "participant_left", "talk_started", "talk_ended", "relay_health_changed", "recording_state_changed", "service_admission_issued", "service_admission_revoked"] },
+        "channel_id": { "type": ["integer", "null"], "minimum": 0, "maximum": 4294967295 },
+        "sender_id": { "type": ["integer", "null"], "minimum": 1, "maximum": 4294967295 },
+        "service_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 128 },
+        "recording_job_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 128 },
+        "state": { "type": ["string", "null"], "enum": [null, "healthy", "degraded", "unhealthy", "starting", "recording", "stopping", "stopped", "failed"] },
+        "reason": { "type": ["string", "null"], "minLength": 1, "maxLength": 128, "pattern": "^[A-Z0-9_:-]+$" }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "event_type": { "const": "relay_health_changed" } }, "required": ["event_type"] },
+          "then": { "required": ["state"], "properties": { "channel_id": { "const": null }, "state": { "enum": ["healthy", "degraded", "unhealthy"] } } },
+          "else": { "properties": { "channel_id": { "not": { "const": null } } } }
+        }
+      ]
+    },
+    "relayAuditInput": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id", "occurred_at", "action", "actor_type", "actor_id", "channel_id", "result"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "relay_audit_input" },
+        "message_id": { "$ref": "#/$defs/identifier16" },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "action": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+        "actor_type": { "enum": ["identity", "service", "relay"] },
+        "actor_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "channel_id": { "type": ["integer", "null"], "minimum": 0, "maximum": 4294967295 },
+        "result": { "enum": ["success", "denied", "failed"] },
+        "floor_interrupt": { "$ref": "#/$defs/floorInterrupt" }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "action": { "const": "floor_interrupt" } }, "required": ["action"] },
+          "then": { "required": ["floor_interrupt"] }
+        }
+      ]
+    }
+  }
+}
