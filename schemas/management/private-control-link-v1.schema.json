@@ -11,7 +11,9 @@
     { "$ref": "#/$defs/ack" },
     { "$ref": "#/$defs/error" },
     { "$ref": "#/$defs/relayLifecycleEvent" },
-    { "$ref": "#/$defs/relayAuditInput" }
+    { "$ref": "#/$defs/relayAuditInput" },
+    { "$ref": "#/$defs/getRelayDiagnostics" },
+    { "$ref": "#/$defs/relayDiagnosticsSnapshot" }
   ],
   "$defs": {
     "identifier16": {
@@ -39,20 +41,21 @@
     },
     "hello": {
       "type": "object",
-      "required": ["schema_version", "type", "message_id", "management_service_id", "want_lifecycle_events", "want_audit_inputs"],
+      "required": ["schema_version", "type", "message_id", "management_service_id", "want_lifecycle_events", "want_audit_inputs", "want_diagnostics"],
       "properties": {
         "schema_version": { "const": "private-control-link-v1" },
         "type": { "const": "hello" },
         "message_id": { "$ref": "#/$defs/identifier16" },
         "management_service_id": { "$ref": "#/$defs/serviceId" },
         "want_lifecycle_events": { "type": "boolean" },
-        "want_audit_inputs": { "type": "boolean" }
+        "want_audit_inputs": { "type": "boolean" },
+        "want_diagnostics": { "type": "boolean" }
       },
       "additionalProperties": false
     },
     "helloAck": {
       "type": "object",
-      "required": ["schema_version", "type", "message_id", "in_reply_to", "session_id", "relay_id", "lifecycle_events_accepted", "audit_inputs_accepted"],
+      "required": ["schema_version", "type", "message_id", "in_reply_to", "session_id", "relay_id", "lifecycle_events_accepted", "audit_inputs_accepted", "diagnostics_accepted"],
       "properties": {
         "schema_version": { "const": "private-control-link-v1" },
         "type": { "const": "hello_ack" },
@@ -61,7 +64,8 @@
         "session_id": { "$ref": "#/$defs/identifier16" },
         "relay_id": { "type": "string", "minLength": 1, "maxLength": 128 },
         "lifecycle_events_accepted": { "type": "boolean" },
-        "audit_inputs_accepted": { "type": "boolean" }
+        "audit_inputs_accepted": { "type": "boolean" },
+        "diagnostics_accepted": { "type": "boolean" }
       },
       "additionalProperties": false
     },
@@ -188,6 +192,48 @@
           "then": { "required": ["floor_interrupt"] }
         }
       ]
+    },
+    "safeCounter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "floorInterruptCounters": {
+      "type": "object",
+      "required": ["ptt_requests_total", "grants_total", "denials_total", "preemptions_total", "unauthorized_rejections_total"],
+      "properties": {
+        "ptt_requests_total": { "$ref": "#/$defs/safeCounter" },
+        "grants_total": { "$ref": "#/$defs/safeCounter" },
+        "denials_total": { "$ref": "#/$defs/safeCounter" },
+        "preemptions_total": { "$ref": "#/$defs/safeCounter" },
+        "unauthorized_rejections_total": { "$ref": "#/$defs/safeCounter" }
+      },
+      "additionalProperties": false
+    },
+    "getRelayDiagnostics": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "get_relay_diagnostics" },
+        "message_id": { "$ref": "#/$defs/identifier16" }
+      },
+      "additionalProperties": false
+    },
+    "relayDiagnosticsSnapshot": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id", "in_reply_to", "relay_id", "counter_epoch", "observed_at", "floor_interrupt"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "relay_diagnostics_snapshot" },
+        "message_id": { "$ref": "#/$defs/identifier16" },
+        "in_reply_to": { "$ref": "#/$defs/identifier16" },
+        "relay_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "counter_epoch": { "$ref": "#/$defs/identifier16" },
+        "observed_at": { "type": "string", "format": "date-time" },
+        "floor_interrupt": { "$ref": "#/$defs/floorInterruptCounters" }
+      },
+      "additionalProperties": false
     }
   }
 }

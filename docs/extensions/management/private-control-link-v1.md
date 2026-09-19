@@ -81,10 +81,10 @@ variant.
 
 The Management Service MUST send `hello` as its first frame within five
 seconds of connecting. It contains its `management_service_id` and booleans
-that request optional Relay lifecycle events and audit inputs. The Relay MUST
-verify the transport identity and the `management_service_id`, then reply with
-`hello_ack` containing a fresh `session_id`, its opaque `relay_id`, and the
-accepted optional inputs.
+that request optional Relay lifecycle events, audit inputs, and diagnostic
+snapshots. The Relay MUST verify the transport identity and the
+`management_service_id`, then reply with `hello_ack` containing a fresh
+`session_id`, its opaque `relay_id`, and the accepted optional inputs.
 
 Before a valid `hello`/`hello_ack` exchange, neither peer may send a command or
 notification. The Relay MUST allow no more than one active session for the
@@ -148,12 +148,13 @@ with their own authorization and idempotency rules.
 
 A Relay may send `relay_lifecycle_event` only when the Management Service
 requested and the Relay accepted lifecycle input in `hello`/`hello_ack`. It may
-send `relay_audit_input` only when audit input was similarly negotiated. A
-Management Service that advertises `event_delivery` other than `disabled`
-SHOULD request lifecycle inputs. One that advertises `audit_retrieval: true`
-SHOULD request audit inputs and MUST NOT treat rejected or disconnected input
-as complete audit coverage. The allowed event names and redaction requirements
-are those in `overview.md#relay-event-integration`.
+send `relay_audit_input` only when audit input was similarly negotiated.
+Diagnostics use the request/response exchange defined below and are not a
+notification stream. A Management Service that advertises `event_delivery`
+other than `disabled` SHOULD request lifecycle inputs. One that advertises
+`audit_retrieval: true` SHOULD request audit inputs and MUST NOT treat rejected
+or disconnected input as complete audit coverage. The allowed event names and
+redaction requirements are those in `overview.md#relay-event-integration`.
 
 Private-link notifications have no replay cursor and no persistence
 requirement. The Relay MUST use bounded notification queues and MUST NOT let a
@@ -175,6 +176,62 @@ it. The Relay is not an audit store, and a private-link outage does not permit
 the Management Service to claim that the resulting retained record set is a
 complete Relay event history.
 
+## Relay diagnostics
+
+A Management Service that requests `want_diagnostics: true` in `hello` MAY use
+diagnostics only when the Relay returns `diagnostics_accepted: true` in
+`hello_ack`. The Management Service sends the read-only
+`get_relay_diagnostics` request no more frequently than once every ten seconds.
+The request contains only the common `schema_version`, `type`, and
+`message_id` fields. The Relay replies with one `relay_diagnostics_snapshot`
+whose `in_reply_to` equals the request `message_id`. A requester that has not
+negotiated diagnostics MUST NOT send this request; the Relay MUST return
+`unsupported_message` without changing Relay state.
+
+A snapshot contains the following common fields:
+
+- `relay_id`: the opaque identifier from `hello_ack`.
+- `counter_epoch`: a canonical unpadded Base64URL encoding of 16 random bytes.
+  The Relay MUST create it when the Relay process starts and MUST create a new
+  value whenever it resets its diagnostic counters.
+- `observed_at`: the Relay wall-clock observation time as an RFC 3339 UTC
+  timestamp.
+- `floor_interrupt`: the redacted Floor Interrupt counter object below.
+
+The pair `(relay_id, counter_epoch)` identifies one continuous counter domain.
+Counters are process-local, non-negative, monotonically increasing JSON
+integers. They are not durable and reset after a Relay restart; a Management
+Service MUST treat a new `counter_epoch` as a new time-series domain rather
+than infer a counter decrease. A Relay MUST reset its counters and create a new
+`counter_epoch` before any counter would exceed `9007199254740991`.
+
+The `floor_interrupt` object contains:
+
+- `ptt_requests_total`: well-formed `PTT_REQUEST` packets that passed Control
+  Authentication and reached Floor Interrupt decision processing.
+- `grants_total`: requests for which the Relay sent `TALK_GRANT`, including an
+  idempotent grant repair for an already-active requester.
+- `denials_total`: authorized requests denied because no eligible grant or
+  preemption was available.
+- `preemptions_total`: active talkers released with `PREEMPTED`; this is a
+  subset of `grants_total`.
+- `unauthorized_rejections_total`: authenticated requests rejected because the
+  requester lacked a current membership, valid required admission, or interrupt
+  permission.
+
+Packets that fail framing, Control Authentication, or replay checks MUST NOT
+increment the Floor Interrupt counters. A Relay with Floor Interrupt disabled
+MUST report all Floor Interrupt counters as zero. The counters MUST NOT contain
+channel IDs, sender IDs, endpoint addresses, actor or service identifiers,
+priorities, ticket data, grant data, or other per-request labels.
+
+A snapshot is not an audit input and MUST NOT be reconstructed from
+`relay_audit_input` messages. The Relay MUST retain no snapshot history and
+MUST NOT delay media forwarding to produce or deliver one. A Management Service
+may retry a failed read with a new `message_id`; diagnostic reads have no
+idempotency cache or side effects. The Management Service is responsible for
+polling, retaining, and exporting snapshots through its own metrics system.
+
 ## Error handling and limits
 
 An `error` contains the triggering `in_reply_to` message ID when one exists and
@@ -192,7 +249,8 @@ operator has explicitly configured a protected diagnostic sink.
 ## Interoperability vector
 
 `../../../test-vectors/management/private-control-link-v1.json` defines framed
-message examples, canonical identifier validation, and revocation idempotency
-cases. Implementations that support this extension MUST validate the schema,
-framing limits, target intersection, bounded deny duration, and duplicate
-command behavior before claiming Private Control Link v1 compatibility.
+message examples, canonical identifier validation, revocation idempotency, and
+Relay diagnostics cases. Implementations that support this extension MUST
+validate the schema, framing limits, target intersection, bounded deny
+duration, duplicate command behavior, diagnostics negotiation, redaction, and
+counter-epoch handling before claiming Private Control Link v1 compatibility.

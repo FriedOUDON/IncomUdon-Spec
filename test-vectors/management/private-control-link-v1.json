@@ -15,7 +15,8 @@
       "message_id": "AAECAwQFBgcICQoLDA0ODw",
       "management_service_id": "management-main",
       "want_lifecycle_events": true,
-      "want_audit_inputs": true
+      "want_audit_inputs": true,
+      "want_diagnostics": true
     },
     {
       "schema_version": "private-control-link-v1",
@@ -25,7 +26,29 @@
       "session_id": "ICEiIyQlJicoKSorLC0uLw",
       "relay_id": "relay-east-1",
       "lifecycle_events_accepted": true,
-      "audit_inputs_accepted": true
+      "audit_inputs_accepted": true,
+      "diagnostics_accepted": true
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "get_relay_diagnostics",
+      "message_id": "sLGys7S1tre4ubq7vL2-vw"
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "relay_diagnostics_snapshot",
+      "message_id": "wMHCw8TFxsfIycrLzM3Ozw",
+      "in_reply_to": "sLGys7S1tre4ubq7vL2-vw",
+      "relay_id": "relay-east-1",
+      "counter_epoch": "oKGio6SlpqeoqaqrrK2urw",
+      "observed_at": "2026-01-01T00:00:02Z",
+      "floor_interrupt": {
+        "ptt_requests_total": 12,
+        "grants_total": 7,
+        "denials_total": 3,
+        "preemptions_total": 2,
+        "unauthorized_rejections_total": 2
+      }
     },
     {
       "schema_version": "private-control-link-v1",
@@ -117,6 +140,31 @@
       "service_id": "recorder-01",
       "reason": "service_disabled",
       "deny_for_seconds": 5401
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "hello",
+      "message_id": "oKGio6SlpqeoqaqrrK2urw",
+      "management_service_id": "management-main",
+      "want_lifecycle_events": true,
+      "want_audit_inputs": true
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "relay_diagnostics_snapshot",
+      "message_id": "oKGio6SlpqeoqaqrrK2urw",
+      "in_reply_to": "sLGys7S1tre4ubq7vL2-vw",
+      "relay_id": "relay-east-1",
+      "counter_epoch": "AAECAwQFBgcICQoLDA0ODw",
+      "observed_at": "2026-01-01T00:00:02Z",
+      "floor_interrupt": {
+        "ptt_requests_total": 12,
+        "grants_total": 7,
+        "denials_total": 3,
+        "preemptions_total": 2,
+        "unauthorized_rejections_total": 2
+      },
+      "channel_id": 111
     }
   ],
   "revocation_cases": [
