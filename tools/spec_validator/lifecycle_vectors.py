@@ -369,6 +369,15 @@ def _validate_management_sse_resume(root: Path) -> list[str]:
         _compare(errors, f"{name} status", case.get("expected_status"), expected_status)
         if expected_status == 400:
             continue
+        if selected_cursor is None:
+            _compare(errors, f"{name} replay", case.get("replay"), "none")
+            _compare(
+                errors,
+                f"{name} delivery",
+                case.get("expected_delivery"),
+                "subsequently_emitted_authorized_events_only",
+            )
+            continue
         if has_last_event_id:
             _compare(errors, f"{name} selected cursor", case.get("selected_cursor"), selected_cursor)
             _compare(errors, f"{name} cursor source", case.get("selected_cursor_source"), "Last-Event-ID")
@@ -397,6 +406,8 @@ def _validate_management_sse_resume(root: Path) -> list[str]:
             raise VectorValidationError(f"{name} must select a replay cursor")
         _compare(errors, f"{name} selected cursor", case.get("selected_cursor"), selected_cursor)
         _compare(errors, f"{name} cursor source", case.get("selected_cursor_source"), source)
+        if has_last_event_id and "since" in request:
+            _compare(errors, f"{name} ignored query parameters", case.get("ignored_query_parameters"), ["since"])
         _compare(errors, f"{name} first event", case.get("expected_first_event_id"), str(int(selected_cursor) + 1))
     return errors
 

@@ -52,6 +52,14 @@
       "expected_status": 400
     },
     {
+      "name": "replay_initial_connection_delivers_subsequent_events_only",
+      "event_delivery": "replay",
+      "request": {},
+      "expected_status": 200,
+      "replay": "none",
+      "expected_delivery": "subsequently_emitted_authorized_events_only"
+    },
+    {
       "name": "replay_reconnect_uses_last_event_id",
       "event_delivery": "replay",
       "request": {
