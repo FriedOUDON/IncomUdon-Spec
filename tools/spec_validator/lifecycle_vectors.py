@@ -24,7 +24,8 @@ RELEASE_REASONS = {
     "PREEMPTED": 7,
     "SERVICE_ADMISSION_EXPIRED": 8,
 }
-MAX_DIRECTORY_REPLAY_SEQUENCE = (1 << 53) - 1
+MAX_SAFE_JSON_INTEGER = (1 << 53) - 1
+MAX_DIRECTORY_REPLAY_SEQUENCE = MAX_SAFE_JSON_INTEGER
 MEDIA_SECURITY_MODES = frozenset({"no-crypto", "legacy-xor", "aes-gcm-v2"})
 
 
@@ -557,7 +558,171 @@ def _validate_private_control_link(root: Path) -> list[str]:
             expected.get("talk_release_reason"),
             "SERVICE_ADMISSION_REVOKED" if releases else None,
         )
+    diagnostics = document.get("diagnostics_lifecycle")
+    if not isinstance(diagnostics, dict):
+        raise VectorValidationError("Private Control Link diagnostics_lifecycle must be an object")
+    poll_interval = _integer(
+        diagnostics.get("minimum_poll_interval_ms"),
+        "Private Control Link diagnostics minimum poll interval",
+        MAX_SAFE_JSON_INTEGER,
+    )
+    _compare(errors, "Private Control Link diagnostics minimum poll interval", poll_interval, 10000)
+    maximum_counter = _integer(
+        diagnostics.get("maximum_counter"),
+        "Private Control Link diagnostics maximum counter",
+        MAX_SAFE_JSON_INTEGER,
+    )
+    _compare(errors, "Private Control Link diagnostics maximum counter", maximum_counter, MAX_SAFE_JSON_INTEGER)
+    counter_names = diagnostics.get("counter_names")
+    expected_counter_names = [
+        "ptt_requests_total",
+        "grants_total",
+        "denials_total",
+        "preemptions_total",
+        "unauthorized_rejections_total",
+    ]
+    if not isinstance(counter_names, list) or not all(isinstance(name, str) for name in counter_names):
+        raise VectorValidationError("Private Control Link diagnostics counter_names must be an array of strings")
+    _compare(errors, "Private Control Link diagnostics counter names", counter_names, expected_counter_names)
+
+    negotiation_cases = diagnostics.get("negotiation_cases")
+    if not isinstance(negotiation_cases, list):
+        raise VectorValidationError("Private Control Link diagnostics negotiation_cases must be an array")
+    for index, case in enumerate(negotiation_cases):
+        if not isinstance(case, dict):
+            raise VectorValidationError(f"Private Control Link diagnostics negotiation case {index} must be an object")
+        name = case.get("name", f"Private Control Link diagnostics negotiation case {index}")
+        supports = case.get("relay_supports_diagnostics")
+        requested = case.get("want_diagnostics")
+        if not isinstance(supports, bool) or not isinstance(requested, bool):
+            raise VectorValidationError(f"{name}: relay_supports_diagnostics and want_diagnostics must be booleans")
+        accepted = supports and requested
+        result = "relay_diagnostics_snapshot" if accepted else "unsupported_message"
+        _compare(errors, f"{name} diagnostics accepted", case.get("expected_diagnostics_accepted"), accepted)
+        _compare(errors, f"{name} request result", case.get("expected_request_result"), result)
+        _compare(errors, f"{name} state changed", case.get("expected_state_changed"), False)
+
+    polling_case = diagnostics.get("polling_case")
+    if not isinstance(polling_case, dict):
+        raise VectorValidationError("Private Control Link diagnostics polling_case must be an object")
+    polling_name = polling_case.get("name", "Private Control Link diagnostics polling")
+    requests = polling_case.get("requests")
+    if not isinstance(requests, list) or not requests:
+        raise VectorValidationError(f"{polling_name}: requests must be a non-empty array")
+    last_accepted_at: int | None = None
+    previous_at: int | None = None
+    for index, request in enumerate(requests):
+        if not isinstance(request, dict):
+            raise VectorValidationError(f"{polling_name} request {index} must be an object")
+        at = _integer(request.get("at_monotonic_ms"), f"{polling_name} request {index} time", MAX_SAFE_JSON_INTEGER)
+        if previous_at is not None and at < previous_at:
+            raise VectorValidationError(f"{polling_name} request times must be non-decreasing")
+        previous_at = at
+        accepted = last_accepted_at is None or at - last_accepted_at >= poll_interval
+        result = "relay_diagnostics_snapshot" if accepted else "overloaded"
+        _compare(errors, f"{polling_name} request {index} result", request.get("expected_result"), result)
+        if accepted:
+            last_accepted_at = at
+
+    domain_cases = diagnostics.get("counter_domain_cases")
+    if not isinstance(domain_cases, list):
+        raise VectorValidationError("Private Control Link diagnostics counter_domain_cases must be an array")
+    for index, case in enumerate(domain_cases):
+        if not isinstance(case, dict):
+            raise VectorValidationError(f"Private Control Link diagnostics counter domain case {index} must be an object")
+        name = case.get("name", f"Private Control Link diagnostics counter domain case {index}")
+        enabled = case.get("floor_interrupt_enabled")
+        snapshots = case.get("snapshots")
+        if not isinstance(enabled, bool) or not isinstance(snapshots, list) or not snapshots:
+            raise VectorValidationError(f"{name}: floor_interrupt_enabled and snapshots are required")
+        actual = "accept_monotonic"
+        previous_epoch: str | None = None
+        previous_counters: dict[str, int] | None = None
+        for snapshot_index, snapshot in enumerate(snapshots):
+            if not isinstance(snapshot, dict):
+                raise VectorValidationError(f"{name} snapshot {snapshot_index} must be an object")
+            epoch = snapshot.get("counter_epoch")
+            counters = snapshot.get("floor_interrupt")
+            if not isinstance(epoch, str) or not isinstance(counters, dict):
+                raise VectorValidationError(f"{name} snapshot {snapshot_index} is malformed")
+            values = {
+                counter: _integer(
+                    counters.get(counter),
+                    f"{name} snapshot {snapshot_index} {counter}",
+                    maximum_counter,
+                )
+                for counter in expected_counter_names
+            }
+            if not enabled and any(values.values()):
+                actual = "reject_disabled_feature_counter"
+            elif values["preemptions_total"] > values["grants_total"]:
+                actual = "reject_preemptions_exceed_grants"
+            elif (
+                previous_epoch == epoch
+                and previous_counters is not None
+                and any(values[counter] < previous_counters[counter] for counter in expected_counter_names)
+            ):
+                actual = "reject_counter_regression"
+            previous_epoch = epoch
+            previous_counters = values
+        if actual == "accept_monotonic" and len({snapshot["counter_epoch"] for snapshot in snapshots}) > 1:
+            actual = "accept_new_counter_epoch"
+        _compare(errors, f"{name} result", case.get("expected_result"), actual)
+
+    rollover = diagnostics.get("rollover_case")
+    if not isinstance(rollover, dict):
+        raise VectorValidationError("Private Control Link diagnostics rollover_case must be an object")
+    rollover_name = rollover.get("name", "Private Control Link diagnostics rollover")
+    before = rollover.get("before")
+    after = rollover.get("after")
+    if not isinstance(before, dict) or not isinstance(after, dict):
+        raise VectorValidationError(f"{rollover_name}: before and after must be objects")
+    before_epoch = before.get("counter_epoch")
+    after_epoch = after.get("counter_epoch")
+    before_counters = before.get("floor_interrupt")
+    after_counters = after.get("floor_interrupt")
+    if not isinstance(before_epoch, str) or not isinstance(after_epoch, str) or not isinstance(before_counters, dict) or not isinstance(after_counters, dict):
+        raise VectorValidationError(f"{rollover_name}: snapshots are malformed")
+    before_values = {
+        counter: _integer(before_counters.get(counter), f"{rollover_name} before {counter}", maximum_counter)
+        for counter in expected_counter_names
+    }
+    after_values = {
+        counter: _integer(after_counters.get(counter), f"{rollover_name} after {counter}", maximum_counter)
+        for counter in expected_counter_names
+    }
+    rollover_result = (
+        "accept_reset_before_overflow"
+        if before_epoch != after_epoch
+        and any(value == maximum_counter for value in before_values.values())
+        and not any(after_values.values())
+        else "reject_invalid_counter_rollover"
+    )
+    _compare(errors, f"{rollover_name} result", rollover.get("expected_result"), rollover_result)
+
+    redaction_cases = diagnostics.get("redaction_cases")
+    if not isinstance(redaction_cases, list):
+        raise VectorValidationError("Private Control Link diagnostics redaction_cases must be an array")
+    for index, case in enumerate(redaction_cases):
+        if not isinstance(case, dict):
+            raise VectorValidationError(f"Private Control Link diagnostics redaction case {index} must be an object")
+        name = case.get("name", f"Private Control Link diagnostics redaction case {index}")
+        candidate = case.get("candidate")
+        forbidden = case.get("forbidden_field_names")
+        if not isinstance(candidate, dict) or not isinstance(forbidden, list) or not all(isinstance(field, str) for field in forbidden):
+            raise VectorValidationError(f"{name}: candidate and forbidden_field_names are required")
+
+        def contains_forbidden(value: Any) -> bool:
+            if isinstance(value, dict):
+                return any(key in forbidden or contains_forbidden(item) for key, item in value.items())
+            if isinstance(value, list):
+                return any(contains_forbidden(item) for item in value)
+            return False
+
+        result = "reject_sensitive_field" if contains_forbidden(candidate) else "accept_redacted_snapshot"
+        _compare(errors, f"{name} result", case.get("expected_result"), result)
     return errors
+
 
 def _validate_media_replay(root: Path) -> list[str]:
     document = _load(root, "test-vectors/media-replay-v1.json")

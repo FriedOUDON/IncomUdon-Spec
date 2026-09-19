@@ -180,13 +180,23 @@ complete Relay event history.
 
 A Management Service that requests `want_diagnostics: true` in `hello` MAY use
 diagnostics only when the Relay returns `diagnostics_accepted: true` in
-`hello_ack`. The Management Service sends the read-only
-`get_relay_diagnostics` request no more frequently than once every ten seconds.
+`hello_ack`. A Relay MUST set `diagnostics_accepted` to `false` when
+`want_diagnostics` is `false`, and it MUST set the field to `true` only when it
+can serve the diagnostics exchange for the established session. A requester
+that has not negotiated diagnostics MUST NOT send `get_relay_diagnostics`; the
+Relay MUST return `unsupported_message` without changing Relay state.
+
 The request contains only the common `schema_version`, `type`, and
-`message_id` fields. The Relay replies with one `relay_diagnostics_snapshot`
-whose `in_reply_to` equals the request `message_id`. A requester that has not
-negotiated diagnostics MUST NOT send this request; the Relay MUST return
-`unsupported_message` without changing Relay state.
+`message_id` fields. A Management Service MUST send the read-only
+`get_relay_diagnostics` request no more frequently than once every ten seconds.
+The Relay MUST enforce the same minimum interval per established Private
+Control Link session using a monotonic clock. It MUST reply to an earlier
+request with `error` code `overloaded`, whose `in_reply_to` identifies that
+request, and MUST NOT send a snapshot or alter Relay state. A rate-limited
+request does not restart the interval measured from the preceding accepted
+diagnostic request. For an accepted request, the Relay replies with one
+`relay_diagnostics_snapshot` whose `in_reply_to` equals the request
+`message_id`.
 
 A snapshot contains the following common fields:
 
@@ -200,10 +210,14 @@ A snapshot contains the following common fields:
 
 The pair `(relay_id, counter_epoch)` identifies one continuous counter domain.
 Counters are process-local, non-negative, monotonically increasing JSON
-integers. They are not durable and reset after a Relay restart; a Management
-Service MUST treat a new `counter_epoch` as a new time-series domain rather
-than infer a counter decrease. A Relay MUST reset its counters and create a new
-`counter_epoch` before any counter would exceed `9007199254740991`.
+integers. For snapshots received in order within one counter domain, every
+named counter in a later snapshot MUST be greater than or equal to the same
+counter in the preceding snapshot. Counters are not durable and reset after a
+Relay restart; a Management Service MUST treat a new `counter_epoch` as a new
+time-series domain rather than infer a counter decrease. A Relay MUST reset
+all diagnostic counters to zero and create a new `counter_epoch` before any
+counter would exceed `9007199254740991`. A counter MUST NOT wrap or decrease
+while `counter_epoch` is unchanged.
 
 The `floor_interrupt` object contains:
 
@@ -221,9 +235,14 @@ The `floor_interrupt` object contains:
 
 Packets that fail framing, Control Authentication, or replay checks MUST NOT
 increment the Floor Interrupt counters. A Relay with Floor Interrupt disabled
-MUST report all Floor Interrupt counters as zero. The counters MUST NOT contain
-channel IDs, sender IDs, endpoint addresses, actor or service identifiers,
-priorities, ticket data, grant data, or other per-request labels.
+MUST report all Floor Interrupt counters as zero. In every snapshot,
+`preemptions_total` MUST be less than or equal to `grants_total`. The counters
+MUST NOT contain channel IDs, sender IDs, endpoint addresses, actor or service
+identifiers, priorities, ticket data, grant data, channel credentials, derived
+keys, admission secrets, bearer tokens, raw control credentials, or other
+per-request labels. The exhaustive snapshot schema is an enforceable redaction
+boundary: a receiver MUST reject a snapshot containing an unrecognized or
+sensitive field.
 
 A snapshot is not an audit input and MUST NOT be reconstructed from
 `relay_audit_input` messages. The Relay MUST retain no snapshot history and

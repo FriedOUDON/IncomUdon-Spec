@@ -223,5 +223,299 @@
         "additional_talk_release_count": 0
       }
     }
-  ]
+  ],
+  "diagnostics_lifecycle": {
+    "minimum_poll_interval_ms": 10000,
+    "maximum_counter": 9007199254740991,
+    "counter_names": [
+      "ptt_requests_total",
+      "grants_total",
+      "denials_total",
+      "preemptions_total",
+      "unauthorized_rejections_total"
+    ],
+    "negotiation_cases": [
+      {
+        "name": "diagnostics_not_requested_is_not_negotiated",
+        "relay_supports_diagnostics": true,
+        "want_diagnostics": false,
+        "expected_diagnostics_accepted": false,
+        "expected_request_result": "unsupported_message",
+        "expected_state_changed": false
+      },
+      {
+        "name": "relay_declines_requested_diagnostics",
+        "relay_supports_diagnostics": false,
+        "want_diagnostics": true,
+        "expected_diagnostics_accepted": false,
+        "expected_request_result": "unsupported_message",
+        "expected_state_changed": false
+      },
+      {
+        "name": "negotiated_diagnostics_returns_snapshot",
+        "relay_supports_diagnostics": true,
+        "want_diagnostics": true,
+        "expected_diagnostics_accepted": true,
+        "expected_request_result": "relay_diagnostics_snapshot",
+        "expected_state_changed": false
+      }
+    ],
+    "polling_case": {
+      "name": "per_session_polling_interval_is_enforced_without_extending_on_rejection",
+      "requests": [
+        {
+          "at_monotonic_ms": 0,
+          "expected_result": "relay_diagnostics_snapshot"
+        },
+        {
+          "at_monotonic_ms": 5000,
+          "expected_result": "overloaded"
+        },
+        {
+          "at_monotonic_ms": 10000,
+          "expected_result": "relay_diagnostics_snapshot"
+        }
+      ]
+    },
+    "counter_domain_cases": [
+      {
+        "name": "same_epoch_counters_are_monotonic",
+        "floor_interrupt_enabled": true,
+        "snapshots": [
+          {
+            "counter_epoch": "AAECAwQFBgcICQoLDA0ODw",
+            "floor_interrupt": {
+              "ptt_requests_total": 100,
+              "grants_total": 60,
+              "denials_total": 40,
+              "preemptions_total": 20,
+              "unauthorized_rejections_total": 10
+            }
+          },
+          {
+            "counter_epoch": "AAECAwQFBgcICQoLDA0ODw",
+            "floor_interrupt": {
+              "ptt_requests_total": 105,
+              "grants_total": 65,
+              "denials_total": 40,
+              "preemptions_total": 21,
+              "unauthorized_rejections_total": 10
+            }
+          }
+        ],
+        "expected_result": "accept_monotonic"
+      },
+      {
+        "name": "same_epoch_counter_regression_is_rejected",
+        "floor_interrupt_enabled": true,
+        "snapshots": [
+          {
+            "counter_epoch": "EBESExQVFhcYGRobHB0eHw",
+            "floor_interrupt": {
+              "ptt_requests_total": 100,
+              "grants_total": 60,
+              "denials_total": 40,
+              "preemptions_total": 20,
+              "unauthorized_rejections_total": 10
+            }
+          },
+          {
+            "counter_epoch": "EBESExQVFhcYGRobHB0eHw",
+            "floor_interrupt": {
+              "ptt_requests_total": 105,
+              "grants_total": 59,
+              "denials_total": 40,
+              "preemptions_total": 20,
+              "unauthorized_rejections_total": 10
+            }
+          }
+        ],
+        "expected_result": "reject_counter_regression"
+      },
+      {
+        "name": "relay_restart_creates_a_new_counter_domain",
+        "floor_interrupt_enabled": true,
+        "snapshots": [
+          {
+            "counter_epoch": "ICEiIyQlJicoKSorLC0uLw",
+            "floor_interrupt": {
+              "ptt_requests_total": 500,
+              "grants_total": 300,
+              "denials_total": 200,
+              "preemptions_total": 75,
+              "unauthorized_rejections_total": 25
+            }
+          },
+          {
+            "counter_epoch": "MDEyMzQ1Njc4OTo7PD0-Pw",
+            "floor_interrupt": {
+              "ptt_requests_total": 0,
+              "grants_total": 0,
+              "denials_total": 0,
+              "preemptions_total": 0,
+              "unauthorized_rejections_total": 0
+            }
+          }
+        ],
+        "expected_result": "accept_new_counter_epoch"
+      },
+      {
+        "name": "same_epoch_counter_wrap_is_rejected",
+        "floor_interrupt_enabled": true,
+        "snapshots": [
+          {
+            "counter_epoch": "QEFCQ0RFRkdISUpLTE1OTw",
+            "floor_interrupt": {
+              "ptt_requests_total": 9007199254740991,
+              "grants_total": 9007199254740991,
+              "denials_total": 9007199254740991,
+              "preemptions_total": 9007199254740991,
+              "unauthorized_rejections_total": 9007199254740991
+            }
+          },
+          {
+            "counter_epoch": "QEFCQ0RFRkdISUpLTE1OTw",
+            "floor_interrupt": {
+              "ptt_requests_total": 0,
+              "grants_total": 0,
+              "denials_total": 0,
+              "preemptions_total": 0,
+              "unauthorized_rejections_total": 0
+            }
+          }
+        ],
+        "expected_result": "reject_counter_regression"
+      },
+      {
+        "name": "disabled_floor_interrupt_reports_only_zero_counters",
+        "floor_interrupt_enabled": false,
+        "snapshots": [
+          {
+            "counter_epoch": "UFFSU1RVVldYWVpbXF1eXw",
+            "floor_interrupt": {
+              "ptt_requests_total": 0,
+              "grants_total": 0,
+              "denials_total": 0,
+              "preemptions_total": 0,
+              "unauthorized_rejections_total": 0
+            }
+          }
+        ],
+        "expected_result": "accept_monotonic"
+      },
+      {
+        "name": "disabled_floor_interrupt_nonzero_counter_is_rejected",
+        "floor_interrupt_enabled": false,
+        "snapshots": [
+          {
+            "counter_epoch": "YGFiY2RlZmdoaWprbG1ubw",
+            "floor_interrupt": {
+              "ptt_requests_total": 1,
+              "grants_total": 0,
+              "denials_total": 0,
+              "preemptions_total": 0,
+              "unauthorized_rejections_total": 0
+            }
+          }
+        ],
+        "expected_result": "reject_disabled_feature_counter"
+      },
+      {
+        "name": "preemptions_cannot_exceed_grants",
+        "floor_interrupt_enabled": true,
+        "snapshots": [
+          {
+            "counter_epoch": "cHFyc3R1dnd4eXp7fH1-fw",
+            "floor_interrupt": {
+              "ptt_requests_total": 5,
+              "grants_total": 2,
+              "denials_total": 3,
+              "preemptions_total": 3,
+              "unauthorized_rejections_total": 0
+            }
+          }
+        ],
+        "expected_result": "reject_preemptions_exceed_grants"
+      }
+    ],
+    "rollover_case": {
+      "name": "counter_epoch_changes_before_safe_integer_overflow",
+      "before": {
+        "counter_epoch": "gIGCg4SFhoeIiYqLjI2Ojw",
+        "floor_interrupt": {
+          "ptt_requests_total": 9007199254740991,
+          "grants_total": 1,
+          "denials_total": 0,
+          "preemptions_total": 0,
+          "unauthorized_rejections_total": 0
+        }
+      },
+      "after": {
+        "counter_epoch": "kJGSk5SVlpeYmZqbnJ2enw",
+        "floor_interrupt": {
+          "ptt_requests_total": 0,
+          "grants_total": 0,
+          "denials_total": 0,
+          "preemptions_total": 0,
+          "unauthorized_rejections_total": 0
+        }
+      },
+      "expected_result": "accept_reset_before_overflow"
+    },
+    "redaction_cases": [
+      {
+        "name": "exhaustive_snapshot_fields_are_redacted",
+        "candidate": {
+          "relay_id": "relay-east-1",
+          "counter_epoch": "oKGio6SlpqeoqaqrrK2urw",
+          "floor_interrupt": {
+            "ptt_requests_total": 0,
+            "grants_total": 0,
+            "denials_total": 0,
+            "preemptions_total": 0,
+            "unauthorized_rejections_total": 0
+          }
+        },
+        "forbidden_field_names": [
+          "channel_id",
+          "sender_id",
+          "service_id",
+          "priority",
+          "channel_password",
+          "password_key",
+          "control_key",
+          "media_key",
+          "admission_secret",
+          "bearer_token",
+          "control_credential"
+        ],
+        "expected_result": "accept_redacted_snapshot"
+      },
+      {
+        "name": "sensitive_snapshot_field_is_rejected",
+        "candidate": {
+          "relay_id": "relay-east-1",
+          "counter_epoch": "oKGio6SlpqeoqaqrrK2urw",
+          "floor_interrupt": {
+            "ptt_requests_total": 0,
+            "grants_total": 0,
+            "denials_total": 0,
+            "preemptions_total": 0,
+            "unauthorized_rejections_total": 0
+          },
+          "control_key": "not-a-real-key"
+        },
+        "forbidden_field_names": [
+          "channel_password",
+          "password_key",
+          "control_key",
+          "media_key",
+          "admission_secret",
+          "bearer_token",
+          "control_credential"
+        ],
+        "expected_result": "reject_sensitive_field"
+      }
+    ]
+  }
 }
