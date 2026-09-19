@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -26,6 +27,19 @@ def read_spec_version(root: Path) -> str:
     if not VERSION_PATTERN.fullmatch(version):
         raise ValueError(f"unsupported SPEC_VERSION value: {version!r}")
     return version
+
+
+def head_tags(root: Path) -> set[str]:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(root), "tag", "--points-at", "HEAD"],
+            check=True,
+            capture_output=True,
+            encoding="utf-8",
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ValueError(f"cannot list tags pointing at HEAD: {exc}") from exc
+    return {tag for tag in completed.stdout.splitlines() if tag}
 
 
 def validate_vectors(root: Path, expected: str) -> list[str]:
@@ -62,6 +76,11 @@ def main() -> int:
         "--expected-version",
         help="require SPEC_VERSION to equal this release tag",
     )
+    parser.add_argument(
+        "--require-unreleased-unless-tagged",
+        action="store_true",
+        help="require unreleased unless a matching tag points at HEAD",
+    )
     args = parser.parse_args()
 
     try:
@@ -77,6 +96,20 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
+
+    if args.require_unreleased_unless_tagged and version != "unreleased":
+        try:
+            tags = head_tags(args.root)
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+        if version not in tags:
+            print(
+                "error: non-tag build requires SPEC_VERSION='unreleased' unless "
+                "a matching tag points at HEAD; found %r" % version,
+                file=sys.stderr,
+            )
+            return 1
 
     errors = validate_vectors(args.root, version)
     if errors:

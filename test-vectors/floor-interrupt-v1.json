@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.7.0-draft",
+  "specVersion": "unreleased",
   "scheme": "floor-interrupt-v1",
   "endianness": "big-endian for envelope and control integers",
   "packets": [

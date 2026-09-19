@@ -1,7 +1,7 @@
 # IncomUdon Specification
 
 **Wire protocol version:** `1`
-**Specification snapshot:** [`SPEC_VERSION`](SPEC_VERSION) (currently `v0.7.0-draft`)
+**Development specification snapshot:** [`SPEC_VERSION`](SPEC_VERSION) (currently `unreleased`)
 **Latest tagged specification:** `v0.7.0-draft`
 
 This repository is the canonical interoperability specification for the

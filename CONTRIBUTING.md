@@ -20,3 +20,4 @@
    OpenAPI 3.1 contract validation is needed during iteration.
 
    A release commit must also pass `--expected-version` with its planned tag name.
+   Normal development commits must pass `--require-unreleased-unless-tagged`.

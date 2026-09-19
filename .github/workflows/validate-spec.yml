@@ -9,11 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
       - name: Validate specification snapshot
         run: python tools/check_spec_version.py
+      - name: Require development snapshot or exact release tag
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: python tools/check_spec_version.py --require-unreleased-unless-tagged
       - name: Require release tag to match SPEC_VERSION
         if: startsWith(github.ref, 'refs/tags/')
         run: python tools/check_spec_version.py --expected-version "$GITHUB_REF_NAME"

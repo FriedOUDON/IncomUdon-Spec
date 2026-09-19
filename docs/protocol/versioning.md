@@ -66,8 +66,10 @@ current `specVersion`.
    `tools/validate_vectors.py --suite all`, and the required interoperability
    tests.
 7. Without modifying the validated tree, create the release commit and an
-   annotated Git tag named `TAG` on that exact commit, then push both. The
-   validated commit and tagged commit MUST be identical.
+   annotated Git tag named `TAG` on that exact commit. Push the release commit
+   and tag together, preferably with `git push --atomic origin main TAG`, so
+   branch CI can identify the exact tagged release commit. The validated commit
+   and tagged commit MUST be identical.
 8. Confirm that tag-triggered Specification CI succeeds.
 9. Start the next development cycle in a follow-up commit by restoring
    `SPEC_VERSION` and all vector `specVersion` values to `unreleased`, updating
@@ -76,9 +78,13 @@ current `specVersion`.
    new empty `## Unreleased` section.
 
 A GitHub Actions tag build MUST reject a tag whose name differs from
-`SPEC_VERSION`. Tagged release compatibility MUST always be evaluated from the
-schemas and vectors contained in that exact tag, never from a later `main`
-checkout.
+`SPEC_VERSION`. A non-tag CI build MUST require `SPEC_VERSION` to be
+`unreleased`, except when the checked-out commit already carries a tag whose
+name exactly equals `SPEC_VERSION`. This narrow exception permits branch CI for
+a release commit pushed together with its tag; it MUST NOT permit later
+non-tagged development commits to retain a release version. Tagged release
+compatibility MUST always be evaluated from the schemas and vectors contained
+in that exact tag, never from a later `main` checkout.
 
 ## Compatibility requirements
 
