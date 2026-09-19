@@ -142,7 +142,7 @@ A receive-only service has `perm = 1` (`listen` only), with neither `talk` nor
 2. it does not exceed 1800;
 3. membership and source endpoint remained continuous from before `exp`;
 4. the Relay has not restarted and membership did not expire; and
-5. the grant was not revoked.
+5. the Relay has not applied a Private Control Link revocation for the grant.
 
 A grant with `talk` or `interrupt` MUST NOT use this grace. Its service
 admission deadline is exactly `exp`.
@@ -192,14 +192,27 @@ set grace to zero unless a recorder availability requirement justifies it.
 
 ## Revocation
 
-The Management Service sends the authenticated Private Control Link v1
-`revoke_service_admission` command described in `private-control-link-v1.md`.
-It targets one channel and at least one of the affected service ID or grant ID
-hash; when both are present, both MUST match. The Relay MUST install the
-command's bounded deny rule, invalidate matching current service-admitted
-state, remove membership, stop media forwarding, and release an active talker
-with `TALK_RELEASE` reason `SERVICE_ADMISSION_REVOKED`. A Relay SHOULD complete
-revocation within five seconds of receiving the command.
+Private Control Link v1 is optional for Managed Service Admission grant
+issuance and natural expiry. A deployment without Private Control Link has no
+standards-defined remote administrative revocation path. When an ACL is
+removed, a service is disabled, or a grant is revoked in that profile, the
+Management Service MUST NOT issue new affected grants. The change does not
+immediately invalidate a grant that the Relay has already accepted: the Relay
+continues to apply the normal expiry, bounded receive-only grace, membership,
+and other Relay-local invalidation rules. The Management Service MUST NOT
+represent such an administrative action as a Relay-applied revocation or cause
+`SERVICE_ADMISSION_REVOKED` without a Relay command.
+
+A deployment that requires prompt Relay-side administrative revocation MUST
+enable Private Control Link v1. In that profile, the Management Service MUST
+send the authenticated `revoke_service_admission` command described in
+`private-control-link-v1.md` when an ACL is removed, a service is disabled, or
+a grant is revoked. It targets one channel and at least one of the affected
+service ID or grant ID hash; when both are present, both MUST match. The Relay
+MUST install the command's bounded deny rule, invalidate matching current
+service-admitted state, remove membership, stop media forwarding, and release
+an active talker with `TALK_RELEASE` reason `SERVICE_ADMISSION_REVOKED`. A
+Relay SHOULD complete revocation within five seconds of receiving the command.
 
 Relay-side grant deny lists MAY be retained across Management Service outages.
 They MUST be bounded, expire no later than the revoked grant's maximum possible

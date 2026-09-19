@@ -9,9 +9,16 @@ narrow Relay-control commands and optional redacted Relay lifecycle and audit
 inputs.
 
 A deployment that does not enable this extension MUST retain normal Relay and
-Management API behavior. Managed Service Admission may remain disabled in that
-deployment. A deployment that enables Managed Service Admission and needs
-prompt ACL, service, or grant revocation MUST enable this extension.
+Management API behavior. It MAY enable Managed Service Admission without this
+extension: that profile supports grant issuance and natural expiry, but has no
+standards-defined remote administrative revocation path. After an ACL removal,
+service disablement, or grant revocation, the Management Service MUST NOT issue
+new affected grants, but the action does not alter a grant already accepted by
+the Relay. That grant remains Relay-valid until its normal expiry or another
+already-defined Relay-local invalidation condition. A deployment MUST NOT claim
+prompt Relay-side administrative revocation without this extension. A deployment
+that needs prompt ACL, service, or grant revocation of an accepted grant MUST
+enable this extension.
 
 This extension does not carry media, channel credentials, derived keys,
 admission grants, OIDC material, client certificate private keys, source IP

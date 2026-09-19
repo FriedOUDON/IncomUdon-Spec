@@ -4,9 +4,10 @@
 
 Management Plane v1 is an optional, administratively isolated TCP/TLS plane
 for organization-operated participant management, recording orchestration,
-health monitoring, optional event delivery and audit retrieval, and Managed
-Service Admission. It is not a replacement for the Version 1 UDP Relay, the
-optional Directory UDP protocol, or client media transport.
+health monitoring, optional event delivery and audit retrieval, Managed Service
+Admission, and an optional private Relay control transport. It is not a
+replacement for the Version 1 UDP Relay, the optional Directory UDP protocol,
+or client media transport.
 
 Management Plane v1 is disabled by default. A deployment that does not enable
 it MUST retain the existing Relay, Directory, and client behavior without
@@ -238,6 +239,14 @@ proof of possession over the existing authenticated UDP control path. A Relay
 that validates the grant admits the service according to its channel-scoped
 permissions. The complete protocol is in `service-admission.md`.
 
+Private Control Link v1 is optional for grant issuance and natural expiry. A
+Managed Service Admission deployment without it can issue and verify grants,
+but cannot perform standards-defined prompt Relay-side administrative
+revocation of a grant already accepted by the Relay. A deployment that requires
+that capability MUST enable Private Control Link v1; its authenticated
+`revoke_service_admission` command is defined in
+`private-control-link-v1.md`.
+
 When Identity Admission is `required`, a valid Managed Service Admission MAY
 satisfy the admission prerequisite only when the Relay's managed-service policy
 is enabled. Ordinary clients remain subject to Identity Admission; a managed
@@ -316,12 +325,23 @@ Management Service or subscriber delay Relay media forwarding.
 
 ## Revocation and availability
 
-A Management Service MUST send the Private Control Link v1
-`revoke_service_admission` command when an ACL is removed, a service is
-disabled, or a grant is revoked. The Relay MUST stop forwarding media for a
-revoked service and remove its membership promptly. The command is authenticated,
-bounded, and idempotent; a target propagation time of five seconds is
-RECOMMENDED.
+Prompt Relay-side administrative revocation is an optional capability provided
+by Private Control Link v1. In a Managed Service Admission deployment without
+Private Control Link, an ACL removal, service disablement, or grant revocation
+MUST stop future issuance of affected grants but does not immediately alter a
+grant already accepted by the Relay. The Relay applies its normal expiry,
+bounded receive-only grace, membership, and Relay-local invalidation rules; the
+Management Service MUST NOT represent the administrative action as a
+Relay-applied revocation.
+
+A deployment that requires prompt revocation of existing Service Admission
+state MUST enable Private Control Link v1. In that profile, a Management
+Service MUST send `revoke_service_admission` when an ACL is removed, a service
+is disabled, or a grant is revoked. The Relay MUST stop forwarding media for a
+revoked service, remove its membership promptly, and use
+`SERVICE_ADMISSION_REVOKED` only when it applies that command. The command is
+authenticated, bounded, and idempotent; a target propagation time of five
+seconds is RECOMMENDED.
 
 Service Admission Grants are intentionally short-lived. A service renews them
 through its mTLS-authenticated Management API session before expiry. To support
@@ -434,24 +454,26 @@ management extension. Those functions require separate versioned proposals.
    be used by a different proof-of-possession key.
 8. A valid Managed Service Admission can satisfy a required identity policy
    only for that service endpoint while managed-service admission is enabled.
-9. Revocation removes the affected membership without affecting unrelated
-   channel members.
-10. A Management API outage denies new grants while an uninterrupted existing
+9. Without Private Control Link, an administrative change denies future affected
+   grants but does not claim prompt Relay-side revocation of an accepted grant.
+10. With Private Control Link enabled for prompt revocation, revocation removes
+    the affected membership without affecting unrelated channel members.
+11. A Management API outage denies new grants while an uninterrupted existing
     receive-only membership follows the bounded grace rule.
-11. API responses, SSE events, audit records, and normal Relay logs contain no
+12. API responses, SSE events, audit records, and normal Relay logs contain no
     channel password, derived key, admission grant, certificate private key,
     or media payload.
-12. When `audit_retrieval` is `true`, an `auditor` retrieves only records for
+13. When `audit_retrieval` is `true`, an `auditor` retrieves only records for
     explicitly authorized channels; a request for another channel is rejected.
-13. When `event_delivery` is `replay`, an SSE cursor outside the retained
+14. When `event_delivery` is `replay`, an SSE cursor outside the retained
     window returns `410 Gone` rather than silently skipping history.
-14. With `event_delivery` set to `live`, `GET /events` accepts a cursor-free
+15. With `event_delivery` set to `live`, `GET /events` accepts a cursor-free
     connection and a standard SSE reconnect carrying `Last-Event-ID`, ignores
     that header, and rejects `since` with `400 Bad Request`.
-15. With `event_delivery` set to `disabled`, `GET /events` returns `404 Not
+16. With `event_delivery` set to `disabled`, `GET /events` returns `404 Not
     Found`.
-16. With `audit_retrieval` set to `false`, `GET /audit-records` returns `404
+17. With `audit_retrieval` set to `false`, `GET /audit-records` returns `404
     Not Found` and no audit retention is required.
-17. When `audit_retrieval` is `true`, audit pagination is stable, and an audit
+18. When `audit_retrieval` is `true`, audit pagination is stable, and an audit
     cursor outside the retained window returns `410 Gone` rather than silently
     skipping history.

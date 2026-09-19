@@ -34,6 +34,7 @@ requirements for compatible implementations.
 - `docs/configuration/relay-csv.md`: Relay Directory, control-key, and Management Plane CSV provisioning formats.
 - `docs/extensions/management/overview.md`: optional, mTLS-protected Management Plane boundary and roles.
 - `docs/extensions/management/service-admission.md`: signed Managed Service Admission for non-interactive services.
+- `docs/extensions/management/private-control-link-v1.md`: authenticated private Management Service-Relay control transport for prompt Service Admission revocation, bounded notifications, and optional Relay diagnostics.
 - `docs/extensions/management/recording-integration.md`: receive-only recording-worker integration boundary.
 - `docs/extensions/management/openapi-v1.yaml`: Management Plane HTTPS and SSE API contract.
 - `docs/protocol/fec.md`: external parity FEC and Opus in-band FEC.
