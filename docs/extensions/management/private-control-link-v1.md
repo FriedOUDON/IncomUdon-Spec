@@ -113,12 +113,25 @@ After establishment, the Management Service may send
 - `deny_for_seconds`: from 1 through 5400.
 
 `grant_id_hash` is the canonical unpadded Base64URL encoding of
-`SHA-256(ASCII(compact_jws_jti))`. When both target fields are present, every
-field MUST match; the command MUST NOT widen into an OR match. `deny_for_seconds`
-bounds the Relay-side deny rule. A Management Service revoking a service or
-grant MUST select a duration that covers every still-valid affected grant,
-including any permitted receive-only grace. It MAY renew the command before
-that period ends when policy requires a longer disablement.
+`SHA-256(ASCII(compact_jws_jti))`. The Relay MUST model each accepted command
+as one channel-bound deny rule with the following selector scope:
+
+- `service_id` only creates a service-scoped rule. It matches every current and
+  future Service Admission Grant for that service in the specified channel.
+- `grant_id_hash` only creates a grant-scoped rule. It matches that grant in the
+  specified channel.
+- Both fields create a conjunctive rule. Both selectors MUST match; the command
+  MUST NOT widen into an OR match.
+
+The Relay MUST compute `deny_deadline` from its monotonic command-acceptance
+instant plus `deny_for_seconds`, retain the rule only before that deadline, and
+remove it at the deadline. A Management Service revoking a service or grant
+MUST select a duration that covers every still-valid affected grant, including
+any permitted receive-only grace. For a rule containing `grant_id_hash`, it
+MUST NOT select a deadline later than the targeted grant's maximum possible
+grace deadline. A service-scoped rule is not tied to any individual grant
+deadline; it remains bounded by `deny_for_seconds` and may be renewed before
+expiry when policy requires a longer disablement.
 
 On accepting a valid command, the Relay MUST install the bounded deny rule
 before replying. It MUST reject matching future Managed Service Admission

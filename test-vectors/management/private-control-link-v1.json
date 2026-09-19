@@ -181,6 +181,7 @@
         { "channel_id": 111, "service_id": "recorder-02", "grant_id_hash": "grant-hash-b", "active_talk": false }
       ],
       "expected": {
+        "deny_rule_scope": "conjunctive",
         "deny_rule_installed": true,
         "affected_membership_count": 1,
         "talk_release_count": 1,
@@ -200,10 +201,65 @@
         { "channel_id": 111, "service_id": "recorder-02", "grant_id_hash": "grant-hash-a", "active_talk": true }
       ],
       "expected": {
+        "deny_rule_scope": "conjunctive",
         "deny_rule_installed": true,
         "affected_membership_count": 0,
         "talk_release_count": 0,
         "talk_release_reason": null
+      }
+    },
+    {
+      "name": "service_scoped_rule_denies_current_and_future_grants_until_deadline",
+      "command": {
+        "channel_id": 111,
+        "service_id": "recorder-01",
+        "deny_for_seconds": 60
+      },
+      "accepted_at_relay_monotonic_seconds": 1000,
+      "memberships": [
+        { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "active_talk": true },
+        { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-b", "active_talk": false },
+        { "channel_id": 111, "service_id": "recorder-02", "grant_id_hash": "grant-hash-c", "active_talk": false }
+      ],
+      "admission_attempts": [
+        { "name": "new_grant_for_disabled_service", "accepted_at_relay_monotonic_seconds": 1001, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-future", "expected": "deny_by_service_rule" },
+        { "name": "different_service_is_not_denied", "accepted_at_relay_monotonic_seconds": 1001, "channel_id": 111, "service_id": "recorder-02", "grant_id_hash": "grant-hash-future", "expected": "not_denied_by_rule" },
+        { "name": "same_service_after_deadline_is_not_denied", "accepted_at_relay_monotonic_seconds": 1060, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-after-expiry", "expected": "not_denied_by_rule" }
+      ],
+      "expected": {
+        "deny_rule_scope": "service",
+        "deny_deadline_relay_monotonic_seconds": 1060,
+        "deny_rule_installed": true,
+        "affected_membership_count": 2,
+        "talk_release_count": 1,
+        "talk_release_reason": "SERVICE_ADMISSION_REVOKED"
+      }
+    },
+    {
+      "name": "grant_scoped_rule_does_not_deny_other_grants_for_same_service",
+      "command": {
+        "channel_id": 111,
+        "grant_id_hash": "grant-hash-a",
+        "deny_for_seconds": 60
+      },
+      "accepted_at_relay_monotonic_seconds": 2000,
+      "targeted_grant_maximum_grace_deadline_relay_monotonic_seconds": 2060,
+      "memberships": [
+        { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "active_talk": true },
+        { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-b", "active_talk": true }
+      ],
+      "admission_attempts": [
+        { "name": "same_service_different_grant", "accepted_at_relay_monotonic_seconds": 2001, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-b", "expected": "not_denied_by_rule" },
+        { "name": "targeted_grant_before_deadline", "accepted_at_relay_monotonic_seconds": 2001, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "expected": "deny_by_grant_rule" },
+        { "name": "targeted_grant_after_deadline", "accepted_at_relay_monotonic_seconds": 2060, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "expected": "not_denied_by_rule" }
+      ],
+      "expected": {
+        "deny_rule_scope": "grant",
+        "deny_deadline_relay_monotonic_seconds": 2060,
+        "deny_rule_installed": true,
+        "affected_membership_count": 1,
+        "talk_release_count": 1,
+        "talk_release_reason": "SERVICE_ADMISSION_REVOKED"
       }
     },
     {
@@ -218,6 +274,7 @@
       ],
       "duplicate": true,
       "expected": {
+        "deny_rule_scope": "service",
         "first_ack_outcome": "applied",
         "duplicate_ack": "cached_identical_ack",
         "additional_talk_release_count": 0

@@ -617,17 +617,75 @@ def _validate_private_control_link(root: Path) -> list[str]:
         if service is None and grant_hash is None:
             errors.append(f"{name}: command has no revocation target")
             continue
+        if service is not None and not isinstance(service, str):
+            raise VectorValidationError(f"{name} service_id must be a string")
+        if grant_hash is not None and not isinstance(grant_hash, str):
+            raise VectorValidationError(f"{name} grant_id_hash must be a string")
+        scope = "conjunctive" if service is not None and grant_hash is not None else "service" if service is not None else "grant"
+        _compare(errors, f"{name} deny rule scope", expected.get("deny_rule_scope"), scope)
+
+        def matches_rule(candidate: dict[str, Any]) -> bool:
+            if candidate.get("channel_id") != channel:
+                return False
+            if service is not None and candidate.get("service_id") != service:
+                return False
+            return grant_hash is None or candidate.get("grant_id_hash") == grant_hash
+
         matching: list[dict[str, Any]] = []
         for membership in memberships:
             if not isinstance(membership, dict):
                 raise VectorValidationError(f"{name} membership must be an object")
-            matches = membership.get("channel_id") == channel
-            if service is not None:
-                matches = matches and membership.get("service_id") == service
-            if grant_hash is not None:
-                matches = matches and membership.get("grant_id_hash") == grant_hash
-            if matches:
+            if matches_rule(membership):
                 matching.append(membership)
+
+        accepted_at = case.get("accepted_at_relay_monotonic_seconds")
+        deny_deadline: int | None = None
+        if accepted_at is not None:
+            accepted_at = _integer(
+                accepted_at,
+                f"{name} accepted_at_relay_monotonic_seconds",
+                MAX_SAFE_JSON_INTEGER,
+            )
+            deny_deadline = accepted_at + duration
+            _compare(
+                errors,
+                f"{name} deny deadline",
+                expected.get("deny_deadline_relay_monotonic_seconds"),
+                deny_deadline,
+            )
+        grant_grace_deadline = case.get(
+            "targeted_grant_maximum_grace_deadline_relay_monotonic_seconds"
+        )
+        if grant_grace_deadline is not None:
+            if grant_hash is None or deny_deadline is None:
+                raise VectorValidationError(
+                    f"{name} grant grace deadline requires a grant-scoped command acceptance time"
+                )
+            grant_grace_deadline = _integer(
+                grant_grace_deadline,
+                f"{name} targeted grant maximum grace deadline",
+                MAX_SAFE_JSON_INTEGER,
+            )
+            if deny_deadline > grant_grace_deadline:
+                errors.append(f"{name}: grant-scoped deny deadline exceeds maximum grace deadline")
+        admission_attempts = case.get("admission_attempts", [])
+        if not isinstance(admission_attempts, list):
+            raise VectorValidationError(f"{name} admission_attempts must be an array")
+        for attempt_index, attempt in enumerate(admission_attempts):
+            if not isinstance(attempt, dict):
+                raise VectorValidationError(f"{name} admission attempt {attempt_index} must be an object")
+            attempt_name = attempt.get("name", f"{name} admission attempt {attempt_index}")
+            attempt_at = _integer(
+                attempt.get("accepted_at_relay_monotonic_seconds"),
+                f"{attempt_name} accepted_at_relay_monotonic_seconds",
+                MAX_SAFE_JSON_INTEGER,
+            )
+            if deny_deadline is None:
+                raise VectorValidationError(f"{attempt_name} requires a command acceptance time")
+            active = attempt_at < deny_deadline
+            actual = f"deny_by_{scope}_rule" if active and matches_rule(attempt) else "not_denied_by_rule"
+            _compare(errors, f"{attempt_name} result", attempt.get("expected"), actual)
+
         if case.get("duplicate") is True:
             _compare(errors, f"{name} first ACK", expected.get("first_ack_outcome"), "applied")
             _compare(errors, f"{name} duplicate ACK", expected.get("duplicate_ack"), "cached_identical_ack")

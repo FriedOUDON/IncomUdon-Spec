@@ -208,16 +208,24 @@ enable Private Control Link v1. In that profile, the Management Service MUST
 send the authenticated `revoke_service_admission` command described in
 `private-control-link-v1.md` when an ACL is removed, a service is disabled, or
 a grant is revoked. It targets one channel and at least one of the affected
-service ID or grant ID hash; when both are present, both MUST match. The Relay
-MUST install the command's bounded deny rule, invalidate matching current
+service ID or grant ID hash. A service-ID-only target denies every current and
+future grant for that service in the channel; a grant-ID-hash-only target denies
+only that grant; and when both are present, both MUST match. The Relay MUST
+install the command's bounded deny rule, invalidate matching current
 service-admitted state, remove membership, stop media forwarding, and release
 an active talker with `TALK_RELEASE` reason `SERVICE_ADMISSION_REVOKED`. A
 Relay SHOULD complete revocation within five seconds of receiving the command.
 
-Relay-side grant deny lists MAY be retained across Management Service outages.
-They MUST be bounded, expire no later than the revoked grant's maximum possible
-grace deadline, and contain only a privacy-preserving grant ID hash or an
-opaque grant ID.
+Relay-side Service Admission deny rules MAY be retained across Management
+Service outages. Every rule MUST contain its channel scope, its bounded
+monotonic deny deadline, and only the selector needed to evaluate it: a
+privacy-preserving grant ID hash or opaque grant ID for a grant-scoped rule, the
+pseudonymous `service_id` for a service-scoped rule, or both selectors for a
+conjunctive rule. A rule containing a grant selector MUST expire no later than
+the targeted grant's maximum possible grace deadline. A service-scoped rule
+MUST expire at its command-derived deny deadline; it may reject future grants
+for that service until then, but MUST NOT retain additional identity
+information.
 
 ## Denial reasons
 
