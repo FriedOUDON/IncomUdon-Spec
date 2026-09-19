@@ -25,7 +25,7 @@ MUST NOT be used in production.
 | `management/management-event-v1.json` | Channel-scoped and global Management SSE event envelopes |
 | `management/private-control-link-v1.json` | Private Control Link framing, message envelopes, and service-admission revocation idempotency |
 | `management/audit-retrieval-v1.json` | Audit retrieval query scenario and canonical response page |
-| `management/event-stream-resume-v1.json` | SSE cursor precedence and role-aware `410 Gone` recovery |
+| `management/event-stream-resume-v1.json` | SSE delivery modes, cursor precedence, and role-aware `410 Gone` recovery |
 | `management/authorization-scopes-v1.json` | Management API channel, resource, list, SSE global-event, and global-permission authorization cases |
 | `configuration/relay-csv-v1.json` | Relay Directory, Control Authentication, and Management Plane CSV parser fixture |
 | `mtu-v1.json` | MTU-safe AUDIO and FEC v2 datagram budget cases |

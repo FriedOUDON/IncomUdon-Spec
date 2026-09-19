@@ -2,6 +2,53 @@
   "specVersion": "v0.7.0-draft",
   "scheme": "management-sse-resume-v1",
   "cursor_semantics": "exclusive",
+  "delivery_mode_cases": [
+    {
+      "name": "disabled_event_stream_is_unavailable",
+      "event_delivery": "disabled",
+      "request": {},
+      "expected_status": 404
+    },
+    {
+      "name": "live_initial_connection_delivers_subsequent_events_only",
+      "event_delivery": "live",
+      "request": {},
+      "expected_status": 200,
+      "replay": "none",
+      "expected_delivery": "subsequently_emitted_authorized_events_only"
+    },
+    {
+      "name": "live_eventsource_reconnect_ignores_last_event_id",
+      "event_delivery": "live",
+      "request": {
+        "last_event_id": "150"
+      },
+      "expected_status": 200,
+      "ignored_headers": [
+        "Last-Event-ID"
+      ],
+      "replay": "none",
+      "expected_delivery": "subsequently_emitted_authorized_events_only"
+    },
+    {
+      "name": "live_rejects_explicit_since_cursor",
+      "event_delivery": "live",
+      "request": {
+        "since": "150"
+      },
+      "expected_status": 400
+    },
+    {
+      "name": "replay_reconnect_uses_last_event_id",
+      "event_delivery": "replay",
+      "request": {
+        "last_event_id": "150"
+      },
+      "selected_cursor": "150",
+      "selected_cursor_source": "Last-Event-ID",
+      "expected_first_event_id": "151"
+    }
+  ],
   "cases": [
     {
       "name": "initial_replay_uses_since",

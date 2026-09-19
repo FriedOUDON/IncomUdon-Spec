@@ -72,10 +72,19 @@ MUST advertise both capabilities in its `capabilities` object:
 
 With `event_delivery: "disabled"`, the Management Service MUST return `404 Not
 Found` for `GET /events`. With `event_delivery: "live"`, `GET /events` MAY
-stream only events emitted after the connection is established. It MUST NOT
-claim replay support, and a request containing `since` or `Last-Event-ID` MUST
-return `400 Bad Request`. A live-only event stream does not require durable
-event retention, and a reconnect without a cursor may miss events.
+stream only events emitted after the new live subscription is established. It
+MUST NOT claim replay support. A request containing `since`, including an empty
+`since` value, MUST return `400 Bad Request`. A `Last-Event-ID` header MAY be
+present because a standard SSE client reconnects automatically; the Management
+Service MUST accept it, MUST NOT validate or use its value as a replay cursor,
+and MUST begin delivery only with events emitted after the new subscription is
+established. A live-only event stream does not require durable event retention,
+and a reconnect may miss events.
+
+Every live SSE event still carries its `event_id` in the SSE `id` field. In
+live mode that field does not provide replay or continuity guarantees. Channel
+and global authorization filtering may create normal gaps in the visible event
+IDs, so a client MUST NOT infer an event-loss gap solely from a discontinuity.
 
 With `event_delivery: "replay"`, the Management Service MUST durably retain
 redacted events for its documented retention period before exposing them to an
@@ -437,7 +446,8 @@ management extension. Those functions require separate versioned proposals.
 13. When `event_delivery` is `replay`, an SSE cursor outside the retained
     window returns `410 Gone` rather than silently skipping history.
 14. With `event_delivery` set to `live`, `GET /events` accepts a cursor-free
-    connection and rejects `since` or `Last-Event-ID` with `400 Bad Request`.
+    connection and a standard SSE reconnect carrying `Last-Event-ID`, ignores
+    that header, and rejects `since` with `400 Bad Request`.
 15. With `event_delivery` set to `disabled`, `GET /events` returns `404 Not
     Found`.
 16. With `audit_retrieval` set to `false`, `GET /audit-records` returns `404
