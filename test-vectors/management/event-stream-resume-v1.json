@@ -31,6 +31,19 @@
       "expected_delivery": "subsequently_emitted_authorized_events_only"
     },
     {
+      "name": "live_reconnect_ignores_malformed_last_event_id",
+      "event_delivery": "live",
+      "request": {
+        "last_event_id": "not-a-decimal-cursor"
+      },
+      "expected_status": 200,
+      "ignored_headers": [
+        "Last-Event-ID"
+      ],
+      "replay": "none",
+      "expected_delivery": "subsequently_emitted_authorized_events_only"
+    },
+    {
       "name": "live_rejects_explicit_since_cursor",
       "event_delivery": "live",
       "request": {
@@ -46,7 +59,16 @@
       },
       "selected_cursor": "150",
       "selected_cursor_source": "Last-Event-ID",
-      "expected_first_event_id": "151"
+      "expected_first_event_id": "151",
+      "expected_status": 200
+    },
+    {
+      "name": "replay_rejects_malformed_last_event_id",
+      "event_delivery": "replay",
+      "request": {
+        "last_event_id": "not-a-decimal-cursor"
+      },
+      "expected_status": 400
     }
   ],
   "cases": [

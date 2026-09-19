@@ -316,6 +316,91 @@ def _validate_admission_expiry(root: Path) -> list[str]:
     return errors
 
 
+def _is_decimal_event_cursor(value: Any) -> bool:
+    return (
+        isinstance(value, str)
+        and bool(value)
+        and len(value) <= 64
+        and all("0" <= character <= "9" for character in value)
+    )
+
+
+def _validate_management_sse_resume(root: Path) -> list[str]:
+    document = _load(root, "test-vectors/management/event-stream-resume-v1.json")
+    errors: list[str] = []
+    _compare(errors, "Management SSE cursor semantics", document.get("cursor_semantics"), "exclusive")
+    delivery_cases = document.get("delivery_mode_cases")
+    if not isinstance(delivery_cases, list):
+        raise VectorValidationError("Management SSE delivery_mode_cases must be an array")
+
+    for index, case in enumerate(delivery_cases):
+        if not isinstance(case, dict):
+            raise VectorValidationError(f"Management SSE delivery-mode case {index} must be an object")
+        name = case.get("name", f"Management SSE delivery-mode case {index}")
+        mode = case.get("event_delivery")
+        request = case.get("request")
+        if mode not in {"disabled", "live", "replay"} or not isinstance(request, dict):
+            raise VectorValidationError(f"{name} has an invalid delivery mode or request")
+        if any(not isinstance(value, str) for value in request.values()):
+            raise VectorValidationError(f"{name} request values must be strings")
+
+        has_since = "since" in request
+        has_last_event_id = "last_event_id" in request
+        if mode == "disabled":
+            _compare(errors, f"{name} status", case.get("expected_status"), 404)
+            continue
+        if mode == "live":
+            _compare(errors, f"{name} status", case.get("expected_status"), 400 if has_since else 200)
+            if has_since:
+                continue
+            _compare(errors, f"{name} replay", case.get("replay"), "none")
+            _compare(
+                errors,
+                f"{name} delivery",
+                case.get("expected_delivery"),
+                "subsequently_emitted_authorized_events_only",
+            )
+            if has_last_event_id:
+                _compare(errors, f"{name} ignored header", case.get("ignored_headers"), ["Last-Event-ID"])
+            continue
+
+        selected_cursor = request.get("last_event_id") if has_last_event_id else request.get("since")
+        expected_status = 400 if selected_cursor is not None and not _is_decimal_event_cursor(selected_cursor) else 200
+        _compare(errors, f"{name} status", case.get("expected_status"), expected_status)
+        if expected_status == 400:
+            continue
+        if has_last_event_id:
+            _compare(errors, f"{name} selected cursor", case.get("selected_cursor"), selected_cursor)
+            _compare(errors, f"{name} cursor source", case.get("selected_cursor_source"), "Last-Event-ID")
+            _compare(errors, f"{name} first event", case.get("expected_first_event_id"), str(int(selected_cursor) + 1))
+
+    replay_cases = document.get("cases")
+    if not isinstance(replay_cases, list):
+        raise VectorValidationError("Management SSE cases must be an array")
+    for index, case in enumerate(replay_cases):
+        if not isinstance(case, dict):
+            raise VectorValidationError(f"Management SSE replay case {index} must be an object")
+        name = case.get("name", f"Management SSE replay case {index}")
+        request = case.get("request")
+        if not isinstance(request, dict) or any(not isinstance(value, str) for value in request.values()):
+            raise VectorValidationError(f"{name} has an invalid request")
+        has_last_event_id = "last_event_id" in request
+        selected_cursor = request.get("last_event_id") if has_last_event_id else request.get("since")
+        if selected_cursor is not None and not _is_decimal_event_cursor(selected_cursor):
+            _compare(errors, f"{name} status", case.get("expected_status"), 400)
+            continue
+        if "cursor_state" in case:
+            _compare(errors, f"{name} status", case.get("expected_status"), 410)
+            continue
+        source = "Last-Event-ID" if has_last_event_id else "since"
+        if selected_cursor is None:
+            raise VectorValidationError(f"{name} must select a replay cursor")
+        _compare(errors, f"{name} selected cursor", case.get("selected_cursor"), selected_cursor)
+        _compare(errors, f"{name} cursor source", case.get("selected_cursor_source"), source)
+        _compare(errors, f"{name} first event", case.get("expected_first_event_id"), str(int(selected_cursor) + 1))
+    return errors
+
+
 def _validate_directory_lifecycle(root: Path) -> list[str]:
     document = _load(root, "test-vectors/directory-v3.json")
     limits = document.get("limits")
@@ -852,6 +937,7 @@ def validate_lifecycle_vectors(root: Path) -> list[str]:
         ("Membership lease", _validate_membership),
         ("Media security mode registry", _validate_media_security_mode_registry),
         ("Admission expiry", _validate_admission_expiry),
+        ("Management SSE resume", _validate_management_sse_resume),
         ("Directory lifecycle", _validate_directory_lifecycle),
         ("Private Control Link", _validate_private_control_link),
         ("Media replay", _validate_media_replay),
