@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import base64
+import csv
 import hashlib
 import hmac
+import io
 import json
+import re
 import struct
 from pathlib import Path
 from typing import Any
@@ -28,6 +31,8 @@ RELEASE_REASONS = {
 MAX_SAFE_JSON_INTEGER = (1 << 53) - 1
 MAX_DIRECTORY_REPLAY_SEQUENCE = MAX_SAFE_JSON_INTEGER
 MEDIA_SECURITY_MODES = frozenset({"no-crypto", "legacy-xor", "aes-gcm-v2"})
+MANAGED_SERVICE_ID_GRAMMAR = r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+MANAGED_SERVICE_ID_PATTERN = re.compile(MANAGED_SERVICE_ID_GRAMMAR)
 
 
 def _integer(value: Any, label: str, maximum: int) -> int:
@@ -47,6 +52,10 @@ def _hex_bytes(value: Any, label: str) -> bytes:
 
 def _base64url(value: bytes) -> str:
     return base64.urlsafe_b64encode(value).rstrip(b"=").decode("ascii")
+
+
+def _is_managed_service_id(value: Any) -> bool:
+    return isinstance(value, str) and MANAGED_SERVICE_ID_PATTERN.fullmatch(value) is not None
 
 
 def _load(root: Path, relative: str) -> dict[str, Any]:
@@ -750,6 +759,110 @@ def _validate_private_control_link(root: Path) -> list[str]:
             errors.append(f"{name}: input must differ from the canonical jti bytes")
         if _base64url(negative_digest) == grant_hash:
             errors.append(f"{name}: non-canonical input must not produce grant_id_hash")
+
+    service_id_case = document.get("service_id_cross_surface_vector")
+    if not isinstance(service_id_case, dict):
+        raise VectorValidationError("Private Control Link service_id_cross_surface_vector must be an object")
+    _compare(
+        errors,
+        "Managed Service ID grammar",
+        service_id_case.get("grammar"),
+        MANAGED_SERVICE_ID_GRAMMAR,
+    )
+    if service_id_case.get("source_csv_vector") != "test-vectors/configuration/relay-csv-v1.json":
+        errors.append("Managed Service ID CSV source vector is incorrect")
+    if service_id_case.get("source_service_admission_vector") != (
+        "test-vectors/management/service-admission-v1.json"
+    ):
+        errors.append("Managed Service ID Service Admission source vector is incorrect")
+
+    for expectation, should_match in (("valid", True), ("invalid", False)):
+        values = service_id_case.get(expectation)
+        if not isinstance(values, list) or not values:
+            raise VectorValidationError(f"Managed Service ID {expectation} cases must be a non-empty array")
+        for index, value in enumerate(values):
+            if not isinstance(value, str):
+                raise VectorValidationError(
+                    f"Managed Service ID {expectation} case {index} must be a string"
+                )
+            if _is_managed_service_id(value) != should_match:
+                errors.append(
+                    f"Managed Service ID {expectation} case {index} does not match the canonical grammar"
+                )
+
+    shared_service_id = service_id_case.get("shared_service_id")
+    _compare(errors, "Managed Service ID grant svc", claims.get("svc"), shared_service_id)
+    if not _is_managed_service_id(shared_service_id):
+        errors.append("Managed Service ID shared value is not canonical")
+
+    service_command_id = service_id_case.get("pcl_command_message_id")
+    service_commands = [
+        message
+        for message in messages
+        if isinstance(message, dict)
+        and message.get("type") == "revoke_service_admission"
+        and message.get("message_id") == service_command_id
+    ]
+    if len(service_commands) != 1:
+        errors.append("Managed Service ID cross-vector command must identify one valid message")
+    else:
+        _compare(
+            errors,
+            "Managed Service ID PCL revocation target",
+            service_commands[0].get("service_id"),
+            shared_service_id,
+        )
+
+    management_service_id = service_id_case.get("pcl_management_service_id")
+    hello_messages = [
+        message
+        for message in messages
+        if isinstance(message, dict) and message.get("type") == "hello"
+    ]
+    if len(hello_messages) != 1:
+        errors.append("Managed Service ID cross-vector must identify one PCL hello message")
+    else:
+        _compare(
+            errors,
+            "PCL management_service_id",
+            hello_messages[0].get("management_service_id"),
+            management_service_id,
+        )
+    if not _is_managed_service_id(management_service_id):
+        errors.append("PCL management_service_id is not canonical")
+
+    csv_vector = _load(root, "test-vectors/configuration/relay-csv-v1.json")
+    csv_files = csv_vector.get("valid")
+    if not isinstance(csv_files, dict):
+        raise VectorValidationError("Managed Service ID CSV fixture must define valid files")
+    configured_service_ids: set[str] = set()
+    for filename in ("management-services.csv", "management-channel-acl.csv"):
+        csv_text = csv_files.get(filename)
+        if not isinstance(csv_text, str):
+            raise VectorValidationError(f"Managed Service ID CSV fixture lacks {filename}")
+        for row in csv.DictReader(io.StringIO(csv_text)):
+            service_id = row.get("service_id")
+            if not _is_managed_service_id(service_id):
+                errors.append(f"Managed Service ID CSV fixture has invalid {filename} service_id")
+            if filename == "management-services.csv" and isinstance(service_id, str):
+                configured_service_ids.add(service_id)
+            elif filename == "management-channel-acl.csv" and service_id not in configured_service_ids:
+                errors.append("Managed Service ID CSV fixture ACL references an unconfigured service")
+
+    expected_csv = csv_vector.get("expected")
+    if not isinstance(expected_csv, dict) or not isinstance(expected_csv.get("management_grant_inputs"), list):
+        raise VectorValidationError("Managed Service ID CSV fixture lacks management_grant_inputs")
+    for index, grant_input in enumerate(expected_csv["management_grant_inputs"]):
+        if not isinstance(grant_input, dict):
+            raise VectorValidationError(f"Managed Service ID grant input {index} must be an object")
+        service_id = grant_input.get("service_id")
+        if not _is_managed_service_id(service_id):
+            errors.append(f"Managed Service ID grant input {index} is not canonical")
+        elif service_id not in configured_service_ids:
+            errors.append(f"Managed Service ID grant input {index} is not configured")
+
+    if shared_service_id not in configured_service_ids:
+        errors.append("Managed Service ID shared value is not configured by the CSV fixture")
 
     deployment_cases = document.get("deployment_lifecycle_cases")
     if not isinstance(deployment_cases, list):

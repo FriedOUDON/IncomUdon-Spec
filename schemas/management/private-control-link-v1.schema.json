@@ -27,7 +27,14 @@
     "serviceId": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 128
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "nullableServiceId": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
     },
     "u32": {
       "type": "integer",
@@ -173,7 +180,7 @@
         "event_type": { "enum": ["participant_joined", "participant_left", "talk_started", "talk_ended", "relay_health_changed", "recording_state_changed", "service_admission_issued", "service_admission_revoked"] },
         "channel_id": { "type": ["integer", "null"], "minimum": 0, "maximum": 4294967295 },
         "sender_id": { "type": ["integer", "null"], "minimum": 1, "maximum": 4294967295 },
-        "service_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 128 },
+        "service_id": { "$ref": "#/$defs/nullableServiceId" },
         "recording_job_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 128 },
         "state": { "type": ["string", "null"], "enum": [null, "healthy", "degraded", "unhealthy", "starting", "recording", "stopping", "stopped", "failed"] },
         "reason": { "type": ["string", "null"], "minLength": 1, "maxLength": 128, "pattern": "^[A-Z0-9_:-]+$" }

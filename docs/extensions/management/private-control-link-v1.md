@@ -56,7 +56,9 @@ verified OS peer credentials and its local mapping. If the operating system
 cannot provide peer credentials for the selected local-socket mechanism, the
 deployment MUST use mTLS instead. The `management_service_id` in `hello` is a
 consistency check and MUST exactly equal the identity derived by the Relay. It
-MUST NOT be trusted as authentication input.
+MUST NOT be trusted as authentication input. It uses the Managed Service ID
+lexical grammar defined in `overview.md`, but identifies the Management Service
+control peer and is not required to equal an admitted service's `svc` value.
 
 ## Framing and messages
 
@@ -109,7 +111,8 @@ After establishment, the Management Service may send
 `revoke_service_admission`. It contains:
 
 - `channel_id`: the affected channel.
-- At least one target: `service_id` and/or `grant_id_hash`.
+- At least one target: `service_id` and/or `grant_id_hash`. A `service_id` is
+  the exact canonical Managed Service ID from the admitted grant's `svc` claim.
 - `reason`: `acl_removed`, `service_disabled`, or `grant_revoked`.
 - `deny_until`: an absolute UTC Unix timestamp in seconds.
 
@@ -314,9 +317,9 @@ operator has explicitly configured a protected diagnostic sink.
 
 `../../../test-vectors/management/private-control-link-v1.json` defines framed
 message examples, optional-PCL admission lifecycle, canonical identifier
-validation, `jti`-derived `grant_id_hash` cross-vector validation, revocation
-idempotency, and Relay diagnostics cases. Implementations that support this
-extension MUST validate the schema, framing limits, target intersection,
-absolute deny deadlines, duplicate command behavior, diagnostics negotiation,
-redaction, and counter-epoch handling before claiming Private Control Link v1
-compatibility.
+validation, cross-surface Managed Service ID grammar, `jti`-derived
+`grant_id_hash` cross-vector validation, revocation idempotency, and Relay
+diagnostics cases. Implementations that support this extension MUST validate
+the schema, framing limits, target intersection, absolute deny deadlines,
+duplicate command behavior, diagnostics negotiation, redaction, and
+counter-epoch handling before claiming Private Control Link v1 compatibility.

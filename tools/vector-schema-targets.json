@@ -28,6 +28,14 @@
       "schema": "schemas/management/service-admission-grant-v1.schema.json"
     },
     {
+      "name": "Managed Service Admission invalid grant claims",
+      "vector": "test-vectors/management/service-admission-v1.json",
+      "pointer": "/invalid_grant_claims",
+      "each": true,
+      "schema": "schemas/management/service-admission-grant-v1.schema.json",
+      "expected": "invalid"
+    },
+    {
       "name": "Directory v3 dedicated request envelope",
       "vector": "test-vectors/directory-v3.json",
       "pointer": "/crypto/dedicatedRequest/envelope",

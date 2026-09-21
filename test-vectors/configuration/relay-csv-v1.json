@@ -6,8 +6,8 @@
     "channels.csv": "channel_id,name\n111,Security A\n222,Maintenance\n",
     "speakers.csv": "channel_id,sender_id,name\nall,1002,Dispatch\n111,1002,Security Dispatch\n222,2001,Maintenance Lead\n",
     "control-keys.csv": "channel_id,key_id,control_key_base64\n111,1,AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=\n",
-    "management-services.csv": "service_id,certificate_sha256,api_role,enabled\nrecorder-east,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,recorder,true\ndispatch-console,bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,operator,true\n",
-    "management-channel-acl.csv": "service_id,channel_id,sender_id,admission_role,allow_listen,allow_talk,allow_interrupt,interrupt_priority,enabled\nrecorder-east,111,9001,recorder,true,false,false,0,true\ndispatch-console,111,9002,automation,true,true,true,200,true\n"
+    "management-services.csv": "service_id,certificate_sha256,api_role,enabled\nrecorder-test-01,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,recorder,true\ndispatch-console,bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,operator,true\n",
+    "management-channel-acl.csv": "service_id,channel_id,sender_id,admission_role,allow_listen,allow_talk,allow_interrupt,interrupt_priority,enabled\nrecorder-test-01,111,9001,recorder,true,false,false,0,true\ndispatch-console,111,9002,automation,true,true,true,200,true\n"
   },
   "expected": {
     "directory_speakers": [
@@ -19,7 +19,7 @@
       {"channel_id": 111, "key_id": 1, "key_bytes_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"}
     ],
     "management_grant_inputs": [
-      {"service_id": "recorder-east", "channel_id": 111, "sender_id": 9001, "role": "recorder", "perm": 1, "pri": 0},
+      {"service_id": "recorder-test-01", "channel_id": 111, "sender_id": 9001, "role": "recorder", "perm": 1, "pri": 0},
       {"service_id": "dispatch-console", "channel_id": 111, "sender_id": 9002, "role": "automation", "perm": 7, "pri": 200}
     ]
   },

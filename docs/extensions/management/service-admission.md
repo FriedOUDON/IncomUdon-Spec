@@ -47,7 +47,7 @@ verification. It contains the following claims:
 |---|---|
 | `iss` | Configured Management Service issuer identifier. |
 | `aud` | Exact configured Relay audience. |
-| `svc` | Stable Management-Service-scoped pseudonymous service ID. |
+| `svc` | Canonical Managed Service ID. It MUST exactly match the case-sensitive configured service ID authorized for this grant. |
 | `jti` | Cryptographically random ASCII grant ID. Its exact claim bytes identify the grant for PCL `grant_id_hash` derivation. |
 | `iat` / `exp` | Numeric Unix seconds; `exp - iat` MUST be from 60 through 3600 seconds. |
 | `ch` | Authorized `channel_id` (`u32`). |
@@ -64,6 +64,12 @@ MUST issue `perm` bit 1 only to an ACL that explicitly grants `talk`, and bit
 role names alone are insufficient. The grant MUST omit channel credentials,
 derived keys, OIDC credentials, personal data, certificate material, and
 arbitrary organization claims.
+
+Before issuing a grant, the Management Service MUST resolve `svc` to an enabled
+Managed Service ID and an authorized `management-channel-acl.csv` row for the
+exact `ch` and `sid`. A Relay that has the corresponding managed-service
+configuration MUST reject a grant whose `svc` does not exactly match that
+configuration and authorization tuple.
 
 The Relay selects a configured active or previous Management Service public key
 by `kid`, verifies the JWS signature, then validates all claims, clock skew,

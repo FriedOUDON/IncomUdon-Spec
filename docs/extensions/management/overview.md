@@ -179,6 +179,30 @@ certificate. Bearer tokens, OIDC, and other authentication mechanisms MAY be
 specified by a future Management API version, but MUST NOT weaken the mTLS
 requirement in Management Plane v1.
 
+## Managed Service ID grammar
+
+A Managed Service ID is a case-sensitive ASCII identifier matching the
+following grammar:
+
+```text
+^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$
+```
+
+It is one through 128 characters long, begins with an ASCII letter or digit,
+and thereafter contains only ASCII letters, digits, `.`, `_`, or `-`. The
+`service_id` columns in `management-services.csv` and
+`management-channel-acl.csv`, the Managed Service Admission `svc` claim, and
+the Private Control Link `revoke_service_admission.service_id` and lifecycle
+event `service_id` fields use this same Managed Service ID namespace. Whenever
+two of those fields identify the same service, their values MUST be exactly
+equal. Comparisons are byte-for-byte and case-sensitive.
+
+Private Control Link `management_service_id` identifies the Management Service
+control peer rather than an admitted managed service. It uses this same lexical
+grammar for operational consistency, but is a separate namespace and is not
+required to equal a Managed Service ID used by an admission grant or revocation
+target.
+
 ## Roles and channel ACLs
 
 Authorization is evaluated for every request using the authenticated

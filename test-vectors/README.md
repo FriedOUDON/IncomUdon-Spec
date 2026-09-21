@@ -20,10 +20,10 @@ MUST NOT be used in production.
 | `membership-lease-v1.json` | Independently evaluated membership timing, keepalive cadence, and Control Authentication refresh transitions |
 | `floor-interrupt-v1.json` | Independently evaluated authenticated interrupt request, preemption, and priority-selection transitions |
 | `identity-admission-v1.json` | Ed25519 admission fixtures and independently evaluated membership-expiry tie-breaks |
-| `management/service-admission-v1.json` | Ed25519 service-admission fixtures, canonical `jti`-derived grant-hash fixture, and independently evaluated expiry/grace transitions |
+| `management/service-admission-v1.json` | Ed25519 service-admission fixtures, canonical Managed Service ID and `jti`-derived grant-hash fixtures, and independently evaluated expiry/grace transitions |
 | `management/service-admission-control-auth-v1.json` | Managed Service Admission pre-JOIN Control Authentication counter sequence |
 | `management/management-event-v1.json` | Channel-scoped and global Management SSE event envelopes |
-| `management/private-control-link-v1.json` | Private Control Link framing, message envelopes, cross-validated `jti`-derived grant hashes, fixed-deadline revocation idempotency and durability, and diagnostics lifecycle semantics |
+| `management/private-control-link-v1.json` | Private Control Link framing, message envelopes, cross-validated Managed Service IDs and `jti`-derived grant hashes, fixed-deadline revocation idempotency and durability, and diagnostics lifecycle semantics |
 | `management/audit-retrieval-v1.json` | Audit retrieval query scenario and canonical response page |
 | `management/event-stream-resume-v1.json` | SSE delivery modes, cursor precedence, and role-aware `410 Gone` recovery |
 | `management/authorization-scopes-v1.json` | Management API channel, resource, list, SSE global-event, and global-permission authorization cases |

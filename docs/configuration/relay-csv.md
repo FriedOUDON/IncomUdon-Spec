@@ -151,7 +151,7 @@ service_id,certificate_sha256,api_role,enabled
 
 | Column | Requirement |
 |---|---|
-| `service_id` | Stable ASCII identifier matching `[A-Za-z0-9][A-Za-z0-9._-]{0,127}`. |
+| `service_id` | Canonical Managed Service ID as defined in `../extensions/management/overview.md`. |
 | `certificate_sha256` | Lowercase 64-hex-character SHA-256 digest of the DER-encoded mTLS client certificate. |
 | `api_role` | One of `viewer`, `recorder`, `operator`, `auditor`, or `admin`. |
 | `enabled` | `true` permits the mapped service to authenticate; `false` denies it. |
@@ -182,7 +182,7 @@ service_id,channel_id,sender_id,admission_role,allow_listen,allow_talk,allow_int
 
 | Column | Requirement |
 |---|---|
-| `service_id` | Existing enabled `management-services.csv` service ID. |
+| `service_id` | Existing enabled `management-services.csv` Managed Service ID. |
 | `channel_id` | Exact authorized `u32` channel ID. Wildcards and `all` are forbidden. |
 | `sender_id` | Exact non-zero endpoint `u32` sender ID bound into a Managed Service Admission grant. |
 | `admission_role` | `recorder`, `observer`, or `automation`. |

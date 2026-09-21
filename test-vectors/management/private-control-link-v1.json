@@ -147,6 +147,15 @@
     {
       "schema_version": "private-control-link-v1",
       "type": "revoke_service_admission",
+      "message_id": "AAAAAAAAAAAAAAAAAAAAAA",
+      "channel_id": 111,
+      "service_id": "recorder:east",
+      "reason": "service_disabled",
+      "deny_until": 1767231000
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "revoke_service_admission",
       "message_id": "AAECAwQFBgcICQoLDA0ODx",
       "channel_id": 111,
       "service_id": "recorder-01",
@@ -221,6 +230,28 @@
         "input_ascii_hex": "20746573742d736572766963652d6772616e742d30303031",
         "sha256_hex": "ac021f7086087a3899a0a889744cd61dfb80c41e49a05d30c5ee669fa88c1ca6"
       }
+    ]
+  },
+  "service_id_cross_surface_vector": {
+    "grammar": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+    "source_csv_vector": "test-vectors/configuration/relay-csv-v1.json",
+    "source_service_admission_vector": "test-vectors/management/service-admission-v1.json",
+    "shared_service_id": "recorder-test-01",
+    "pcl_command_message_id": "0NHS09TV1tfY2drb3N3e3w",
+    "pcl_management_service_id": "management-main",
+    "valid": [
+      "A",
+      "service-1",
+      "service.name_1",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "invalid": [
+      "",
+      ".service",
+      ":service",
+      "service:name",
+      "service name",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     ]
   },
   "deployment_lifecycle_cases": [
