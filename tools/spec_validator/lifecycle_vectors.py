@@ -658,6 +658,124 @@ def _validate_private_control_link(root: Path) -> list[str]:
     if retention < 600:
         errors.append("Private Control Link idempotency retention is shorter than ten minutes")
 
+    deployment_cases = document.get("deployment_lifecycle_cases")
+    if not isinstance(deployment_cases, list):
+        raise VectorValidationError(
+            "Private Control Link deployment_lifecycle_cases must be an array"
+        )
+    for index, case in enumerate(deployment_cases):
+        if not isinstance(case, dict):
+            raise VectorValidationError(
+                f"Private Control Link deployment lifecycle case {index} must be an object"
+            )
+        name = case.get("name", f"Private Control Link deployment lifecycle case {index}")
+        pcl_enabled = case.get("private_control_link_enabled")
+        grant = case.get("grant")
+        administrative_change = case.get("administrative_change")
+        presentation = case.get("presentation")
+        expected = case.get("expected")
+        if not isinstance(pcl_enabled, bool):
+            raise VectorValidationError(
+                f"{name}: private_control_link_enabled must be a boolean"
+            )
+        if not all(
+            isinstance(value, dict)
+            for value in (grant, administrative_change, presentation, expected)
+        ):
+            raise VectorValidationError(f"{name} is malformed")
+        grant_service = grant.get("service_id")
+        if not isinstance(grant_service, str):
+            raise VectorValidationError(f"{name}: grant service_id must be a string")
+        issued_at = _integer(
+            grant.get("issued_at_relay_monotonic_seconds"),
+            f"{name} grant issuance time",
+            MAX_SAFE_JSON_INTEGER,
+        )
+        expires_at = _integer(
+            grant.get("expires_at_relay_monotonic_seconds"),
+            f"{name} grant expiry time",
+            MAX_SAFE_JSON_INTEGER,
+        )
+        changed_at = _integer(
+            administrative_change.get("at_relay_monotonic_seconds"),
+            f"{name} administrative change time",
+            MAX_SAFE_JSON_INTEGER,
+        )
+        presented_at = _integer(
+            presentation.get("at_relay_monotonic_seconds"),
+            f"{name} presentation time",
+            MAX_SAFE_JSON_INTEGER,
+        )
+        local_validation = presentation.get("normal_relay_local_validation_succeeds")
+        if administrative_change.get("type") not in {
+            "acl_removed",
+            "grant_revoked",
+            "service_disabled",
+        }:
+            errors.append(f"{name}: administrative change type is invalid")
+        if not isinstance(local_validation, bool):
+            raise VectorValidationError(
+                f"{name}: normal_relay_local_validation_succeeds must be a boolean"
+            )
+        if not issued_at < changed_at < presented_at < expires_at:
+            errors.append(
+                f"{name}: expected issued, changed, presented, and expiry times in that order"
+            )
+        _compare(
+            errors,
+            f"{name} new grant issuance",
+            expected.get("new_grant_issuance"),
+            "denied",
+        )
+
+        command = case.get("revocation_command")
+        remote_revocation_applied = False
+        if pcl_enabled:
+            if not isinstance(command, dict):
+                raise VectorValidationError(
+                    f"{name}: PCL-enabled case requires a revocation_command"
+                )
+            command_service = command.get("service_id")
+            command_at = _integer(
+                command.get("accepted_at_relay_monotonic_seconds"),
+                f"{name} revocation command acceptance time",
+                MAX_SAFE_JSON_INTEGER,
+            )
+            deny_for = _integer(
+                command.get("deny_for_seconds"),
+                f"{name} revocation deny duration",
+                0xFFFFFFFF,
+            )
+            _integer(command.get("channel_id"), f"{name} revocation channel ID", 0xFFFFFFFF)
+            if not isinstance(command_service, str):
+                raise VectorValidationError(f"{name}: revocation command service_id must be a string")
+            if not 1 <= deny_for <= 5400:
+                errors.append(f"{name}: revocation deny_for_seconds must be in 1..5400")
+            if not changed_at <= command_at < presented_at:
+                errors.append(
+                    f"{name}: revocation command must be accepted after the change and before presentation"
+                )
+            remote_revocation_applied = (
+                command_service == grant_service and presented_at < command_at + deny_for
+            )
+        elif command is not None:
+            errors.append(f"{name}: PCL-disabled case must not contain a revocation_command")
+
+        actual_presentation = (
+            "deny_by_service_rule"
+            if remote_revocation_applied
+            else "accept"
+            if local_validation
+            else "reject_relay_local_validation"
+        )
+        _compare(
+            errors,
+            f"{name} remote revocation",
+            expected.get("remote_revocation_applied"),
+            remote_revocation_applied,
+        )
+        _compare(errors, f"{name} presentation", expected.get("presentation"), actual_presentation)
+
     cases = document.get("revocation_cases")
     if not isinstance(cases, list):
         raise VectorValidationError("Private Control Link revocation_cases must be an array")

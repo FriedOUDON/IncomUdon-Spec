@@ -13,12 +13,13 @@ Management API behavior. It MAY enable Managed Service Admission without this
 extension: that profile supports grant issuance and natural expiry, but has no
 standards-defined remote administrative revocation path. After an ACL removal,
 service disablement, or grant revocation, the Management Service MUST NOT issue
-new affected grants, but the action does not alter a grant already accepted by
-the Relay. That grant remains Relay-valid until its normal expiry or another
-already-defined Relay-local invalidation condition. A deployment MUST NOT claim
-prompt Relay-side administrative revocation without this extension. A deployment
-that needs prompt ACL, service, or grant revocation of an accepted grant MUST
-enable this extension.
+new affected grants, but the action does not alter a grant issued before the
+change, whether or not it has previously been presented to or accepted by the
+Relay. Such a grant remains eligible for Relay acceptance until its normal
+expiry or another already-defined Relay-local invalidation condition. A
+deployment MUST NOT claim prompt Relay-side administrative revocation without
+this extension. A deployment that needs prompt ACL, service, or grant
+revocation of an already-issued grant MUST enable this extension.
 
 This extension does not carry media, channel credentials, derived keys,
 admission grants, OIDC material, client certificate private keys, source IP
@@ -288,8 +289,9 @@ operator has explicitly configured a protected diagnostic sink.
 ## Interoperability vector
 
 `../../../test-vectors/management/private-control-link-v1.json` defines framed
-message examples, canonical identifier validation, revocation idempotency, and
-Relay diagnostics cases. Implementations that support this extension MUST
-validate the schema, framing limits, target intersection, bounded deny
-duration, duplicate command behavior, diagnostics negotiation, redaction, and
-counter-epoch handling before claiming Private Control Link v1 compatibility.
+message examples, optional-PCL admission lifecycle, canonical identifier
+validation, revocation idempotency, and Relay diagnostics cases. Implementations
+that support this extension MUST validate the schema, framing limits, target
+intersection, bounded deny duration, duplicate command behavior, diagnostics
+negotiation, redaction, and counter-epoch handling before claiming Private
+Control Link v1 compatibility.

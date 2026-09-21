@@ -167,6 +167,58 @@
       "channel_id": 111
     }
   ],
+  "deployment_lifecycle_cases": [
+    {
+      "name": "pcl_disabled_administrative_change_does_not_revoke_previously_issued_unpresented_grant",
+      "private_control_link_enabled": false,
+      "grant": {
+        "service_id": "recorder-01",
+        "issued_at_relay_monotonic_seconds": 1000,
+        "expires_at_relay_monotonic_seconds": 1600
+      },
+      "administrative_change": {
+        "type": "service_disabled",
+        "at_relay_monotonic_seconds": 1010
+      },
+      "presentation": {
+        "at_relay_monotonic_seconds": 1020,
+        "normal_relay_local_validation_succeeds": true
+      },
+      "expected": {
+        "new_grant_issuance": "denied",
+        "remote_revocation_applied": false,
+        "presentation": "accept"
+      }
+    },
+    {
+      "name": "pcl_enabled_service_revocation_denies_previously_issued_unpresented_grant",
+      "private_control_link_enabled": true,
+      "grant": {
+        "service_id": "recorder-01",
+        "issued_at_relay_monotonic_seconds": 2000,
+        "expires_at_relay_monotonic_seconds": 2600
+      },
+      "administrative_change": {
+        "type": "service_disabled",
+        "at_relay_monotonic_seconds": 2010
+      },
+      "revocation_command": {
+        "channel_id": 111,
+        "service_id": "recorder-01",
+        "accepted_at_relay_monotonic_seconds": 2011,
+        "deny_for_seconds": 60
+      },
+      "presentation": {
+        "at_relay_monotonic_seconds": 2020,
+        "normal_relay_local_validation_succeeds": true
+      },
+      "expected": {
+        "new_grant_issuance": "denied",
+        "remote_revocation_applied": true,
+        "presentation": "deny_by_service_rule"
+      }
+    }
+  ],
   "revocation_cases": [
     {
       "name": "matching_target_removes_active_talker_and_installs_deny_rule",

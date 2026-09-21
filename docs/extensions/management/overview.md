@@ -26,10 +26,11 @@ MUST expose HTTPS over TCP only on an administration network, management VLAN,
 VPN, dedicated interface, or equivalent firewall-restricted boundary. It MUST
 NOT be publicly reachable merely because the normal Relay UDP port is public.
 
-The Relay and Management Service communicate through a separate private
-control link. `private-control-link-v1.md` defines its dedicated listener,
-local-socket or mTLS transport, framing, authentication, revocation command,
-and bounded notification behavior:
+When Private Control Link v1 is enabled, the Relay and Management Service
+communicate through a separate authenticated private control link.
+`private-control-link-v1.md` defines its dedicated listener, local-socket or
+mTLS transport, framing, authentication, revocation command, and bounded
+notification behavior:
 
 - On one host, a Unix Domain Socket is RECOMMENDED.
 - Across hosts, TCP protected by a distinct internal mTLS deployment is
@@ -247,8 +248,9 @@ permissions. The complete protocol is in `service-admission.md`.
 Private Control Link v1 is optional for grant issuance and natural expiry. A
 Managed Service Admission deployment without it can issue and verify grants,
 but cannot perform standards-defined prompt Relay-side administrative
-revocation of a grant already accepted by the Relay. A deployment that requires
-that capability MUST enable Private Control Link v1; its authenticated
+revocation of a grant issued before the administrative change, whether or not
+it has previously been presented to or accepted by the Relay. A deployment that
+requires that capability MUST enable Private Control Link v1; its authenticated
 `revoke_service_admission` command is defined in
 `private-control-link-v1.md`.
 
@@ -334,10 +336,11 @@ Prompt Relay-side administrative revocation is an optional capability provided
 by Private Control Link v1. In a Managed Service Admission deployment without
 Private Control Link, an ACL removal, service disablement, or grant revocation
 MUST stop future issuance of affected grants but does not immediately alter a
-grant already accepted by the Relay. The Relay applies its normal expiry,
-bounded receive-only grace, membership, and Relay-local invalidation rules; the
-Management Service MUST NOT represent the administrative action as a
-Relay-applied revocation.
+grant issued before the change, whether or not it has previously been presented
+to or accepted by the Relay. A later presentation of that grant remains
+eligible for Relay acceptance until its normal expiry or another Relay-local
+invalidation condition applies. The Management Service MUST NOT represent the
+administrative action as a Relay-applied revocation.
 
 A deployment that requires prompt revocation of existing Service Admission
 state MUST enable Private Control Link v1. In that profile, a Management
@@ -460,7 +463,8 @@ management extension. Those functions require separate versioned proposals.
 8. A valid Managed Service Admission can satisfy a required identity policy
    only for that service endpoint while managed-service admission is enabled.
 9. Without Private Control Link, an administrative change denies future affected
-   grants but does not claim prompt Relay-side revocation of an accepted grant.
+   grants but does not claim prompt Relay-side revocation of an already-issued
+   grant.
 10. With Private Control Link enabled for prompt revocation, revocation removes
     the affected membership without affecting unrelated channel members.
 11. A Management API outage denies new grants while an uninterrupted existing
