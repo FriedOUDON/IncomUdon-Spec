@@ -110,16 +110,19 @@ passwords, derived keys, media plaintext, OIDC credentials, or client certificat
 Management API methods MUST use TLS. HTTP/2 MAY be used, but HTTP/1.1
 compatibility is REQUIRED. Every SSE event, when event delivery is enabled,
 MUST carry its monotonic `event_id` as the SSE `id` field. Event IDs are opaque
-decimal cursors scoped to one Management Service instance.
+decimal cursors scoped to one Management Service instance. Their decimal
+serialization does not imply contiguous values, and clients MUST NOT derive a
+next event ID by arithmetic or infer event loss from an ID gap.
 
 The following cursor and recovery rules apply only when `event_delivery` is
 `"replay"`. `since` is an optional query parameter for an initial connection
 or an explicit historical replay. `Last-Event-ID` is the authoritative resume
 cursor for SSE reconnection. Both cursors are exclusive: when either is
 selected, the first replay candidate is the first retained event ordered after
-that cursor. A request with neither cursor starts a live stream and MUST NOT
-imply historical replay. Clients SHOULD omit `since` when reconnecting an
-established stream.
+that cursor that the caller is authorized to receive. Authorization filtering
+may therefore create normal gaps in replayed event IDs. A request with neither
+cursor starts a live stream and MUST NOT imply historical replay. Clients SHOULD
+omit `since` when reconnecting an established stream.
 
 If both `Last-Event-ID` and `since` are present, the Management Service MUST
 use `Last-Event-ID` and MUST ignore `since`. A malformed cursor MUST return

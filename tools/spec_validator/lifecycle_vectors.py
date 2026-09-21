@@ -325,6 +325,37 @@ def _is_decimal_event_cursor(value: Any) -> bool:
     )
 
 
+def _select_first_authorized_replay_event(
+    case: dict[str, Any], label: str, selected_cursor: str
+) -> str | None:
+    retained = case.get("retained_event_ids")
+    authorized = case.get("authorized_event_ids")
+    if not isinstance(retained, list) or not isinstance(authorized, list):
+        raise VectorValidationError(f"{label} must contain retained and authorized event IDs")
+
+    def validate_ordered_ids(values: list[Any], field: str) -> list[str]:
+        event_ids: list[str] = []
+        previous: int | None = None
+        for index, event_id in enumerate(values):
+            if not _is_decimal_event_cursor(event_id):
+                raise VectorValidationError(f"{label} {field}[{index}] is not a decimal cursor")
+            numeric_id = int(event_id)
+            if previous is not None and numeric_id <= previous:
+                raise VectorValidationError(f"{label} {field} must be strictly monotonic")
+            event_ids.append(event_id)
+            previous = numeric_id
+        return event_ids
+
+    retained_ids = validate_ordered_ids(retained, "retained_event_ids")
+    authorized_ids = validate_ordered_ids(authorized, "authorized_event_ids")
+    if not set(authorized_ids).issubset(retained_ids):
+        raise VectorValidationError(f"{label} authorized_event_ids must be retained")
+    if selected_cursor not in retained_ids:
+        raise VectorValidationError(f"{label} selected cursor is not retained")
+    selected_numeric = int(selected_cursor)
+    return next((event_id for event_id in authorized_ids if int(event_id) > selected_numeric), None)
+
+
 def _validate_management_sse_resume(root: Path) -> list[str]:
     document = _load(root, "test-vectors/management/event-stream-resume-v1.json")
     errors: list[str] = []
@@ -378,10 +409,13 @@ def _validate_management_sse_resume(root: Path) -> list[str]:
                 "subsequently_emitted_authorized_events_only",
             )
             continue
-        if has_last_event_id:
-            _compare(errors, f"{name} selected cursor", case.get("selected_cursor"), selected_cursor)
-            _compare(errors, f"{name} cursor source", case.get("selected_cursor_source"), "Last-Event-ID")
-            _compare(errors, f"{name} first event", case.get("expected_first_event_id"), str(int(selected_cursor) + 1))
+        source = "Last-Event-ID" if has_last_event_id else "since"
+        _compare(errors, f"{name} selected cursor", case.get("selected_cursor"), selected_cursor)
+        _compare(errors, f"{name} cursor source", case.get("selected_cursor_source"), source)
+        if has_last_event_id and has_since:
+            _compare(errors, f"{name} ignored query parameters", case.get("ignored_query_parameters"), ["since"])
+        first_event = _select_first_authorized_replay_event(case, name, selected_cursor)
+        _compare(errors, f"{name} first event", case.get("expected_first_event_id"), first_event)
 
     replay_cases = document.get("cases")
     if not isinstance(replay_cases, list):
@@ -408,7 +442,8 @@ def _validate_management_sse_resume(root: Path) -> list[str]:
         _compare(errors, f"{name} cursor source", case.get("selected_cursor_source"), source)
         if has_last_event_id and "since" in request:
             _compare(errors, f"{name} ignored query parameters", case.get("ignored_query_parameters"), ["since"])
-        _compare(errors, f"{name} first event", case.get("expected_first_event_id"), str(int(selected_cursor) + 1))
+        first_event = _select_first_authorized_replay_event(case, name, selected_cursor)
+        _compare(errors, f"{name} first event", case.get("expected_first_event_id"), first_event)
     return errors
 
 

@@ -149,7 +149,7 @@ paths:
           schema: { type: string }
       responses:
         '200':
-          description: Event stream. Each event's SSE id equals its event_id. Selected cursors resume after that event only when event_delivery is replay; live delivery ignores Last-Event-ID and starts with subsequently emitted events.
+          description: Event stream. Each event's SSE id equals its event_id. In replay mode, the first delivered event is the first retained event ordered after the selected cursor that the caller is authorized to receive; decimal event IDs are not required to be contiguous. Live delivery ignores Last-Event-ID and starts with subsequently emitted events.
           content:
             text/event-stream:
               schema:

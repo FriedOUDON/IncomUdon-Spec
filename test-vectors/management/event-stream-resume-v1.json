@@ -60,14 +60,16 @@
       "expected_delivery": "subsequently_emitted_authorized_events_only"
     },
     {
-      "name": "replay_reconnect_uses_last_event_id",
+      "name": "replay_reconnect_skips_filtered_event_id_gaps",
       "event_delivery": "replay",
       "request": {
         "last_event_id": "150"
       },
       "selected_cursor": "150",
       "selected_cursor_source": "Last-Event-ID",
-      "expected_first_event_id": "151",
+      "retained_event_ids": ["140", "150", "151", "152", "153", "157"],
+      "authorized_event_ids": ["140", "150", "153", "157"],
+      "expected_first_event_id": "153",
       "expected_status": 200
     },
     {
@@ -81,22 +83,26 @@
   ],
   "cases": [
     {
-      "name": "initial_replay_uses_since",
+      "name": "initial_replay_uses_first_retained_authorized_event_after_since",
       "request": {
         "since": "100"
       },
       "selected_cursor": "100",
       "selected_cursor_source": "since",
-      "expected_first_event_id": "101"
+      "retained_event_ids": ["100", "104", "109"],
+      "authorized_event_ids": ["100", "104", "109"],
+      "expected_first_event_id": "104"
     },
     {
-      "name": "reconnect_uses_last_event_id",
+      "name": "reconnect_uses_first_retained_authorized_event_after_last_event_id",
       "request": {
         "last_event_id": "150"
       },
       "selected_cursor": "150",
       "selected_cursor_source": "Last-Event-ID",
-      "expected_first_event_id": "151"
+      "retained_event_ids": ["140", "150", "151", "152", "153", "157"],
+      "authorized_event_ids": ["140", "150", "153", "157"],
+      "expected_first_event_id": "153"
     },
     {
       "name": "last_event_id_takes_precedence_over_since",
@@ -109,7 +115,9 @@
       "ignored_query_parameters": [
         "since"
       ],
-      "expected_first_event_id": "151"
+      "retained_event_ids": ["100", "104", "150", "151", "153"],
+      "authorized_event_ids": ["100", "104", "150", "153"],
+      "expected_first_event_id": "153"
     },
     {
       "name": "malformed_selected_cursor_is_bad_request",
