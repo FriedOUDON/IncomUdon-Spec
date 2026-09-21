@@ -1,5 +1,5 @@
 {
-  "specVersion": "unreleased",
+  "specVersion": "v0.8.0-draft",
   "mode": "aes-gcm-v2",
   "windowSize": 64,
   "replayDomain": {

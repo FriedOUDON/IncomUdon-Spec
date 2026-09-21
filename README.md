@@ -2,7 +2,7 @@
 
 **Wire protocol version:** `1`
 **Development specification snapshot:** [`SPEC_VERSION`](SPEC_VERSION) (currently `unreleased`)
-**Latest tagged specification:** `v0.7.0-draft`
+**Latest tagged specification:** `v0.8.0-draft`
 
 This repository is the canonical interoperability specification for the
 IncomUdon Relay, PWA client, Qt native client, and future Rust native client.

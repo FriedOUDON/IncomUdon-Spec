@@ -2,31 +2,51 @@
 
 ## Unreleased
 
-- Restores development metadata after `v0.7.0-draft`: `SPEC_VERSION` and all
-  vector `specVersion` values are `unreleased`; README now distinguishes the
-  development snapshot from the latest tag. CI permits a non-`unreleased`
-  snapshot only when its exact commit already has the matching release tag.
+## v0.8.0-draft - 2026-09-22
 
-- Makes Management SSE delivery and Audit Retrieval independently optional,
-  keeping durable event and audit retention responsibilities with the
-  Management Service rather than the Relay.
+- Strengthens specification snapshot lifecycle checks. Normal development
+  commits use `unreleased`; non-tag CI rejects release metadata unless the
+  exact commit carries the matching release tag. README now distinguishes the
+  development snapshot from the latest tagged specification.
 
-- Defines Private Control Link v1 as the separately authenticated Management
-  Service-Relay control transport for Service Admission revocation, bounded
-  Relay lifecycle/audit inputs, and optional Relay diagnostics.
+- Makes Management SSE delivery and Audit Retrieval independently optional
+  capabilities. Relay and Management Service deployments are no longer
+  required to retain event or audit history when those capabilities are
+  disabled.
 
-- Adds PCL Relay diagnostics negotiation, bounded polling, redacted Floor
+- Completes Management SSE delivery semantics and conformance coverage:
+  `event_delivery` selects disabled, live, or replay operation; live streams
+  accept and ignore automatic `Last-Event-ID` reconnect headers; replay gives
+  precedence to `Last-Event-ID`, validates only the selected cursor, and
+  resumes at the first retained authorized event after that opaque cursor.
+  Viewer and auditor recovery after an expired cursor preserve their distinct
+  information boundaries.
+
+- Defines Private Control Link v1 as a separately authenticated, private
+  Management Service-Relay transport for prompt Service Admission revocation,
+  bounded redacted lifecycle and audit inputs, and optional Relay diagnostics.
+
+- Adds negotiated, bounded PCL Relay diagnostics snapshots with redacted Floor
   Interrupt counters, counter-epoch reset semantics, and independent lifecycle
   conformance validation.
 
-- Allows standard EventSource reconnection in live SSE mode by accepting and
-  ignoring `Last-Event-ID` while continuing to reject explicit `since` cursors
-  and never replaying historical events.
+- Clarifies Managed Service Admission revocation profiles. Without PCL,
+  administrative changes stop issuance of new affected grants but do not
+  promptly invalidate already-issued grants; PCL enables prompt Relay-side
+  revocation. PCL deny rules support grant-, service-, and conjunctive scopes,
+  including service-wide rejection of future grants until their deadline.
 
-- Clarifies that Managed Service Admission may operate without PCL for grant
-  issuance and natural expiry; without PCL, administrative changes stop
-  issuance of new affected grants but do not promptly invalidate already-issued
-  grants. Prompt Relay-side revocation of already-issued grants requires PCL.
+- Makes PCL revocations restart-safe and idempotent with durable absolute
+  `deny_until` deadlines and durable retry metadata. Duplicate commands cannot
+  extend or reactivate a revocation; explicit extensions require a fresh
+  command. Grant-specific rules use a canonical unpadded Base64URL
+  `SHA-256(ASCII(jti))` value derived from the verified Service Admission JWS.
+
+- Unifies the canonical Managed Service ID grammar across Relay CSV
+  configuration, Service Admission `svc`, and PCL revocation/lifecycle fields.
+  Cross-surface vectors require exact case-sensitive matching; the PCL control
+  peer `management_service_id` remains a separate namespace with the same
+  lexical grammar.
 
 ## v0.7.0-draft - 2026-09-16
 

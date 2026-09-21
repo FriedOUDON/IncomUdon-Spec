@@ -1,5 +1,5 @@
 {
-  "specVersion": "unreleased",
+  "specVersion": "v0.8.0-draft",
   "scheme": "membership-lease-v1",
   "serverConfig": {
     "maximumTalkSeconds": 60,

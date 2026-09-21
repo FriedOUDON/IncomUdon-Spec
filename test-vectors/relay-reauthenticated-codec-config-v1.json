@@ -1,5 +1,5 @@
 {
-  "specVersion": "unreleased",
+  "specVersion": "v0.8.0-draft",
   "scheme": "relay-reauthenticated-codec-config-v1",
   "channelId": 100,
   "originalTalkerSenderId": 1002,

@@ -1,5 +1,5 @@
 {
-  "specVersion": "unreleased",
+  "specVersion": "v0.8.0-draft",
   "scheme": "control-auth-v1",
   "passwordInput": "test-password",
   "channelId": 100,
