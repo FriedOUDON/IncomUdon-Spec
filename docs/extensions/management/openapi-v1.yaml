@@ -140,8 +140,8 @@ paths:
         - name: since
           in: query
           required: false
-          description: Optional exclusive initial-replay cursor for event_delivery=replay; ignored when Last-Event-ID is present. Supplying since when event_delivery=live returns 400.
-          schema: { type: string, minLength: 1, maxLength: 64, pattern: '^[0-9]+$' }
+          description: Optional exclusive initial-replay cursor for event_delivery=replay. It is validated as a decimal replay cursor only when Last-Event-ID is absent; otherwise its value is ignored without validation. Supplying since when event_delivery=live returns 400 regardless of its value.
+          schema: { type: string }
         - name: Last-Event-ID
           in: header
           required: false
@@ -155,7 +155,7 @@ paths:
               schema:
                 type: string
         '400':
-          description: A replay cursor is malformed, or since was supplied while event_delivery is live. Last-Event-ID is ignored in live mode.
+          description: The selected replay cursor is malformed, or since was supplied while event_delivery is live. Last-Event-ID is ignored in live mode.
         '403': { $ref: '#/components/responses/Forbidden' }
         '404':
           description: Event delivery is disabled by the advertised capability.

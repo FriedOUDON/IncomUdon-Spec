@@ -75,7 +75,8 @@ With `event_delivery: "disabled"`, the Management Service MUST return `404 Not
 Found` for `GET /events`. With `event_delivery: "live"`, `GET /events` MAY
 stream only events emitted after the new live subscription is established. It
 MUST NOT claim replay support. A request containing `since`, including an empty
-`since` value, MUST return `400 Bad Request`. A `Last-Event-ID` header MAY be
+or non-cursor value, MUST return `400 Bad Request` because the parameter is not
+supported in live mode. A `Last-Event-ID` header MAY be
 present because a standard SSE client reconnects automatically; the Management
 Service MUST accept it, MUST NOT validate or use its value as a replay cursor,
 and MUST begin delivery only with events emitted after the new subscription is
@@ -125,8 +126,9 @@ cursor starts a live stream and MUST NOT imply historical replay. Clients SHOULD
 omit `since` when reconnecting an established stream.
 
 If both `Last-Event-ID` and `since` are present, the Management Service MUST
-use `Last-Event-ID` and MUST ignore `since`. A malformed cursor MUST return
-`400 Bad Request`. A syntactically valid cursor that is unknown, belongs to a
+use `Last-Event-ID` and MUST ignore `since` without validating its value. A
+malformed selected cursor MUST return `400 Bad Request`. A syntactically valid
+selected cursor that is unknown, belongs to a
 different Management Service instance, or is no longer retained MUST return
 `410 Gone`; the service MUST NOT silently start from the newest event. A caller
 that receives `410 Gone` MUST discard the expired cursor before opening a new

@@ -49,7 +49,17 @@
       "request": {
         "since": "150"
       },
-      "expected_status": 400
+      "expected_status": 400,
+      "expected_rejection_reason": "since_unsupported_in_live_mode"
+    },
+    {
+      "name": "live_rejects_malformed_since_without_cursor_validation",
+      "event_delivery": "live",
+      "request": {
+        "since": "not-a-cursor"
+      },
+      "expected_status": 400,
+      "expected_rejection_reason": "since_unsupported_in_live_mode"
     },
     {
       "name": "replay_initial_connection_delivers_subsequent_events_only",
@@ -73,12 +83,39 @@
       "expected_status": 200
     },
     {
+      "name": "replay_ignores_malformed_since_when_last_event_id_is_selected",
+      "event_delivery": "replay",
+      "request": {
+        "since": "not-a-cursor",
+        "last_event_id": "150"
+      },
+      "selected_cursor": "150",
+      "selected_cursor_source": "Last-Event-ID",
+      "ignored_query_parameters": [
+        "since"
+      ],
+      "retained_event_ids": ["140", "150", "151", "152", "153", "157"],
+      "authorized_event_ids": ["140", "150", "153", "157"],
+      "expected_first_event_id": "153",
+      "expected_status": 200
+    },
+    {
       "name": "replay_rejects_malformed_last_event_id",
       "event_delivery": "replay",
       "request": {
         "last_event_id": "not-a-decimal-cursor"
       },
-      "expected_status": 400
+      "expected_status": 400,
+      "expected_rejection_reason": "invalid_selected_replay_cursor"
+    },
+    {
+      "name": "replay_rejects_malformed_selected_since",
+      "event_delivery": "replay",
+      "request": {
+        "since": "not-a-cursor"
+      },
+      "expected_status": 400,
+      "expected_rejection_reason": "invalid_selected_replay_cursor"
     }
   ],
   "cases": [
@@ -124,7 +161,8 @@
       "request": {
         "last_event_id": "not-a-cursor"
       },
-      "expected_status": 400
+      "expected_status": 400,
+      "expected_rejection_reason": "invalid_selected_replay_cursor"
     },
     {
       "name": "unavailable_selected_cursor_viewer_resynchronizes_from_snapshot",

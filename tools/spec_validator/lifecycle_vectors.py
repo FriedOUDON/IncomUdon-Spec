@@ -383,6 +383,12 @@ def _validate_management_sse_resume(root: Path) -> list[str]:
         if mode == "live":
             _compare(errors, f"{name} status", case.get("expected_status"), 400 if has_since else 200)
             if has_since:
+                _compare(
+                    errors,
+                    f"{name} rejection reason",
+                    case.get("expected_rejection_reason"),
+                    "since_unsupported_in_live_mode",
+                )
                 continue
             _compare(errors, f"{name} replay", case.get("replay"), "none")
             _compare(
@@ -399,6 +405,12 @@ def _validate_management_sse_resume(root: Path) -> list[str]:
         expected_status = 400 if selected_cursor is not None and not _is_decimal_event_cursor(selected_cursor) else 200
         _compare(errors, f"{name} status", case.get("expected_status"), expected_status)
         if expected_status == 400:
+            _compare(
+                errors,
+                f"{name} rejection reason",
+                case.get("expected_rejection_reason"),
+                "invalid_selected_replay_cursor",
+            )
             continue
         if selected_cursor is None:
             _compare(errors, f"{name} replay", case.get("replay"), "none")
@@ -431,6 +443,12 @@ def _validate_management_sse_resume(root: Path) -> list[str]:
         selected_cursor = request.get("last_event_id") if has_last_event_id else request.get("since")
         if selected_cursor is not None and not _is_decimal_event_cursor(selected_cursor):
             _compare(errors, f"{name} status", case.get("expected_status"), 400)
+            _compare(
+                errors,
+                f"{name} rejection reason",
+                case.get("expected_rejection_reason"),
+                "invalid_selected_replay_cursor",
+            )
             continue
         if "cursor_state" in case:
             _compare(errors, f"{name} status", case.get("expected_status"), 410)
