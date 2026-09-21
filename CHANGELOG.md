@@ -24,8 +24,9 @@
   and never replaying historical events.
 
 - Clarifies that Managed Service Admission may operate without PCL for grant
-  issuance and natural expiry; prompt Relay-side revocation of accepted grants
-  requires PCL.
+  issuance and natural expiry; without PCL, administrative changes stop
+  issuance of new affected grants but do not promptly invalidate already-issued
+  grants. Prompt Relay-side revocation of already-issued grants requires PCL.
 
 ## v0.7.0-draft - 2026-09-16
 
