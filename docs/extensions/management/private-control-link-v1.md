@@ -111,7 +111,7 @@ After establishment, the Management Service may send
 - `channel_id`: the affected channel.
 - At least one target: `service_id` and/or `grant_id_hash`.
 - `reason`: `acl_removed`, `service_disabled`, or `grant_revoked`.
-- `deny_for_seconds`: from 1 through 5400.
+- `deny_until`: an absolute UTC Unix timestamp in seconds.
 
 `grant_id_hash` is the canonical unpadded Base64URL encoding of
 `SHA-256(ASCII(compact_jws_jti))`. The Relay MUST model each accepted command
@@ -124,24 +124,37 @@ as one channel-bound deny rule with the following selector scope:
 - Both fields create a conjunctive rule. Both selectors MUST match; the command
   MUST NOT widen into an OR match.
 
-The Relay MUST compute `deny_deadline` from its monotonic command-acceptance
-instant plus `deny_for_seconds`, retain the rule only before that deadline, and
-remove it at the deadline. A Management Service revoking a service or grant
-MUST select a duration that covers every still-valid affected grant, including
-any permitted receive-only grace. For a rule containing `grant_id_hash`, it
-MUST NOT select a deadline later than the targeted grant's maximum possible
-grace deadline. A service-scoped rule is not tied to any individual grant
-deadline; it remains bounded by `deny_for_seconds` and may be renewed before
-expiry when policy requires a longer disablement.
+`deny_until` defines a fixed deadline, not a duration relative to any Relay
+acceptance or retry time. The Management Service and Relay MUST use sufficiently
+synchronized UTC clocks to evaluate it. At command processing, the Relay MUST
+return `error` with code `invalid_revocation_deadline` when `deny_until` is more
+than 5400 seconds after its current UTC time. If `deny_until` is at or before
+the Relay's current UTC time, the Relay MUST NOT install or reactivate a rule;
+it MUST return an `ack` with outcome `already_expired`, the supplied
+`deny_until`, and zero effect counts.
 
-On accepting a valid command, the Relay MUST install the bounded deny rule
-before replying. It MUST reject matching future Managed Service Admission
-flows, invalidate matching current service-admitted state, remove matching
-memberships, stop their media forwarding, and send `TALK_RELEASE` with
-`SERVICE_ADMISSION_REVOKED` for every matching active talker. It MUST return an
-`ack` only after these effects are committed. The `affected_membership_count`
-and `talk_release_count` report the effects for the command and may both be
-zero when the deny rule was installed before the targeted service joined.
+For a non-expired command, the Relay MUST retain the rule while its current UTC
+time is strictly before `deny_until` and remove it at that deadline. A
+Management Service revoking a service or grant MUST choose a deadline that
+covers every still-valid affected grant, including any permitted receive-only
+grace. For a rule containing `grant_id_hash`, `deny_until` MUST NOT be later
+than the targeted grant's maximum possible grace deadline. A service-scoped
+rule is not tied to any individual grant deadline; it may be extended only by a
+new command with a fresh `message_id` and a later `deny_until`.
+
+On accepting a non-expired valid command, the Relay MUST durably commit the
+bounded deny rule before replying. The durable state MUST include the selector,
+`deny_until`, `message_id`, sufficient command identity to recognize an
+identical retry, and the original acknowledgement. The Relay MUST restore every
+unexpired rule before accepting Managed Service Admission after a restart. It
+MUST reject matching future Managed Service Admission flows, invalidate matching
+current service-admitted state, remove matching memberships, stop their media
+forwarding, and send `TALK_RELEASE` with `SERVICE_ADMISSION_REVOKED` for every
+matching active talker. It MUST return an `ack` only after these effects are
+committed. An applied `ack` MUST echo `deny_until`; its
+`affected_membership_count` and `talk_release_count` report the effects for the
+command and may both be zero when the deny rule was installed before the
+targeted service joined.
 
 The Relay SHOULD complete these effects within five seconds of receiving the
 command. An unauthorized sender or an unsupported command MUST produce `error`,
@@ -153,8 +166,12 @@ unacknowledged command after reconnecting with the identical `message_id` and
 identical command body. The Relay MUST retain a bounded idempotency entry for
 at least ten minutes after sending an `ack`; a duplicate MUST resend the cached
 acknowledgement and MUST NOT emit another `TALK_RELEASE`. Reusing a
-`message_id` with a different body is a protocol error. A Relay restart may
-lose this cache, but reapplying a revocation command remains state-idempotent.
+`message_id` with a different body is a protocol error. Cache eviction or a
+Relay restart MUST NOT change an active rule's `deny_until`: an identical retry
+for an unexpired durable rule MUST return its original acknowledgement and MUST
+NOT emit another `TALK_RELEASE`. After `deny_until`, a retry MUST NOT recreate
+or extend the rule and returns `already_expired` if no cached acknowledgement is
+available.
 
 The Management Service MUST keep a revocation pending until it receives an
 `ack` or the bounded denial period no longer matters. It MUST NOT treat a lost

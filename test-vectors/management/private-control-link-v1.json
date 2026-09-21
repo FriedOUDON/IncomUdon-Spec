@@ -58,7 +58,7 @@
       "service_id": "recorder-01",
       "grant_id_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
       "reason": "grant_revoked",
-      "deny_for_seconds": 5400
+      "deny_until": 1767231000
     },
     {
       "schema_version": "private-control-link-v1",
@@ -66,8 +66,19 @@
       "message_id": "QEFCQ0RFRkdISUpLTE1OTw",
       "in_reply_to": "MDEyMzQ1Njc4OTo7PD0-Pw",
       "outcome": "applied",
+      "deny_until": 1767231000,
       "affected_membership_count": 1,
       "talk_release_count": 1
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "ack",
+      "message_id": "YWJjZGVmZ2hpamtsbW5vcA",
+      "in_reply_to": "MDEyMzQ1Njc4OTo7PD0-Pw",
+      "outcome": "already_expired",
+      "deny_until": 1767231000,
+      "affected_membership_count": 0,
+      "talk_release_count": 0
     },
     {
       "schema_version": "private-control-link-v1",
@@ -121,7 +132,7 @@
       "message_id": "cHFyc3R1dnd4eXp7fH1-fw",
       "channel_id": 111,
       "reason": "grant_revoked",
-      "deny_for_seconds": 5400
+      "deny_until": 1767231000
     },
     {
       "schema_version": "private-control-link-v1",
@@ -139,7 +150,17 @@
       "channel_id": 111,
       "service_id": "recorder-01",
       "reason": "service_disabled",
-      "deny_for_seconds": 5401
+      "deny_until": 0
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "ack",
+      "message_id": "YWJjZGVmZ2hpamtsbW5vcA",
+      "in_reply_to": "MDEyMzQ1Njc4OTo7PD0-Pw",
+      "outcome": "already_expired",
+      "deny_until": 1767231000,
+      "affected_membership_count": 1,
+      "talk_release_count": 0
     },
     {
       "schema_version": "private-control-link-v1",
@@ -173,15 +194,15 @@
       "private_control_link_enabled": false,
       "grant": {
         "service_id": "recorder-01",
-        "issued_at_relay_monotonic_seconds": 1000,
-        "expires_at_relay_monotonic_seconds": 1600
+        "issued_at_relay_unix_seconds": 1767225600,
+        "expires_at_relay_unix_seconds": 1767226200
       },
       "administrative_change": {
         "type": "service_disabled",
-        "at_relay_monotonic_seconds": 1010
+        "at_relay_unix_seconds": 1767225610
       },
       "presentation": {
-        "at_relay_monotonic_seconds": 1020,
+        "at_relay_unix_seconds": 1767225620,
         "normal_relay_local_validation_succeeds": true
       },
       "expected": {
@@ -195,21 +216,21 @@
       "private_control_link_enabled": true,
       "grant": {
         "service_id": "recorder-01",
-        "issued_at_relay_monotonic_seconds": 2000,
-        "expires_at_relay_monotonic_seconds": 2600
+        "issued_at_relay_unix_seconds": 1767226600,
+        "expires_at_relay_unix_seconds": 1767227200
       },
       "administrative_change": {
         "type": "service_disabled",
-        "at_relay_monotonic_seconds": 2010
+        "at_relay_unix_seconds": 1767226610
       },
       "revocation_command": {
         "channel_id": 111,
         "service_id": "recorder-01",
-        "accepted_at_relay_monotonic_seconds": 2011,
-        "deny_for_seconds": 60
+        "accepted_at_relay_unix_seconds": 1767226611,
+        "deny_until": 1767226671
       },
       "presentation": {
-        "at_relay_monotonic_seconds": 2020,
+        "at_relay_unix_seconds": 1767226620,
         "normal_relay_local_validation_succeeds": true
       },
       "expected": {
@@ -226,14 +247,16 @@
         "channel_id": 111,
         "service_id": "recorder-01",
         "grant_id_hash": "grant-hash-a",
-        "deny_for_seconds": 5400
+        "deny_until": 1767231000
       },
+      "accepted_at_relay_unix_seconds": 1767225600,
       "memberships": [
         { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "active_talk": true },
         { "channel_id": 111, "service_id": "recorder-02", "grant_id_hash": "grant-hash-b", "active_talk": false }
       ],
       "expected": {
         "deny_rule_scope": "conjunctive",
+        "deny_until": 1767231000,
         "deny_rule_installed": true,
         "affected_membership_count": 1,
         "talk_release_count": 1,
@@ -246,14 +269,16 @@
         "channel_id": 111,
         "service_id": "recorder-01",
         "grant_id_hash": "grant-hash-a",
-        "deny_for_seconds": 60
+        "deny_until": 1767225660
       },
+      "accepted_at_relay_unix_seconds": 1767225600,
       "memberships": [
         { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-b", "active_talk": true },
         { "channel_id": 111, "service_id": "recorder-02", "grant_id_hash": "grant-hash-a", "active_talk": true }
       ],
       "expected": {
         "deny_rule_scope": "conjunctive",
+        "deny_until": 1767225660,
         "deny_rule_installed": true,
         "affected_membership_count": 0,
         "talk_release_count": 0,
@@ -265,22 +290,22 @@
       "command": {
         "channel_id": 111,
         "service_id": "recorder-01",
-        "deny_for_seconds": 60
+        "deny_until": 1767225660
       },
-      "accepted_at_relay_monotonic_seconds": 1000,
+      "accepted_at_relay_unix_seconds": 1767225600,
       "memberships": [
         { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "active_talk": true },
         { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-b", "active_talk": false },
         { "channel_id": 111, "service_id": "recorder-02", "grant_id_hash": "grant-hash-c", "active_talk": false }
       ],
       "admission_attempts": [
-        { "name": "new_grant_for_disabled_service", "accepted_at_relay_monotonic_seconds": 1001, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-future", "expected": "deny_by_service_rule" },
-        { "name": "different_service_is_not_denied", "accepted_at_relay_monotonic_seconds": 1001, "channel_id": 111, "service_id": "recorder-02", "grant_id_hash": "grant-hash-future", "expected": "not_denied_by_rule" },
-        { "name": "same_service_after_deadline_is_not_denied", "accepted_at_relay_monotonic_seconds": 1060, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-after-expiry", "expected": "not_denied_by_rule" }
+        { "name": "new_grant_for_disabled_service", "accepted_at_relay_unix_seconds": 1767225601, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-future", "expected": "deny_by_service_rule" },
+        { "name": "different_service_is_not_denied", "accepted_at_relay_unix_seconds": 1767225601, "channel_id": 111, "service_id": "recorder-02", "grant_id_hash": "grant-hash-future", "expected": "not_denied_by_rule" },
+        { "name": "same_service_after_deadline_is_not_denied", "accepted_at_relay_unix_seconds": 1767225660, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-after-expiry", "expected": "not_denied_by_rule" }
       ],
       "expected": {
         "deny_rule_scope": "service",
-        "deny_deadline_relay_monotonic_seconds": 1060,
+        "deny_until": 1767225660,
         "deny_rule_installed": true,
         "affected_membership_count": 2,
         "talk_release_count": 1,
@@ -292,45 +317,114 @@
       "command": {
         "channel_id": 111,
         "grant_id_hash": "grant-hash-a",
-        "deny_for_seconds": 60
+        "deny_until": 1767226660
       },
-      "accepted_at_relay_monotonic_seconds": 2000,
-      "targeted_grant_maximum_grace_deadline_relay_monotonic_seconds": 2060,
+      "accepted_at_relay_unix_seconds": 1767226600,
+      "targeted_grant_maximum_grace_deadline_unix_seconds": 1767226660,
       "memberships": [
         { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "active_talk": true },
         { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-b", "active_talk": true }
       ],
       "admission_attempts": [
-        { "name": "same_service_different_grant", "accepted_at_relay_monotonic_seconds": 2001, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-b", "expected": "not_denied_by_rule" },
-        { "name": "targeted_grant_before_deadline", "accepted_at_relay_monotonic_seconds": 2001, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "expected": "deny_by_grant_rule" },
-        { "name": "targeted_grant_after_deadline", "accepted_at_relay_monotonic_seconds": 2060, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "expected": "not_denied_by_rule" }
+        { "name": "same_service_different_grant", "accepted_at_relay_unix_seconds": 1767226601, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-b", "expected": "not_denied_by_rule" },
+        { "name": "targeted_grant_before_deadline", "accepted_at_relay_unix_seconds": 1767226601, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "expected": "deny_by_grant_rule" },
+        { "name": "targeted_grant_after_deadline", "accepted_at_relay_unix_seconds": 1767226660, "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "expected": "not_denied_by_rule" }
       ],
       "expected": {
         "deny_rule_scope": "grant",
-        "deny_deadline_relay_monotonic_seconds": 2060,
+        "deny_until": 1767226660,
         "deny_rule_installed": true,
         "affected_membership_count": 1,
         "talk_release_count": 1,
         "talk_release_reason": "SERVICE_ADMISSION_REVOKED"
       }
-    },
+    }
+  ],
+  "idempotency_cases": [
     {
-      "name": "duplicate_command_replays_cached_ack_without_second_release",
+      "name": "identical_retry_preserves_deny_until_across_cache_expiry_and_restart",
       "command": {
+        "message_id": "AAECAwQFBgcICQoLDA0ODw",
         "channel_id": 111,
         "service_id": "recorder-01",
-        "deny_for_seconds": 5400
+        "deny_until": 1767231000
       },
-      "memberships": [
-        { "channel_id": 111, "service_id": "recorder-01", "grant_id_hash": "grant-hash-a", "active_talk": true }
-      ],
-      "duplicate": true,
-      "expected": {
-        "deny_rule_scope": "service",
-        "first_ack_outcome": "applied",
-        "duplicate_ack": "cached_identical_ack",
-        "additional_talk_release_count": 0
-      }
+      "initial_acceptance_at_relay_unix_seconds": 1767225600,
+      "initial_talk_release_count": 1,
+      "retries": [
+        {
+          "name": "immediate_duplicate_uses_cached_ack",
+          "at_relay_unix_seconds": 1767225601,
+          "idempotency_cache_retained": true,
+          "relay_restarted": false,
+          "identical_message_id_and_body": true,
+          "expected_ack": "cached_original_ack",
+          "expected_deny_until": 1767231000,
+          "expected_additional_talk_release_count": 0
+        },
+        {
+          "name": "duplicate_after_cache_expiry_uses_durable_rule",
+          "at_relay_unix_seconds": 1767226300,
+          "idempotency_cache_retained": false,
+          "relay_restarted": false,
+          "identical_message_id_and_body": true,
+          "expected_ack": "durable_original_ack",
+          "expected_deny_until": 1767231000,
+          "expected_additional_talk_release_count": 0
+        },
+        {
+          "name": "duplicate_after_restart_uses_restored_durable_rule",
+          "at_relay_unix_seconds": 1767226400,
+          "idempotency_cache_retained": false,
+          "relay_restarted": true,
+          "identical_message_id_and_body": true,
+          "expected_ack": "durable_original_ack",
+          "expected_deny_until": 1767231000,
+          "expected_additional_talk_release_count": 0
+        },
+        {
+          "name": "duplicate_at_expiry_does_not_reactivate_rule",
+          "at_relay_unix_seconds": 1767231000,
+          "idempotency_cache_retained": false,
+          "relay_restarted": false,
+          "identical_message_id_and_body": true,
+          "expected_ack": "already_expired",
+          "expected_deny_until": 1767231000,
+          "expected_additional_talk_release_count": 0
+        }
+      ]
+    },
+    {
+      "name": "fresh_command_with_later_deny_until_explicitly_extends_service_rule",
+      "initial_command": {
+        "message_id": "EBESExQVFhcYGRobHB0eHw",
+        "channel_id": 111,
+        "service_id": "recorder-01",
+        "deny_until": 1767225660
+      },
+      "initial_acceptance_at_relay_unix_seconds": 1767225600,
+      "renewal_command": {
+        "message_id": "ICEiIyQlJicoKSorLC0uLw",
+        "channel_id": 111,
+        "service_id": "recorder-01",
+        "deny_until": 1767229220
+      },
+      "renewal_acceptance_at_relay_unix_seconds": 1767225620,
+      "expected_effective_deny_until": 1767229220
+    }
+  ],
+  "deadline_validation_cases": [
+    {
+      "name": "deny_until_more_than_5400_seconds_in_future_is_rejected",
+      "accepted_at_relay_unix_seconds": 1767225600,
+      "deny_until": 1767231001,
+      "expected": "invalid_revocation_deadline"
+    },
+    {
+      "name": "deny_until_at_or_before_current_time_is_already_expired",
+      "accepted_at_relay_unix_seconds": 1767225600,
+      "deny_until": 1767225600,
+      "expected": "already_expired"
     }
   ],
   "diagnostics_lifecycle": {

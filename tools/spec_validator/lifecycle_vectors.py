@@ -687,22 +687,22 @@ def _validate_private_control_link(root: Path) -> list[str]:
         if not isinstance(grant_service, str):
             raise VectorValidationError(f"{name}: grant service_id must be a string")
         issued_at = _integer(
-            grant.get("issued_at_relay_monotonic_seconds"),
+            grant.get("issued_at_relay_unix_seconds"),
             f"{name} grant issuance time",
             MAX_SAFE_JSON_INTEGER,
         )
         expires_at = _integer(
-            grant.get("expires_at_relay_monotonic_seconds"),
+            grant.get("expires_at_relay_unix_seconds"),
             f"{name} grant expiry time",
             MAX_SAFE_JSON_INTEGER,
         )
         changed_at = _integer(
-            administrative_change.get("at_relay_monotonic_seconds"),
+            administrative_change.get("at_relay_unix_seconds"),
             f"{name} administrative change time",
             MAX_SAFE_JSON_INTEGER,
         )
         presented_at = _integer(
-            presentation.get("at_relay_monotonic_seconds"),
+            presentation.get("at_relay_unix_seconds"),
             f"{name} presentation time",
             MAX_SAFE_JSON_INTEGER,
         )
@@ -737,26 +737,26 @@ def _validate_private_control_link(root: Path) -> list[str]:
                 )
             command_service = command.get("service_id")
             command_at = _integer(
-                command.get("accepted_at_relay_monotonic_seconds"),
+                command.get("accepted_at_relay_unix_seconds"),
                 f"{name} revocation command acceptance time",
                 MAX_SAFE_JSON_INTEGER,
             )
-            deny_for = _integer(
-                command.get("deny_for_seconds"),
-                f"{name} revocation deny duration",
-                0xFFFFFFFF,
+            deny_until = _integer(
+                command.get("deny_until"),
+                f"{name} revocation deny deadline",
+                MAX_SAFE_JSON_INTEGER,
             )
             _integer(command.get("channel_id"), f"{name} revocation channel ID", 0xFFFFFFFF)
             if not isinstance(command_service, str):
                 raise VectorValidationError(f"{name}: revocation command service_id must be a string")
-            if not 1 <= deny_for <= 5400:
-                errors.append(f"{name}: revocation deny_for_seconds must be in 1..5400")
+            if not command_at < deny_until <= command_at + 5400:
+                errors.append(f"{name}: deny_until must be within the 5400-second command window")
             if not changed_at <= command_at < presented_at:
                 errors.append(
                     f"{name}: revocation command must be accepted after the change and before presentation"
                 )
             remote_revocation_applied = (
-                command_service == grant_service and presented_at < command_at + deny_for
+                command_service == grant_service and presented_at < deny_until
             )
         elif command is not None:
             errors.append(f"{name}: PCL-disabled case must not contain a revocation_command")
@@ -790,9 +790,7 @@ def _validate_private_control_link(root: Path) -> list[str]:
         expected = case.get("expected")
         if not isinstance(command, dict) or not isinstance(memberships, list) or not isinstance(expected, dict):
             raise VectorValidationError(f"{name} is malformed")
-        duration = _integer(command.get("deny_for_seconds"), f"{name} deny_for_seconds", 0xFFFFFFFF)
-        if not 1 <= duration <= 5400:
-            errors.append(f"{name}: deny_for_seconds must be in 1..5400")
+        deny_until = _integer(command.get("deny_until"), f"{name} deny_until", MAX_SAFE_JSON_INTEGER)
         channel = _integer(command.get("channel_id"), f"{name} channel_id", 0xFFFFFFFF)
         service = command.get("service_id")
         grant_hash = command.get("grant_id_hash")
@@ -820,35 +818,28 @@ def _validate_private_control_link(root: Path) -> list[str]:
             if matches_rule(membership):
                 matching.append(membership)
 
-        accepted_at = case.get("accepted_at_relay_monotonic_seconds")
-        deny_deadline: int | None = None
-        if accepted_at is not None:
-            accepted_at = _integer(
-                accepted_at,
-                f"{name} accepted_at_relay_monotonic_seconds",
-                MAX_SAFE_JSON_INTEGER,
-            )
-            deny_deadline = accepted_at + duration
-            _compare(
-                errors,
-                f"{name} deny deadline",
-                expected.get("deny_deadline_relay_monotonic_seconds"),
-                deny_deadline,
-            )
+        accepted_at = _integer(
+            case.get("accepted_at_relay_unix_seconds"),
+            f"{name} accepted_at_relay_unix_seconds",
+            MAX_SAFE_JSON_INTEGER,
+        )
+        if not accepted_at < deny_until <= accepted_at + 5400:
+            errors.append(f"{name}: deny_until must be within the 5400-second command window")
+        _compare(errors, f"{name} deny_until", expected.get("deny_until"), deny_until)
         grant_grace_deadline = case.get(
-            "targeted_grant_maximum_grace_deadline_relay_monotonic_seconds"
+            "targeted_grant_maximum_grace_deadline_unix_seconds"
         )
         if grant_grace_deadline is not None:
-            if grant_hash is None or deny_deadline is None:
+            if grant_hash is None:
                 raise VectorValidationError(
-                    f"{name} grant grace deadline requires a grant-scoped command acceptance time"
+                    f"{name} grant grace deadline requires a grant-scoped command"
                 )
             grant_grace_deadline = _integer(
                 grant_grace_deadline,
                 f"{name} targeted grant maximum grace deadline",
                 MAX_SAFE_JSON_INTEGER,
             )
-            if deny_deadline > grant_grace_deadline:
+            if deny_until > grant_grace_deadline:
                 errors.append(f"{name}: grant-scoped deny deadline exceeds maximum grace deadline")
         admission_attempts = case.get("admission_attempts", [])
         if not isinstance(admission_attempts, list):
@@ -858,21 +849,14 @@ def _validate_private_control_link(root: Path) -> list[str]:
                 raise VectorValidationError(f"{name} admission attempt {attempt_index} must be an object")
             attempt_name = attempt.get("name", f"{name} admission attempt {attempt_index}")
             attempt_at = _integer(
-                attempt.get("accepted_at_relay_monotonic_seconds"),
-                f"{attempt_name} accepted_at_relay_monotonic_seconds",
+                attempt.get("accepted_at_relay_unix_seconds"),
+                f"{attempt_name} accepted_at_relay_unix_seconds",
                 MAX_SAFE_JSON_INTEGER,
             )
-            if deny_deadline is None:
-                raise VectorValidationError(f"{attempt_name} requires a command acceptance time")
-            active = attempt_at < deny_deadline
+            active = attempt_at < deny_until
             actual = f"deny_by_{scope}_rule" if active and matches_rule(attempt) else "not_denied_by_rule"
             _compare(errors, f"{attempt_name} result", attempt.get("expected"), actual)
 
-        if case.get("duplicate") is True:
-            _compare(errors, f"{name} first ACK", expected.get("first_ack_outcome"), "applied")
-            _compare(errors, f"{name} duplicate ACK", expected.get("duplicate_ack"), "cached_identical_ack")
-            _compare(errors, f"{name} duplicate TALK_RELEASE count", expected.get("additional_talk_release_count"), 0)
-            continue
         releases = sum(1 for membership in matching if membership.get("active_talk") is True)
         _compare(errors, f"{name} deny rule", expected.get("deny_rule_installed"), True)
         _compare(errors, f"{name} affected membership count", expected.get("affected_membership_count"), len(matching))
@@ -883,6 +867,184 @@ def _validate_private_control_link(root: Path) -> list[str]:
             expected.get("talk_release_reason"),
             "SERVICE_ADMISSION_REVOKED" if releases else None,
         )
+
+    def validate_idempotency_command(
+        command: Any,
+        accepted_at: Any,
+        label: str,
+    ) -> tuple[str, int, str | None, str | None, int]:
+        if not isinstance(command, dict):
+            raise VectorValidationError(f"{label}: command must be an object")
+        message_id = command.get("message_id")
+        if not isinstance(message_id, str):
+            raise VectorValidationError(f"{label}: message_id must be a string")
+        channel = _integer(command.get("channel_id"), f"{label} channel_id", 0xFFFFFFFF)
+        service = command.get("service_id")
+        grant_hash = command.get("grant_id_hash")
+        if service is None and grant_hash is None:
+            raise VectorValidationError(f"{label}: command has no revocation target")
+        if service is not None and not isinstance(service, str):
+            raise VectorValidationError(f"{label}: service_id must be a string")
+        if grant_hash is not None and not isinstance(grant_hash, str):
+            raise VectorValidationError(f"{label}: grant_id_hash must be a string")
+        accepted = _integer(
+            accepted_at,
+            f"{label} acceptance time",
+            MAX_SAFE_JSON_INTEGER,
+        )
+        deny_until = _integer(
+            command.get("deny_until"),
+            f"{label} deny_until",
+            MAX_SAFE_JSON_INTEGER,
+        )
+        if not accepted < deny_until <= accepted + 5400:
+            errors.append(f"{label}: deny_until must be within the 5400-second command window")
+        return message_id, channel, service, grant_hash, deny_until
+
+    idempotency_cases = document.get("idempotency_cases")
+    if not isinstance(idempotency_cases, list):
+        raise VectorValidationError("Private Control Link idempotency_cases must be an array")
+    for index, case in enumerate(idempotency_cases):
+        if not isinstance(case, dict):
+            raise VectorValidationError(
+                f"Private Control Link idempotency case {index} must be an object"
+            )
+        name = case.get("name", f"Private Control Link idempotency case {index}")
+        if "retries" in case:
+            command = case.get("command")
+            message_id, _, _, _, deny_until = validate_idempotency_command(
+                command,
+                case.get("initial_acceptance_at_relay_unix_seconds"),
+                name,
+            )
+            initial_accepted_at = _integer(
+                case.get("initial_acceptance_at_relay_unix_seconds"),
+                f"{name} initial acceptance time",
+                MAX_SAFE_JSON_INTEGER,
+            )
+            initial_releases = _integer(
+                case.get("initial_talk_release_count"),
+                f"{name} initial talk release count",
+                0xFFFFFFFF,
+            )
+            if initial_releases < 1:
+                errors.append(f"{name}: initial command must demonstrate a release effect")
+            retries = case.get("retries")
+            if not isinstance(retries, list) or not retries:
+                raise VectorValidationError(f"{name}: retries must be a non-empty array")
+            previous_at = initial_accepted_at
+            for retry_index, retry in enumerate(retries):
+                if not isinstance(retry, dict):
+                    raise VectorValidationError(f"{name} retry {retry_index} must be an object")
+                retry_name = retry.get("name", f"{name} retry {retry_index}")
+                retry_at = _integer(
+                    retry.get("at_relay_unix_seconds"),
+                    f"{retry_name} time",
+                    MAX_SAFE_JSON_INTEGER,
+                )
+                if retry_at < previous_at:
+                    errors.append(f"{name}: retry times must be non-decreasing")
+                previous_at = retry_at
+                for field in (
+                    "idempotency_cache_retained",
+                    "relay_restarted",
+                    "identical_message_id_and_body",
+                ):
+                    if not isinstance(retry.get(field), bool):
+                        raise VectorValidationError(f"{retry_name}: {field} must be a boolean")
+                if retry.get("relay_restarted") and retry.get("idempotency_cache_retained"):
+                    errors.append(f"{retry_name}: a Relay restart must not retain the in-memory cache")
+                _compare(
+                    errors,
+                    f"{retry_name} identical command",
+                    retry.get("identical_message_id_and_body"),
+                    True,
+                )
+                active = retry_at < deny_until
+                if active:
+                    actual_ack = (
+                        "cached_original_ack"
+                        if retry.get("idempotency_cache_retained")
+                        else "durable_original_ack"
+                    )
+                else:
+                    actual_ack = "already_expired"
+                _compare(errors, f"{retry_name} ACK", retry.get("expected_ack"), actual_ack)
+                _compare(
+                    errors,
+                    f"{retry_name} deny_until",
+                    retry.get("expected_deny_until"),
+                    deny_until,
+                )
+                _compare(
+                    errors,
+                    f"{retry_name} additional TALK_RELEASE count",
+                    retry.get("expected_additional_talk_release_count"),
+                    0,
+                )
+                if retry.get("relay_restarted") and active and actual_ack != "durable_original_ack":
+                    errors.append(f"{retry_name}: restart must restore the durable deny rule")
+            continue
+
+        initial_command = case.get("initial_command")
+        renewal_command = case.get("renewal_command")
+        initial = validate_idempotency_command(
+            initial_command,
+            case.get("initial_acceptance_at_relay_unix_seconds"),
+            f"{name} initial command",
+        )
+        renewal = validate_idempotency_command(
+            renewal_command,
+            case.get("renewal_acceptance_at_relay_unix_seconds"),
+            f"{name} renewal command",
+        )
+        initial_message_id, initial_channel, initial_service, initial_grant, initial_deadline = initial
+        renewal_message_id, renewal_channel, renewal_service, renewal_grant, renewal_deadline = renewal
+        if initial_message_id == renewal_message_id:
+            errors.append(f"{name}: an explicit extension requires a fresh message_id")
+        if (initial_channel, initial_service, initial_grant) != (
+            renewal_channel,
+            renewal_service,
+            renewal_grant,
+        ):
+            errors.append(f"{name}: renewal command must use the same revocation selector")
+        if renewal_deadline <= initial_deadline:
+            errors.append(f"{name}: renewal deny_until must be later than the original deadline")
+        _compare(
+            errors,
+            f"{name} effective deny_until",
+            case.get("expected_effective_deny_until"),
+            renewal_deadline,
+        )
+
+    deadline_cases = document.get("deadline_validation_cases")
+    if not isinstance(deadline_cases, list):
+        raise VectorValidationError("Private Control Link deadline_validation_cases must be an array")
+    for index, case in enumerate(deadline_cases):
+        if not isinstance(case, dict):
+            raise VectorValidationError(
+                f"Private Control Link deadline validation case {index} must be an object"
+            )
+        name = case.get("name", f"Private Control Link deadline validation case {index}")
+        accepted_at = _integer(
+            case.get("accepted_at_relay_unix_seconds"),
+            f"{name} acceptance time",
+            MAX_SAFE_JSON_INTEGER,
+        )
+        deny_until = _integer(
+            case.get("deny_until"),
+            f"{name} deny_until",
+            MAX_SAFE_JSON_INTEGER,
+        )
+        actual = (
+            "invalid_revocation_deadline"
+            if deny_until > accepted_at + 5400
+            else "already_expired"
+            if deny_until <= accepted_at
+            else "applied"
+        )
+        _compare(errors, f"{name} result", case.get("expected"), actual)
+
     diagnostics = document.get("diagnostics_lifecycle")
     if not isinstance(diagnostics, dict):
         raise VectorValidationError("Private Control Link diagnostics_lifecycle must be an object")

@@ -34,6 +34,11 @@
       "minimum": 0,
       "maximum": 4294967295
     },
+    "unixTime": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
     "endpointSenderId": {
       "type": "integer",
       "minimum": 1,
@@ -92,7 +97,7 @@
     },
     "revokeServiceAdmission": {
       "type": "object",
-      "required": ["schema_version", "type", "message_id", "channel_id", "reason", "deny_for_seconds"],
+      "required": ["schema_version", "type", "message_id", "channel_id", "reason", "deny_until"],
       "properties": {
         "schema_version": { "const": "private-control-link-v1" },
         "type": { "const": "revoke_service_admission" },
@@ -101,7 +106,7 @@
         "service_id": { "$ref": "#/$defs/serviceId" },
         "grant_id_hash": { "$ref": "#/$defs/grantIdHash" },
         "reason": { "enum": ["acl_removed", "service_disabled", "grant_revoked"] },
-        "deny_for_seconds": { "type": "integer", "minimum": 1, "maximum": 5400 }
+        "deny_until": { "$ref": "#/$defs/unixTime" }
       },
       "anyOf": [
         { "required": ["service_id"] },
@@ -111,17 +116,29 @@
     },
     "ack": {
       "type": "object",
-      "required": ["schema_version", "type", "message_id", "in_reply_to", "outcome", "affected_membership_count", "talk_release_count"],
+      "required": ["schema_version", "type", "message_id", "in_reply_to", "outcome", "deny_until", "affected_membership_count", "talk_release_count"],
       "properties": {
         "schema_version": { "const": "private-control-link-v1" },
         "type": { "const": "ack" },
         "message_id": { "$ref": "#/$defs/identifier16" },
         "in_reply_to": { "$ref": "#/$defs/identifier16" },
-        "outcome": { "const": "applied" },
+        "outcome": { "enum": ["applied", "already_expired"] },
+        "deny_until": { "$ref": "#/$defs/unixTime" },
         "affected_membership_count": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
         "talk_release_count": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "outcome": { "const": "already_expired" } }, "required": ["outcome"] },
+          "then": {
+            "properties": {
+              "affected_membership_count": { "const": 0 },
+              "talk_release_count": { "const": 0 }
+            }
+          }
+        }
+      ]
     },
     "error": {
       "type": "object",
@@ -131,7 +148,7 @@
         "type": { "const": "error" },
         "message_id": { "$ref": "#/$defs/identifier16" },
         "in_reply_to": { "$ref": "#/$defs/identifier16" },
-        "code": { "enum": ["handshake_required", "identity_mismatch", "unsupported_message", "invalid_revocation_target", "unauthorized", "overloaded", "internal_error"] }
+        "code": { "enum": ["handshake_required", "identity_mismatch", "unsupported_message", "invalid_revocation_target", "invalid_revocation_deadline", "unauthorized", "overloaded", "internal_error"] }
       },
       "additionalProperties": false
     },

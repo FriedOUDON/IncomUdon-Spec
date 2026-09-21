@@ -218,16 +218,16 @@ media forwarding, and release an active talker with `TALK_RELEASE` reason
 `SERVICE_ADMISSION_REVOKED`. A Relay SHOULD complete revocation within five
 seconds of receiving the command.
 
-Relay-side Service Admission deny rules MAY be retained across Management
-Service outages. Every rule MUST contain its channel scope, its bounded
-monotonic deny deadline, and only the selector needed to evaluate it: a
-privacy-preserving grant ID hash or opaque grant ID for a grant-scoped rule, the
-pseudonymous `service_id` for a service-scoped rule, or both selectors for a
-conjunctive rule. A rule containing a grant selector MUST expire no later than
-the targeted grant's maximum possible grace deadline. A service-scoped rule
-MUST expire at its command-derived deny deadline; it may reject future grants
-for that service until then, but MUST NOT retain additional identity
-information.
+Relay-side Service Admission deny rules MUST be retained across Management
+Service outages and Relay restarts until their absolute `deny_until` deadline.
+Every rule MUST contain its channel scope, UTC `deny_until`, idempotency
+metadata sufficient to recognize an identical retry, and only the selector
+needed to evaluate it: a privacy-preserving grant ID hash or opaque grant ID for
+a grant-scoped rule, the pseudonymous `service_id` for a service-scoped rule, or
+both selectors for a conjunctive rule. A rule containing a grant selector MUST
+expire no later than the targeted grant's maximum possible grace deadline. A
+service-scoped rule MUST expire at `deny_until`; it may reject future grants for
+that service until then, but MUST NOT retain additional identity information.
 
 ## Denial reasons
 

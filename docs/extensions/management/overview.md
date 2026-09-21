@@ -348,8 +348,9 @@ Service MUST send `revoke_service_admission` when an ACL is removed, a service
 is disabled, or a grant is revoked. The Relay MUST stop forwarding media for a
 revoked service, remove its membership promptly, and use
 `SERVICE_ADMISSION_REVOKED` only when it applies that command. The command is
-authenticated, bounded, and idempotent; a target propagation time of five
-seconds is RECOMMENDED.
+authenticated, bounded by its fixed `deny_until` deadline, durable across Relay
+restart, and idempotent; a target propagation time of five seconds is
+RECOMMENDED.
 
 Service Admission Grants are intentionally short-lived. A service renews them
 through its mTLS-authenticated Management API session before expiry. To support
