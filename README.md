@@ -43,8 +43,9 @@ requirements for compatible implementations.
 - `docs/protocol/ping.md`: liveness and RTT measurement.
 - `docs/protocol/diagnostics.md`: local debug metrics and redaction rules.
 - `docs/protocol/versioning.md`: compatibility and release procedure.
-- `schemas/`: JSON Schemas for directory, management events, and service grants.
-- `test-vectors/`: deterministic packet, cryptographic, service-admission, and Relay CSV parser test data.
+- `schemas/`: canonical JSON Schemas for schema-governed protocol and management objects.
+- `test-vectors/`: deterministic and semantic interoperability vectors for protocol,
+  security, management, and lifecycle behavior.
 
 ## Compatibility rule
 
