@@ -62,6 +62,16 @@
     },
     {
       "schema_version": "private-control-link-v1",
+      "type": "revoke_service_admission",
+      "message_id": "0NHS09TV1tfY2drb3N3e3w",
+      "channel_id": 100,
+      "service_id": "recorder-test-01",
+      "grant_id_hash": "LcNS4x8QLit4FG_ELcT1jihi9JayZG4hML1hZUDZujI",
+      "reason": "grant_revoked",
+      "deny_until": 1700000600
+    },
+    {
+      "schema_version": "private-control-link-v1",
       "type": "ack",
       "message_id": "QEFCQ0RFRkdISUpLTE1OTw",
       "in_reply_to": "MDEyMzQ1Njc4OTo7PD0-Pw",
@@ -188,6 +198,31 @@
       "channel_id": 111
     }
   ],
+  "grant_id_hash_cross_vector": {
+    "source_vector": "test-vectors/management/service-admission-v1.json",
+    "expected_jti": "test-service-grant-0001",
+    "input_ascii_hex": "746573742d736572766963652d6772616e742d30303031",
+    "sha256_hex": "2dc352e31f102e2b78146fc42dc4f58e2862f496b2646e2130bd616540d9ba32",
+    "grant_id_hash": "LcNS4x8QLit4FG_ELcT1jihi9JayZG4hML1hZUDZujI",
+    "pcl_command_message_id": "0NHS09TV1tfY2drb3N3e3w",
+    "negative_inputs": [
+      {
+        "name": "json_quoted_jti_is_not_canonical_input",
+        "input_ascii_hex": "22746573742d736572766963652d6772616e742d3030303122",
+        "sha256_hex": "be03adb32a642e803f6e79876e08fb765346687dabbc877fc7bd3ce897dd8cca"
+      },
+      {
+        "name": "trailing_newline_is_not_canonical_input",
+        "input_ascii_hex": "746573742d736572766963652d6772616e742d303030310a",
+        "sha256_hex": "2e05959e939b301706d4ce5bf86e9d15edbc7138b7e2825342f8726b0097f9e3"
+      },
+      {
+        "name": "leading_space_is_not_canonical_input",
+        "input_ascii_hex": "20746573742d736572766963652d6772616e742d30303031",
+        "sha256_hex": "ac021f7086087a3899a0a889744cd61dfb80c41e49a05d30c5ee669fa88c1ca6"
+      }
+    ]
+  },
   "deployment_lifecycle_cases": [
     {
       "name": "pcl_disabled_administrative_change_does_not_revoke_previously_issued_unpresented_grant",

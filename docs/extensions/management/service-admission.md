@@ -48,7 +48,7 @@ verification. It contains the following claims:
 | `iss` | Configured Management Service issuer identifier. |
 | `aud` | Exact configured Relay audience. |
 | `svc` | Stable Management-Service-scoped pseudonymous service ID. |
-| `jti` | Cryptographically random grant ID. |
+| `jti` | Cryptographically random ASCII grant ID. Its exact claim bytes identify the grant for PCL `grant_id_hash` derivation. |
 | `iat` / `exp` | Numeric Unix seconds; `exp - iat` MUST be from 60 through 3600 seconds. |
 | `ch` | Authorized `channel_id` (`u32`). |
 | `sid` | Authorized endpoint `sender_id` (`u32`, `1` through `4294967295`). |
@@ -264,7 +264,8 @@ signing key, or compromise of a Recorder Worker's channel credential.
 ## Deterministic vector
 
 `../../../test-vectors/management/service-admission-v1.json` contains synthetic Ed25519 keys,
-a signed grant, a begin payload, a challenge, and a proof.
+a signed grant, a begin payload, a challenge, a proof, and the canonical
+`jti`-derived PCL `grant_id_hash` value.
 `../../../test-vectors/management/service-admission-control-auth-v1.json`
 defines the required client-to-Relay Control Authentication counter sequence.
 Implementations that support Managed Service Admission v1 MUST verify the

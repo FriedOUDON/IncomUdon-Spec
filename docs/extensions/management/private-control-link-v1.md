@@ -114,8 +114,15 @@ After establishment, the Management Service may send
 - `deny_until`: an absolute UTC Unix timestamp in seconds.
 
 `grant_id_hash` is the canonical unpadded Base64URL encoding of
-`SHA-256(ASCII(compact_jws_jti))`. The Relay MUST model each accepted command
-as one channel-bound deny rule with the following selector scope:
+`SHA-256(ASCII(jti))`, where `jti` is the exact string value of the `jti` claim
+from the signature-verified Service Admission JWS payload. The hash input is
+only those ASCII claim bytes: it MUST NOT contain JSON quotation marks, JSON
+escaping, whitespace, a prefix or suffix, or any compact-JWS bytes. The Relay
+MUST derive the same value from the verified grant before evaluating a
+grant-scoped deny rule. The compact-JWS hash used by the proof-of-possession
+flow is a distinct construction and MUST NOT be used as `grant_id_hash`. The
+Relay MUST model each accepted command as one channel-bound deny rule with the
+following selector scope:
 
 - `service_id` only creates a service-scoped rule. It matches every current and
   future Service Admission Grant for that service in the specified channel.
@@ -307,8 +314,9 @@ operator has explicitly configured a protected diagnostic sink.
 
 `../../../test-vectors/management/private-control-link-v1.json` defines framed
 message examples, optional-PCL admission lifecycle, canonical identifier
-validation, revocation idempotency, and Relay diagnostics cases. Implementations
-that support this extension MUST validate the schema, framing limits, target
-intersection, bounded deny duration, duplicate command behavior, diagnostics
-negotiation, redaction, and counter-epoch handling before claiming Private
-Control Link v1 compatibility.
+validation, `jti`-derived `grant_id_hash` cross-vector validation, revocation
+idempotency, and Relay diagnostics cases. Implementations that support this
+extension MUST validate the schema, framing limits, target intersection,
+absolute deny deadlines, duplicate command behavior, diagnostics negotiation,
+redaction, and counter-epoch handling before claiming Private Control Link v1
+compatibility.

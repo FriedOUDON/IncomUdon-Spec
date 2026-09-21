@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
 import json
@@ -42,6 +43,10 @@ def _hex_bytes(value: Any, label: str) -> bytes:
         return bytes.fromhex(value)
     except ValueError as exc:
         raise VectorValidationError(f"{label} is not valid hexadecimal") from exc
+
+
+def _base64url(value: bytes) -> str:
+    return base64.urlsafe_b64encode(value).rstrip(b"=").decode("ascii")
 
 
 def _load(root: Path, relative: str) -> dict[str, Any]:
@@ -657,6 +662,94 @@ def _validate_private_control_link(root: Path) -> list[str]:
     )
     if retention < 600:
         errors.append("Private Control Link idempotency retention is shorter than ten minutes")
+
+    grant_hash_case = document.get("grant_id_hash_cross_vector")
+    if not isinstance(grant_hash_case, dict):
+        raise VectorValidationError("Private Control Link grant_id_hash_cross_vector must be an object")
+    source_vector = grant_hash_case.get("source_vector")
+    if source_vector != "test-vectors/management/service-admission-v1.json":
+        errors.append("Private Control Link grant_id_hash source vector is incorrect")
+    service_vector = _load(root, "test-vectors/management/service-admission-v1.json")
+    grant = service_vector.get("grant")
+    if not isinstance(grant, dict) or not isinstance(grant.get("payload_json"), str):
+        raise VectorValidationError("Service Admission grant payload_json is required")
+    try:
+        claims = json.loads(grant["payload_json"])
+    except json.JSONDecodeError as exc:
+        raise VectorValidationError("Service Admission grant payload_json is invalid") from exc
+    if not isinstance(claims, dict) or not isinstance(claims.get("jti"), str):
+        raise VectorValidationError("Service Admission grant jti is required")
+    jti = claims["jti"]
+    try:
+        jti_bytes = jti.encode("ascii")
+    except UnicodeEncodeError as exc:
+        raise VectorValidationError("Service Admission grant jti must be ASCII") from exc
+    digest = hashlib.sha256(jti_bytes).digest()
+    grant_hash = _base64url(digest)
+    _compare(errors, "PCL grant_id_hash source jti", jti, grant_hash_case.get("expected_jti"))
+    _compare(errors, "PCL grant_id_hash input bytes", jti_bytes.hex(), grant_hash_case.get("input_ascii_hex"))
+    _compare(errors, "PCL grant_id_hash digest", digest.hex(), grant_hash_case.get("sha256_hex"))
+    _compare(errors, "PCL grant_id_hash", grant_hash, grant_hash_case.get("grant_id_hash"))
+
+    service_derivation = service_vector.get("grant_id_hash_derivation")
+    if not isinstance(service_derivation, dict):
+        raise VectorValidationError("Service Admission grant_id_hash_derivation must be an object")
+    _compare(
+        errors,
+        "Service Admission grant_id_hash input bytes",
+        jti_bytes.hex(),
+        service_derivation.get("input_ascii_hex"),
+    )
+    _compare(
+        errors,
+        "Service Admission grant_id_hash digest",
+        digest.hex(),
+        service_derivation.get("sha256_hex"),
+    )
+    _compare(
+        errors,
+        "Service Admission grant_id_hash",
+        grant_hash,
+        service_derivation.get("base64url"),
+    )
+
+    command_id = grant_hash_case.get("pcl_command_message_id")
+    messages = document.get("valid_messages")
+    if not isinstance(command_id, str) or not isinstance(messages, list):
+        raise VectorValidationError("PCL grant_id_hash cross-vector command is malformed")
+    commands = [
+        message
+        for message in messages
+        if isinstance(message, dict)
+        and message.get("type") == "revoke_service_admission"
+        and message.get("message_id") == command_id
+    ]
+    if len(commands) != 1:
+        errors.append("PCL grant_id_hash cross-vector command must identify one valid message")
+    else:
+        command = commands[0]
+        _compare(errors, "PCL grant_id_hash command", command.get("grant_id_hash"), grant_hash)
+        _compare(errors, "PCL grant_id_hash command channel", command.get("channel_id"), claims.get("ch"))
+        _compare(errors, "PCL grant_id_hash command service", command.get("service_id"), claims.get("svc"))
+
+    negative_inputs = grant_hash_case.get("negative_inputs")
+    if not isinstance(negative_inputs, list) or not negative_inputs:
+        raise VectorValidationError("PCL grant_id_hash negative_inputs must be a non-empty array")
+    for index, negative in enumerate(negative_inputs):
+        if not isinstance(negative, dict):
+            raise VectorValidationError(f"PCL grant_id_hash negative input {index} must be an object")
+        name = negative.get("name", f"PCL grant_id_hash negative input {index}")
+        input_bytes = _hex_bytes(negative.get("input_ascii_hex"), f"{name} input")
+        try:
+            input_bytes.decode("ascii")
+        except UnicodeDecodeError as exc:
+            raise VectorValidationError(f"{name} input must be ASCII") from exc
+        negative_digest = hashlib.sha256(input_bytes).digest()
+        _compare(errors, f"{name} digest", negative_digest.hex(), negative.get("sha256_hex"))
+        if input_bytes == jti_bytes:
+            errors.append(f"{name}: input must differ from the canonical jti bytes")
+        if _base64url(negative_digest) == grant_hash:
+            errors.append(f"{name}: non-canonical input must not produce grant_id_hash")
 
     deployment_cases = document.get("deployment_lifecycle_cases")
     if not isinstance(deployment_cases, list):
