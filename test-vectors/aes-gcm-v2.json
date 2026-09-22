@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.8.0-draft",
+  "specVersion": "unreleased",
   "mode": "aes-gcm-v2",
   "channelId": 1234,
   "passwordKeyHex": "bcad701cf1a05f957d93aad27ea055a7d76f2d2650c89ab5bcb0790182854e4b",

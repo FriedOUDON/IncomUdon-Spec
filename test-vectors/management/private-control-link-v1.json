@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.8.0-draft",
+  "specVersion": "unreleased",
   "scheme": "private-control-link-v1",
   "framing": {
     "lengthEncoding": "U32BE",

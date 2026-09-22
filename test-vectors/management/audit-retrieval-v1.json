@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.8.0-draft",
+  "specVersion": "unreleased",
   "query": {
     "channel_id": 111,
     "since": "2026-09-15T00:00:00Z",

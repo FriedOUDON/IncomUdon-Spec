@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.8.0-draft",
+  "specVersion": "unreleased",
   "snapshot": {
     "schema_version": "diagnostics-v1",
     "snapshot_monotonic_ms": 123456,

@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.8.0-draft",
+  "specVersion": "unreleased",
   "document": "../docs/protocol/fec-testing.md",
   "externalFecV2": [
     "fec-v2-clean",

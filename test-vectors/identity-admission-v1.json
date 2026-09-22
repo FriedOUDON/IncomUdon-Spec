@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.8.0-draft",
+  "specVersion": "unreleased",
   "scheme": "identity-admission-v1",
   "sender_id_constraints": {
     "valid_endpoint_sender_ids": [1, 4294967295],

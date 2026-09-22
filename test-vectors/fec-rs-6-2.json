@@ -1,5 +1,5 @@
 {
-  "specVersion": "v0.8.0-draft",
+  "specVersion": "unreleased",
   "field": "GF(256), primitive polynomial 0x11d",
   "blockStart": 0,
   "blockSize": 6,
