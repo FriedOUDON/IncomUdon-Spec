@@ -133,6 +133,41 @@
         "replaced_sender_id": 1002,
         "replaced_priority": 100
       }
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "get_relay_state_snapshot",
+      "message_id": "AQIDBAUGBwgJCgsMDQ4PEA"
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "relay_state_snapshot",
+      "message_id": "ERITFBUWFxgZGhscHR4fIA",
+      "in_reply_to": "AQIDBAUGBwgJCgsMDQ4PEA",
+      "snapshot_id": "ISIjJCUmJygpKissLS4vMA",
+      "chunk_index": 0,
+      "chunk_count": 2,
+      "channels": [
+        {
+          "channel_id": 100,
+          "participants": [
+            { "sender_id": 1, "state": "idle" },
+            { "sender_id": 2, "state": "talking" }
+          ]
+        }
+      ]
+    },
+    {
+      "schema_version": "private-control-link-v1",
+      "type": "relay_state_snapshot",
+      "message_id": "MTIzNDU2Nzg5Ojs8PT4_QA",
+      "in_reply_to": "AQIDBAUGBwgJCgsMDQ4PEA",
+      "snapshot_id": "ISIjJCUmJygpKissLS4vMA",
+      "chunk_index": 1,
+      "chunk_count": 2,
+      "channels": [
+        { "channel_id": 101, "participants": [] }
+      ]
     }
   ],
   "invalid_messages": [
@@ -786,5 +821,17 @@
         "expected_result": "reject_sensitive_field"
       }
     ]
-  }
+  },
+  "state_snapshot_cases": [
+    {
+      "name": "fragmented_snapshot_is_applied_atomically",
+      "request_message_id": "AQIDBAUGBwgJCgsMDQ4PEA",
+      "snapshot_id": "ISIjJCUmJygpKissLS4vMA",
+      "chunk_count": 2,
+      "received_chunk_indexes": [1, 0],
+      "expected_apply_after_received_count": 2,
+      "expected_channel_ids": [100, 101],
+      "expected_result": "apply_complete_snapshot"
+    }
+  ]
 }

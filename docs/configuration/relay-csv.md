@@ -211,6 +211,31 @@ priority or channel scope. See
 `../extensions/management/service-admission.md` and
 `../protocol/floor-interrupt.md`.
 
+### `management-global-permissions.csv`
+
+Columns:
+
+```text
+service_id,permission,enabled
+```
+
+| Column | Requirement |
+|---|---|
+| `service_id` | Existing enabled `management-services.csv` Managed Service ID. |
+| `permission` | A defined global Management Plane permission. Version 1 defines `health.read`. |
+| `enabled` | `true` grants the explicit permission; `false` retains the row without granting it. |
+
+The tuple `(service_id, permission)` MUST be unique. A global permission does
+not grant any channel-scoped role or resource access. The Management Service,
+not the Relay media path, evaluates these permissions for Management API
+requests and global SSE event delivery. A Relay deployment MAY therefore ignore
+this file when it does not host the Management API.
+
+```csv
+service_id,permission,enabled
+health-monitor-01,health.read,true
+```
+
 ## Reload, revocation, and logging
 
 Changes to Directory files may update published display metadata on the next

@@ -224,6 +224,42 @@ it. The Relay is not an audit store, and a private-link outage does not permit
 the Management Service to claim that the resulting retained record set is a
 complete Relay event history.
 
+## Relay state snapshots
+
+A Management Service that needs canonical current channel and participant state
+MAY send `get_relay_state_snapshot` after session establishment. The request
+contains only the common `schema_version`, `type`, and `message_id` fields. A
+Relay that does not implement this optional read-only command returns `error`
+with code `unsupported_message`; it MUST NOT alter Relay state.
+
+For an accepted request, the Relay captures one point-in-time view of every
+current channel and responds with one or more `relay_state_snapshot` messages.
+Every response has a fresh `message_id`, the request `message_id` in
+`in_reply_to`, a common fresh `snapshot_id`, a zero-based `chunk_index`, and a
+common `chunk_count` from one through 64. A chunk contains channel entries with
+`channel_id` and the current participant `sender_id`/`state` pairs. A channel
+may occur in more than one chunk when its participant list crosses a frame
+boundary. Each response is independently framed and MUST remain within the
+normal 65536-byte Private Control Link frame limit.
+
+The Relay MUST send all chunks for one snapshot before any lifecycle event
+whose underlying Relay state changed after the snapshot was captured. A
+lifecycle event sent before the chunks may be represented already in the
+snapshot. The Management Service MUST collect every index from zero through
+`chunk_count - 1` for the same `snapshot_id` and `in_reply_to`, reject duplicate
+or inconsistent chunks, and atomically replace its current state projection
+only after the complete set is received. It MUST discard an incomplete set on
+link loss and request a fresh snapshot after reconnecting. A Management Service
+that exposes current-state API resources MUST NOT present a prior connection's
+projection as current; it returns the documented unavailable response until the
+new complete snapshot is applied. Snapshot messages are read-only, have no
+replay cursor, and do not imply durable Relay history.
+
+The Relay MUST bound snapshot work to 64 chunks. If the current state cannot be
+encoded within that bound, it MUST return `error` with code `overloaded` rather
+than drop or truncate participants. Snapshot collection and delivery MUST NOT
+delay media forwarding.
+
 ## Relay diagnostics
 
 A Management Service that requests `want_diagnostics: true` in `hello` MAY use

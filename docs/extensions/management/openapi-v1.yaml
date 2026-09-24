@@ -51,6 +51,7 @@ paths:
                       $ref: '#/components/schemas/ChannelSummary'
                 additionalProperties: false
         '403': { $ref: '#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/RelayStateUnavailable' }
   /channels/{channel_id}/participants:
     get:
       operationId: listParticipants
@@ -72,6 +73,7 @@ paths:
                     items: { $ref: '#/components/schemas/Participant' }
                 additionalProperties: false
         '403': { $ref: '#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/RelayStateUnavailable' }
   /audit-records:
     get:
       operationId: listAuditRecords
@@ -261,6 +263,8 @@ components:
   responses:
     Forbidden:
       description: The mTLS identity lacks the required Management Plane permission.
+    RelayStateUnavailable:
+      description: The authenticated Management Service has not applied a current complete Relay state snapshot.
   schemas:
     ManagementCapabilities:
       type: object

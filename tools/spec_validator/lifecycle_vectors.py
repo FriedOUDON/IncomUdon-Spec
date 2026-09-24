@@ -849,9 +849,44 @@ def _validate_private_control_link(root: Path) -> list[str]:
             elif filename == "management-channel-acl.csv" and service_id not in configured_service_ids:
                 errors.append("Managed Service ID CSV fixture ACL references an unconfigured service")
 
+    global_permissions_csv = csv_files.get("management-global-permissions.csv")
+    if not isinstance(global_permissions_csv, str):
+        raise VectorValidationError("Managed Service ID CSV fixture lacks management-global-permissions.csv")
+    global_permissions: list[dict[str, str]] = []
+    seen_global_permissions: set[tuple[str, str]] = set()
+    for row in csv.DictReader(io.StringIO(global_permissions_csv)):
+        service_id = row.get("service_id")
+        permission = row.get("permission")
+        enabled = row.get("enabled")
+        if not _is_managed_service_id(service_id) or service_id not in configured_service_ids:
+            errors.append("Managed Service global permission references an unconfigured service")
+            continue
+        if permission != "health.read":
+            errors.append("Managed Service global permission is not defined by Version 1")
+            continue
+        if enabled not in {"true", "false"}:
+            errors.append("Managed Service global permission enabled value is not canonical")
+            continue
+        key = (service_id, permission)
+        if key in seen_global_permissions:
+            errors.append("Managed Service global permission is duplicated")
+            continue
+        seen_global_permissions.add(key)
+        if enabled == "true":
+            global_permissions.append({"service_id": service_id, "permission": permission})
+
     expected_csv = csv_vector.get("expected")
     if not isinstance(expected_csv, dict) or not isinstance(expected_csv.get("management_grant_inputs"), list):
         raise VectorValidationError("Managed Service ID CSV fixture lacks management_grant_inputs")
+    expected_global_permissions = expected_csv.get("management_api_global_permissions")
+    if not isinstance(expected_global_permissions, list):
+        raise VectorValidationError("Managed Service ID CSV fixture lacks management_api_global_permissions")
+    _compare(
+        errors,
+        "Managed Service global permissions",
+        sorted(global_permissions, key=lambda entry: (entry["service_id"], entry["permission"])),
+        sorted(expected_global_permissions, key=lambda entry: (entry["service_id"], entry["permission"])),
+    )
     for index, grant_input in enumerate(expected_csv["management_grant_inputs"]):
         if not isinstance(grant_input, dict):
             raise VectorValidationError(f"Managed Service ID grant input {index} must be an object")
@@ -1414,6 +1449,62 @@ def _validate_private_control_link(root: Path) -> list[str]:
 
         result = "reject_sensitive_field" if contains_forbidden(candidate) else "accept_redacted_snapshot"
         _compare(errors, f"{name} result", case.get("expected_result"), result)
+    snapshot_cases = document.get("state_snapshot_cases")
+    if not isinstance(snapshot_cases, list):
+        raise VectorValidationError("Private Control Link state_snapshot_cases must be an array")
+    for case_index, case in enumerate(snapshot_cases):
+        if not isinstance(case, dict):
+            raise VectorValidationError(f"Private Control Link state snapshot case {case_index} must be an object")
+        name = case.get("name", f"Private Control Link state snapshot case {case_index}")
+        request_id = case.get("request_message_id")
+        snapshot_id = case.get("snapshot_id")
+        chunk_count = _integer(case.get("chunk_count"), f"{name} chunk_count", 64)
+        received_indexes = case.get("received_chunk_indexes")
+        if not isinstance(request_id, str) or not isinstance(snapshot_id, str) or not isinstance(received_indexes, list):
+            raise VectorValidationError(f"{name}: request_message_id, snapshot_id, and received_chunk_indexes are required")
+        responses_by_index: dict[int, dict[str, Any]] = {}
+        for message in messages:
+            if not isinstance(message, dict) or message.get("type") != "relay_state_snapshot":
+                continue
+            if message.get("in_reply_to") != request_id or message.get("snapshot_id") != snapshot_id:
+                continue
+            message_count = _integer(message.get("chunk_count"), f"{name} response chunk_count", 64)
+            message_index = _integer(message.get("chunk_index"), f"{name} response chunk_index", 63)
+            if message_count != chunk_count or message_index >= chunk_count:
+                errors.append(f"{name}: response chunk metadata is inconsistent")
+                continue
+            if message_index in responses_by_index:
+                errors.append(f"{name}: duplicate response chunk index in valid_messages")
+                continue
+            responses_by_index[message_index] = message
+
+        seen_indexes: set[int] = set()
+        complete_after: int | None = None
+        actual_result = "discard_incomplete_snapshot"
+        channels: list[dict[str, Any]] = []
+        for received_count, raw_index in enumerate(received_indexes, start=1):
+            index = _integer(raw_index, f"{name} received chunk index", 63)
+            if index >= chunk_count or index in seen_indexes or index not in responses_by_index:
+                actual_result = "reject_invalid_snapshot"
+                break
+            seen_indexes.add(index)
+            response_channels = responses_by_index[index].get("channels")
+            if not isinstance(response_channels, list):
+                raise VectorValidationError(f"{name}: response channels must be an array")
+            channels.extend(response_channels)
+            if len(seen_indexes) == chunk_count:
+                complete_after = received_count
+                actual_result = "apply_complete_snapshot"
+                break
+        _compare(errors, f"{name} apply count", complete_after, case.get("expected_apply_after_received_count"))
+        _compare(errors, f"{name} result", actual_result, case.get("expected_result"))
+        channel_ids = []
+        for channel in channels:
+            if not isinstance(channel, dict):
+                raise VectorValidationError(f"{name}: snapshot channel must be an object")
+            channel_ids.append(_integer(channel.get("channel_id"), f"{name} channel_id", 0xFFFFFFFF))
+        _compare(errors, f"{name} channel IDs", sorted(channel_ids), case.get("expected_channel_ids"))
+
     return errors
 
 

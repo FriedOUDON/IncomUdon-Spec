@@ -13,7 +13,9 @@
     { "$ref": "#/$defs/relayLifecycleEvent" },
     { "$ref": "#/$defs/relayAuditInput" },
     { "$ref": "#/$defs/getRelayDiagnostics" },
-    { "$ref": "#/$defs/relayDiagnosticsSnapshot" }
+    { "$ref": "#/$defs/relayDiagnosticsSnapshot" },
+    { "$ref": "#/$defs/getRelayStateSnapshot" },
+    { "$ref": "#/$defs/relayStateSnapshot" }
   ],
   "$defs": {
     "identifier16": {
@@ -256,6 +258,57 @@
         "counter_epoch": { "$ref": "#/$defs/identifier16" },
         "observed_at": { "type": "string", "format": "date-time" },
         "floor_interrupt": { "$ref": "#/$defs/floorInterruptCounters" }
+      },
+      "additionalProperties": false
+    },
+    "snapshotParticipant": {
+      "type": "object",
+      "required": ["sender_id", "state"],
+      "properties": {
+        "sender_id": { "$ref": "#/$defs/endpointSenderId" },
+        "state": { "enum": ["joined", "talking", "idle"] }
+      },
+      "additionalProperties": false
+    },
+    "snapshotChannel": {
+      "type": "object",
+      "required": ["channel_id", "participants"],
+      "properties": {
+        "channel_id": { "$ref": "#/$defs/u32" },
+        "participants": {
+          "type": "array",
+          "maxItems": 32768,
+          "items": { "$ref": "#/$defs/snapshotParticipant" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "getRelayStateSnapshot": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "get_relay_state_snapshot" },
+        "message_id": { "$ref": "#/$defs/identifier16" }
+      },
+      "additionalProperties": false
+    },
+    "relayStateSnapshot": {
+      "type": "object",
+      "required": ["schema_version", "type", "message_id", "in_reply_to", "snapshot_id", "chunk_index", "chunk_count", "channels"],
+      "properties": {
+        "schema_version": { "const": "private-control-link-v1" },
+        "type": { "const": "relay_state_snapshot" },
+        "message_id": { "$ref": "#/$defs/identifier16" },
+        "in_reply_to": { "$ref": "#/$defs/identifier16" },
+        "snapshot_id": { "$ref": "#/$defs/identifier16" },
+        "chunk_index": { "type": "integer", "minimum": 0, "maximum": 63 },
+        "chunk_count": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "channels": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/snapshotChannel" }
+        }
       },
       "additionalProperties": false
     }
