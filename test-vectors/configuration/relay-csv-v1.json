@@ -6,9 +6,9 @@
     "channels.csv": "channel_id,name\n111,Security A\n222,Maintenance\n",
     "speakers.csv": "channel_id,sender_id,name\nall,1002,Dispatch\n111,1002,Security Dispatch\n222,2001,Maintenance Lead\n",
     "control-keys.csv": "channel_id,key_id,control_key_base64\n111,1,AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=\n",
-    "management-services.csv": "service_id,certificate_sha256,api_role,enabled\nrecorder-test-01,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,recorder,true\ndispatch-console,bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,operator,true\n",
+    "management-services.csv": "service_id,certificate_sha256,api_role,enabled\nrecorder-test-01,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,recorder,true\ndispatch-console,bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,operator,true\nmanagement-admin,cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc,admin,true\n",
     "management-channel-acl.csv": "service_id,channel_id,sender_id,admission_role,allow_listen,allow_talk,allow_interrupt,interrupt_priority,enabled\nrecorder-test-01,111,9001,recorder,true,false,false,0,true\ndispatch-console,111,9002,automation,true,true,true,200,true\n",
-    "management-global-permissions.csv": "service_id,permission,enabled\ndispatch-console,health.read,true\n"
+    "management-global-permissions.csv": "service_id,permission,enabled\ndispatch-console,health.read,true\nmanagement-admin,service_admission.revoke,true\n"
   },
   "expected": {
     "directory_speakers": [
@@ -24,7 +24,8 @@
       {"service_id": "dispatch-console", "channel_id": 111, "sender_id": 9002, "role": "automation", "perm": 7, "pri": 200}
     ],
     "management_api_global_permissions": [
-      {"service_id": "dispatch-console", "permission": "health.read"}
+      {"service_id": "dispatch-console", "permission": "health.read"},
+      {"service_id": "management-admin", "permission": "service_admission.revoke"}
     ]
   },
   "invalid_semantic_conditions": [

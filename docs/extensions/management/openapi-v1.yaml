@@ -207,7 +207,69 @@ paths:
                   grant: { type: string, minLength: 1, maxLength: 768 }
                   expires_at: { type: string, format: date-time }
                 additionalProperties: false
+        '400':
+          description: The request is malformed or requests permissions outside the caller's exact channel ACL.
         '403': { $ref: '#/components/responses/Forbidden' }
+        '503':
+          description: Service Admission grant issuance is not configured.
+  /service-admission-revocations:
+    post:
+      operationId: revokeServiceAdmission
+      summary: Request prompt Relay-side Service Admission revocation.
+      description: >
+        Requires the admin API role and the explicit global service_admission.revoke permission.
+        A 200 response means the Relay acknowledged the Private Control Link command. A 202
+        response means the command is pending Relay acknowledgement and MUST NOT be considered
+        Relay-applied.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [channel_id, reason, deny_until]
+              properties:
+                channel_id: { $ref: '#/components/schemas/U32' }
+                service_id: { $ref: '#/components/schemas/ManagedServiceId' }
+                grant_id_hash: { $ref: '#/components/schemas/GrantIdHash' }
+                reason:
+                  enum: [acl_removed, service_disabled, grant_revoked]
+                deny_until: { $ref: '#/components/schemas/UnixTime' }
+              anyOf:
+                - required: [service_id]
+                - required: [grant_id_hash]
+              additionalProperties: false
+      responses:
+        '200':
+          description: The Relay acknowledged the command.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [outcome, deny_until, affected_membership_count, talk_release_count]
+                properties:
+                  outcome: { enum: [applied, already_expired] }
+                  deny_until: { $ref: '#/components/schemas/UnixTime' }
+                  affected_membership_count: { type: integer, minimum: 0, maximum: 4294967295 }
+                  talk_release_count: { type: integer, minimum: 0, maximum: 4294967295 }
+                additionalProperties: false
+        '202':
+          description: The Management Service queued the command but has not received a Relay acknowledgement.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message_id, deny_until]
+                properties:
+                  status: { const: pending_relay_ack }
+                  message_id: { $ref: '#/components/schemas/Identifier16' }
+                  deny_until: { $ref: '#/components/schemas/UnixTime' }
+                additionalProperties: false
+        '400':
+          description: The request is malformed, expired, or outside a known grant's scope.
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '503':
+          description: Private Control Link revocation is unavailable or could not be queued.
   /recording-jobs:
     post:
       operationId: startRecordingJob
@@ -283,6 +345,27 @@ components:
       type: integer
       minimum: 1
       maximum: 4294967295
+    ManagedServiceId:
+      type: string
+      minLength: 1
+      maxLength: 128
+      pattern: '^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$'
+    GrantIdHash:
+      type: string
+      minLength: 43
+      maxLength: 43
+      pattern: '^[A-Za-z0-9_-]{43}$'
+      description: Canonical unpadded Base64URL encoding of SHA-256 over the exact ASCII JWS jti claim value.
+    Identifier16:
+      type: string
+      minLength: 22
+      maxLength: 22
+      pattern: '^[A-Za-z0-9_-]{21}[AQgw]$'
+      description: Canonical unpadded Base64URL encoding of exactly 16 random bytes.
+    UnixTime:
+      type: integer
+      minimum: 1
+      maximum: 9007199254740991
     Priority:
       type: integer
       minimum: 0

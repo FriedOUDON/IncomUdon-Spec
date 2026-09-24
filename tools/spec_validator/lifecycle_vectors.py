@@ -861,7 +861,7 @@ def _validate_private_control_link(root: Path) -> list[str]:
         if not _is_managed_service_id(service_id) or service_id not in configured_service_ids:
             errors.append("Managed Service global permission references an unconfigured service")
             continue
-        if permission != "health.read":
+        if permission not in {"health.read", "service_admission.revoke"}:
             errors.append("Managed Service global permission is not defined by Version 1")
             continue
         if enabled not in {"true", "false"}:

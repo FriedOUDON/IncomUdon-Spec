@@ -228,7 +228,9 @@ global access from possession of a certificate or channel-scoped role.
    an explicit global event permission MUST receive `403` for the stream.
 5. A global operation or global event has no channel ID and MUST require an
    explicitly configured global permission. A channel-scoped role MUST NOT imply
-   that permission.
+   that permission. `POST /service-admission-revocations` is a global operation:
+   it requires the `admin` role and the explicit global
+   `service_admission.revoke` permission.
 
 | Role | Permitted operations |
 |---|---|
@@ -236,7 +238,7 @@ global access from possession of a certificate or channel-scoped role.
 | `recorder` | `viewer` operations plus recording-job lifecycle and Managed Service Admission with receive-only permissions. |
 | `operator` | `viewer` operations plus explicitly configured channel operations. |
 | `auditor` | Read redacted events for explicitly authorized channels and, when Audit Retrieval is enabled, retained audit records; unscoped records require an explicit global audit permission. |
-| `admin` | Manage Management Plane ACLs and signing-key configuration. |
+| `admin` | Manage Management Plane ACLs and signing-key configuration; request Service Admission revocation only with explicit global `service_admission.revoke`. |
 
 For the initial HTTP contract, `GET /channels` filters its channel summaries
 to the caller's `viewer` scope. `GET /events` filters every channel-scoped
@@ -268,6 +270,12 @@ Ed25519-signed Service Admission Grant. The service presents that grant and a
 proof of possession over the existing authenticated UDP control path. A Relay
 that validates the grant admits the service according to its channel-scoped
 permissions. The complete protocol is in `service-admission.md`.
+
+`POST /service-admission-grants` is self-service issuance: the Management
+Service MUST derive the grant `svc` claim from the mTLS-authenticated caller,
+and MUST derive its channel, sender, role, permissions, and optional interrupt
+priority solely from that caller's exact channel ACL. The caller MUST NOT
+select another service identity or a priority.
 
 Private Control Link v1 is optional for grant issuance and natural expiry. A
 Managed Service Admission deployment without it can issue and verify grants,
@@ -375,6 +383,13 @@ revoked service, remove its membership promptly, and use
 authenticated, bounded by its fixed `deny_until` deadline, durable across Relay
 restart, and idempotent; a target propagation time of five seconds is
 RECOMMENDED.
+
+`POST /service-admission-revocations` is the Management API request path for
+that command. A `200` response means that the Relay acknowledged the command.
+A `202` response means the Management Service accepted and queued the command
+but has not received a Relay acknowledgement; it MUST NOT be represented as a
+Relay-applied revocation. While a command remains queued, the Management
+Service MUST retry the identical PCL message after reconnecting.
 
 Service Admission Grants are intentionally short-lived. A service renews them
 through its mTLS-authenticated Management API session before expiry. To support

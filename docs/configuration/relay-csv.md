@@ -222,7 +222,7 @@ service_id,permission,enabled
 | Column | Requirement |
 |---|---|
 | `service_id` | Existing enabled `management-services.csv` Managed Service ID. |
-| `permission` | A defined global Management Plane permission. Version 1 defines `health.read`. |
+| `permission` | A defined global Management Plane permission. Version 1 defines `health.read` and `service_admission.revoke`. |
 | `enabled` | `true` grants the explicit permission; `false` retains the row without granting it. |
 
 The tuple `(service_id, permission)` MUST be unique. A global permission does
@@ -231,9 +231,15 @@ not the Relay media path, evaluates these permissions for Management API
 requests and global SSE event delivery. A Relay deployment MAY therefore ignore
 this file when it does not host the Management API.
 
+`service_admission.revoke` is deliberately global. It authorizes only the
+Management API operation that requests Private Control Link revocation; it
+MUST be combined with the `admin` API role and does not authorize grant
+issuance, channel access, or media access.
+
 ```csv
 service_id,permission,enabled
 health-monitor-01,health.read,true
+management-admin,service_admission.revoke,true
 ```
 
 ## Reload, revocation, and logging
