@@ -161,6 +161,8 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404':
           description: Event delivery is disabled by the advertised capability.
+        '503':
+          description: The Management Service cannot accept another live event subscription without exceeding its bounded delivery capacity.
         '410':
           description: Selected event cursor is unknown, belongs to another Management Service instance, or is no longer retained. Discard it; viewer-authorized callers refresh participant snapshots, while auditor-only callers record a gap and reconnect without a cursor.
   /service-admission-grants:

@@ -82,7 +82,9 @@ present because a standard SSE client reconnects automatically; the Management
 Service MUST accept it, MUST NOT validate or use its value as a replay cursor,
 and MUST begin delivery only with events emitted after the new subscription is
 established. A live-only event stream does not require durable event retention,
-and a reconnect may miss events.
+and a reconnect may miss events. A Management Service MAY bound its concurrent
+live subscriptions and return `503 Service Unavailable` rather than allowing a
+slow or excessive subscriber set to delay event ingestion.
 
 Every live SSE event still carries its `event_id` in the SSE `id` field. In
 live mode that field does not provide replay or continuity guarantees. Channel
